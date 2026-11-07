@@ -112,6 +112,7 @@ export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
 
           <WhatsAppButton
             href={waLink}
+            productId={product.id}
             variant={isSoldOut ? "ghost" : "wa"}
             size="default"
             className="w-full text-sm font-bold shadow-none hover:shadow-none"

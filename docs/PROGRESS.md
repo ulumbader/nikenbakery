@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 08 — Admin: banner, testimoni, social, FAQ, pengaturan
+- **Tahap aktif:** 09 — Analitik dasar & dashboard ringkasan
 - **Status:** selesai ✅
-- **Kondisi repo:** Manajemen konten lengkap di admin tanpa sentuh kode: Banner promo (`/admin/banners`) dengan penjadwalan tayang otomatis dan upload foto via Sharp, Testimoni pelanggan (`/admin/testimonials`) dengan rating bintang dan sortir urutan, Postingan kurasi sosial (`/admin/social`) untuk Instagram/TikTok dengan upload gambar, Tanya Jawab FAQ (`/admin/faqs`), serta Pengaturan Toko komprehensif (`/admin/settings`) bertab (Identitas, normalisasi nomor WhatsApp & tombol tes interaktif, Jam operasional 7 hari, Lokasi Google Maps, Konten profil/About/Kebijakan dengan upload foto dapur, Akun sosmed & custom cake). Lint & build 100% lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/09-analytics-dashboard.md` (Tahap 09).
+- **Kondisi repo:** Analitik internal ringan, privat, dan etis tanpa script pihak ketiga: pelacakan `product_view` (server-side dengan bot filtering dan dedupe harian cookie anonim), pelacakan `wa_click` (`WhatsAppButton` via `navigator.sendBeacon` ke route `/api/events` dengan rate limiter in-memory dan pembatasan payload 2KB), dashboard ringkasan `/admin` berfitur lengkap (4 kartu ringkas, Top 5 produk dilihat & diklik WA, grafik batang tren 14 hari SVG/CSS murni, checklist kelengkapan data toko dengan direct link, pintasan aksi cepat), serta script pemangkasan data `npm run events:prune` (> 180 hari). Lint & build 100% lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/10-polish-qa.md` (Tahap 10).
 
 ## Checklist tahap
 
@@ -22,7 +22,7 @@
 | 06 | Admin: auth & kerangka dashboard | [x] |
 | 07 | Admin: produk, kategori, upload gambar | [x] |
 | 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [x] |
-| 09 | Analitik dasar & dashboard ringkasan | [ ] |
+| 09 | Analitik dasar & dashboard ringkasan | [x] |
 | 10 | Polish: SEO, performa, aksesibilitas, QA | [ ] |
 | 11 | Deploy & serah terima | [ ] |
 | 12 | (Opsional) Form custom order | [ ] |
@@ -64,15 +64,30 @@ Perbarui tabel ini begitu pengguna memberi data asli.
    ```
 3. Akun admin otomatis dibuat/diperbarui di database SQLite.
 
+## Pemeliharaan Data Analitik (Prune Events)
+Untuk menjaga database SQLite tetap ramping dan performa query tetap cepat, data event analitik yang lebih lama dari 180 hari dapat dipangkas secara berkala:
+```bash
+npm run events:prune
+```
+Script ini (`scripts/prune-events.ts`) menghapus seluruh baris di tabel `events` di mana `createdAt < now - 180 hari`. Dapat dijadwalkan lewat cron di server produksi (mis. mingguan atau bulanan).
+
 ## Blocker & pertanyaan terbuka
 
 - (kosong)
 
 ## Ringkasan sesi terakhir
 
-- Tahap 08 selesai. Dibuat Server Actions `actions/banners.ts`, `actions/testimonials.ts`, `actions/social.ts`, `actions/faqs.ts`, dan `actions/settings.ts` lengkap dengan validasi zod, `requireAdmin()`, dan `revalidatePath`. Dibuat komponen admin neo-brutal responsif `BannerManager.tsx`, `TestimonialManager.tsx`, `SocialManager.tsx`, `FaqManager.tsx`, dan `SettingsManager.tsx`. Halaman `/admin/banners`, `/admin/testimonials`, `/admin/social`, `/admin/faqs`, dan `/admin/settings` kini beroperasi penuh mengelola seluruh konten website toko. Uji banner scheduling lulus (masa depan/lampau tidak tayang di Home). Uji normalisasi WhatsApp dan jam buka terintegrasi langsung dengan halaman publik. Lint dan build lulus 100%.
+- Tahap 09 selesai. Dibuat helper `lib/events.ts` (deteksi crawler/bot lewat regex user-agent, dedupe harian `product_view` berbasis cookie anonim `nb_pv`). Dibuat Route Handler `app/api/events/route.ts` yang memproses `wa_click` dan `product_view` dengan rate limit in-memory (maks 30 req/menit per IP), validasi zod, dan pembatasan payload 2KB tanpa mencatat IP ke database. Ditambahkan integrasi `navigator.sendBeacon` pada `components/public/WhatsAppButton.tsx` (`ProductCard` dan `ProductDetailClient`). Dibuat query analitik agregasi `db/queries/events.ts` (`getAnalyticsSummary()`) yang menghasilkan metrik 7/30 hari, Top 5 produk sering dilihat, Top 5 produk sering diklik WA, time-series 14 hari, dan checklist 5 butir kelengkapan toko. Dibuat visualisasi grafik batang `components/admin/AnalyticsChart.tsx` (SVG/CSS murni tanpa library pihak ketiga). Dashboard utama `/admin` diperbarui menampilkan ringkasan analitik lengkap, checklist toko dengan tombol aksi langsung, dan pintasan aksi cepat. Dibuat script pemeliharaan `scripts/prune-events.ts` dan script npm `events:prune`. Pengujian otomatis dan manual lulus 100%. Lint & build lulus.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 09
+- Dikerjakan: buat `lib/events.ts` (deteksi bot user-agent, dedupe harian cookie anonim). Buat route `app/api/events/route.ts` (POST event wa_click, validasi zod, batas ukuran 2KB, rate limiter in-memory tahan spam). Update `components/public/WhatsAppButton.tsx` (prop `productId`, pencatatan non-blocking via `navigator.sendBeacon`). Update `ProductCard.tsx` dan `ProductDetailClient.tsx` (sertakan `productId` ke `WhatsAppButton`, sinkronisasi cookie dedupe). Update `app/(public)/menu/[slug]/page.tsx` (catat `product_view` server-side). Buat query agregasi `db/queries/events.ts` (`getAnalyticsSummary`, time-series 14 hari, checklist toko) dan ekspor ke `db/queries/index.ts`. Buat grafik batang neo-brutal responsif `components/admin/AnalyticsChart.tsx`. Rombak total halaman utama `app/admin/(dashboard)/page.tsx` (4 kartu metrik, checklist kelengkapan toko interaktif, grafik batang 14 hari, Top 5 produk views/WA clicks, pintasan aksi cepat). Buat script pemangkasan data `scripts/prune-events.ts` dan script `npm run events:prune`.
+- File penting yang diubah/dibuat: `lib/events.ts`, `app/api/events/route.ts`, `components/public/WhatsAppButton.tsx`, `components/public/ProductCard.tsx`, `components/public/ProductDetailClient.tsx`, `app/(public)/menu/[slug]/page.tsx`, `db/queries/events.ts`, `db/queries/index.ts`, `components/admin/AnalyticsChart.tsx`, `app/admin/(dashboard)/page.tsx`, `scripts/prune-events.ts`, `package.json`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: scratch test script lulus (validasi route, penolakan bot, rate limiting 429 pada spam, data point 14 hari), `npm run events:prune` lulus, `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅.
+- Berikutnya: tahap 10 (Polish: SEO, performa, aksesibilitas, QA)
 
 ### 2026-11-07 — Tahap 08
 - Dikerjakan: buat `actions/banners.ts` (CRUD banner promo, validasi jadwal mulai/selesai & URL, upload/hapus gambar via Sharp, sortir urutan, toggle aktif), buat `components/admin/BannerManager.tsx` dan perbarui `app/admin/(dashboard)/banners/page.tsx`. Buat `actions/testimonials.ts` (CRUD testimoni, rating 1-5, sortir, toggle publish), buat `components/admin/TestimonialManager.tsx` dan perbarui `app/admin/(dashboard)/testimonials/page.tsx`. Buat `actions/social.ts` (CRUD kurasi sosmed Instagram/TikTok, validasi URL http/https, upload foto, sortir, toggle publish), buat `components/admin/SocialManager.tsx` dan perbarui `app/admin/(dashboard)/social/page.tsx`. Buat `actions/faqs.ts` (CRUD tanya-jawab, sortir, toggle publish), buat `components/admin/FaqManager.tsx` dan perbarui `app/admin/(dashboard)/faqs/page.tsx`. Buat `actions/settings.ts` (kelola identitas toko, normalisasi WA, jam operasional 7 hari, Google Maps URL/embed, cerita & 3 nilai brand, upload foto About, kebijakan, pengiriman, kehalalan, akun sosmed, dan custom order) serta `components/admin/SettingsManager.tsx` bertab lengkap dengan tombol tes link WA interaktif dan perbarui `app/admin/(dashboard)/settings/page.tsx`.

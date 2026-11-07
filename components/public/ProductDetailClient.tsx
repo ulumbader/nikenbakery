@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/format";
@@ -43,11 +43,13 @@ export type ProductDetailData = {
 interface ProductDetailClientProps {
   product: ProductDetailData;
   whatsappNumber: string;
+  newViewCookie?: string;
 }
 
 export function ProductDetailClient({
   product,
   whatsappNumber,
+  newViewCookie,
 }: ProductDetailClientProps) {
   // State for selected variant
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
@@ -59,6 +61,13 @@ export function ProductDetailClient({
 
   // State for share toast feedback
   const [shareToast, setShareToast] = useState(false);
+
+  // Set dedupe cookie untuk view produk jika ada pembaruan
+  useEffect(() => {
+    if (newViewCookie && typeof document !== "undefined") {
+      document.cookie = `nb_pv=${newViewCookie}; path=/; max-age=86400; SameSite=Lax`;
+    }
+  }, [newViewCookie]);
 
   // Active variant & price
   const selectedVariant = product.variants.find(
@@ -251,6 +260,7 @@ export function ProductDetailClient({
           <div className="hidden md:flex flex-col gap-3 pt-2">
             <WhatsAppButton
               href={waLink}
+              productId={product.id}
               label={buttonLabel}
               variant={buttonVariant}
               size="lg"
@@ -337,6 +347,7 @@ export function ProductDetailClient({
 
             <WhatsAppButton
               href={waLink}
+              productId={product.id}
               label={buttonLabel}
               variant={buttonVariant}
               size="default"

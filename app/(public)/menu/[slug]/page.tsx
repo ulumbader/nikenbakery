@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
 import { getProductBySlug, listRelatedProducts } from "@/db/queries";
+import { recordProductViewServer } from "@/lib/events";
 import { ProductDetailClient } from "@/components/public/ProductDetailClient";
 import { ProductCard } from "@/components/public/ProductCard";
 import { SectionHeading } from "@/components/ui";
@@ -53,6 +54,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   const settings = getSettings();
   const relatedProducts = listRelatedProducts(product.id, 3);
+  const { cookieHeaderValue } = await recordProductViewServer(product.id);
 
   return (
     <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-16">
@@ -60,6 +62,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       <ProductDetailClient
         product={product}
         whatsappNumber={settings.whatsapp_number}
+        newViewCookie={cookieHeaderValue}
       />
 
       {/* ─── Produk Terkait (Rekomendasi) ─── */}

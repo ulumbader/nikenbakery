@@ -11,7 +11,8 @@
     "db:migrate": "tsx --env-file=.env.local db/migrate.ts",
     "db:seed": "tsx --env-file=.env.local db/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "admin:create": "tsx --env-file=.env.local scripts/create-admin.ts"
+    "admin:create": "tsx --env-file=.env.local scripts/create-admin.ts",
+    "events:prune": "tsx --env-file=.env.local scripts/prune-events.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

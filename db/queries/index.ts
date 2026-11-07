@@ -348,3 +348,7 @@ export function listFaqs() {
     .all();
 }
 
+/* ─── Analytics & Events ─── */
+export { getAnalyticsSummary, type AnalyticsSummary } from "./events";
+
+
