@@ -134,7 +134,7 @@ export default function AboutPage() {
                     {icons[idx % icons.length]}
                   </span>
                   <div>
-                    <span className="font-bold text-xs uppercase tracking-wider text-ink/70 block mb-1">
+                    <span className="font-extrabold text-xs uppercase tracking-wider text-ink block mb-1">
                       Poin 0{idx + 1}
                     </span>
                     <h3 className="text-lg font-extrabold leading-snug">

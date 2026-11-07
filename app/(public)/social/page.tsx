@@ -124,7 +124,7 @@ export default function SocialPage() {
                       <span>Lihat di {isInstagram ? "Instagram" : "TikTok"}</span>
                       <span aria-hidden="true">↗</span>
                     </a>
-                    <span className="text-xs text-ink/50 font-bold" aria-hidden="true">
+                    <span className="text-xs text-ink/80 font-bold" aria-hidden="true">
                       ● Niken Bakery
                     </span>
                   </div>

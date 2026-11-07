@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 10 — Polish: SEO, performa, aksesibilitas, QA
+- **Tahap aktif:** 10b — Testing E2E (Playwright) & UAT
 - **Status:** selesai ✅
-- **Kondisi repo:** Polish komprehensif selesai: Metadata SEO lengkap (title template, Open Graph, Twitter cards, canonical), sitemap dinamis (`app/sitemap.ts`) memuat seluruh halaman publik dan produk published dari DB, `robots.ts` memproteksi `/admin` & `/api`, Open Graph Image dinamis 1200x630 via Next.js `ImageResponse` (`app/opengraph-image.tsx`), web app manifest (`app/manifest.ts`), ikon SVG neo-brutal cake (`app/icon.svg`), JSON-LD Structured Data (`Bakery` & `Product` dengan `offers` schema.org), aksesibilitas keyboard (skip link `#main-content`, focus ring 3px, ukuran tap target, preferensi reduced-motion), error boundary neo-brutal (`app/error.tsx`), dan loading skeleton (`app/(public)/loading.tsx`). Lint & build 100% lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/11-deploy-handoff.md` (Tahap 11).
+- **Kondisi repo:** Pengujian otomatis E2E dan Unit Test selesai 100%. Terpasang Playwright (`@playwright/test`, `@axe-core/playwright`) dan Vitest. Seluruh 37 unit/integration test Vitest lulus. Seluruh 57 skenario uji Playwright E2E (PUB-01 s/d PUB-09, ADM-01 s/d ADM-09, SEC-01 s/d SEC-06, QLT-01 s/d QLT-04) lulus di project `desktop` (1280×800) dan `mobile` (Pixel 7). Zero pelanggaran axe-core (serious/critical), zero unhandled console error, zero scroll horizontal. Screenshot visual 375px & 1280px tersimpan di `e2e/screenshots/`. Checklist pengujian manual dibuat di `docs/UAT_CHECKLIST.md`. Lint (0 errors, 0 warnings) dan build produksi 100% lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/11-deploy-handoff.md` (Tahap 11 — Deploy & serah terima).
 
 ## Checklist tahap
 
@@ -24,6 +24,7 @@
 | 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [x] |
 | 09 | Analitik dasar & dashboard ringkasan | [x] |
 | 10 | Polish: SEO, performa, aksesibilitas, QA | [x] |
+| 10b | Testing E2E (Playwright) & UAT | [x] |
 | 11 | Deploy & serah terima | [ ] |
 | 12 | (Opsional) Form custom order | [ ] |
 
@@ -71,15 +72,81 @@ npm run events:prune
 ```
 Script ini (`scripts/prune-events.ts`) menghapus seluruh baris di tabel `events` di mana `createdAt < now - 180 hari`. Dapat dijadwalkan lewat cron di server produksi (mis. mingguan atau bulanan).
 
+## Panduan Menjalankan Pengujian (Testing Suite)
+
+Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integration Test, dan Browser E2E Test Playwright) serta checklist UAT manual:
+
+1. **Unit & Integration Test (Vitest):**
+   ```bash
+   npm test
+   ```
+   Menjalankan 37 pengujian fungsi murni (`normalizePhone`, `buildWhatsAppLink`, `orderMessage`, `formatRupiah`, `slug`, `hours`, validasi Zod) dan query integrasi SQLite in-memory secara cepat (< 2 detik).
+
+2. **Playwright E2E Headless (Semua Kasus Desktop & Mobile):**
+   ```bash
+   npm run test:e2e
+   ```
+   Menjalankan 57 skenario uji browser sesungguhnya (project `desktop` 1280×800 dan `mobile` Pixel 7) mencakup alur publik PUB-01 s/d PUB-09, alur admin ADM-01 s/d ADM-09, celah keamanan SEC-01 s/d SEC-06, dan kualitas QLT-01 s/d QLT-04.
+
+3. **Playwright UI Mode (Interaktif):**
+   ```bash
+   npm run test:e2e:ui
+   ```
+   Membuka antarmuka interaktif Playwright untuk melihat proses pengujian langkah demi langkah beserta inspect DOM visual dan time-travel debugging.
+
+4. **Laporan HTML Playwright:**
+   ```bash
+   npm run test:e2e:report
+   ```
+   Membuka laporan HTML interaktif hasil pengujian terakhir di browser.
+
+5. **Pengujian Menyeluruh (One-Shot):**
+   ```bash
+   npm run test:all
+   ```
+   Menjalankan `npm test` dilanjutkan `npm run test:e2e` secara otomatis dari kondisi bersih.
+
+> [!NOTE]
+> **Isolasi Data Penuh:** Pengujian E2E menggunakan `.env.test` (`DB_PATH=./data/test.db` dan `UPLOAD_DIR=./data/test-uploads`). File database pengguna `data/nikenbakery.db` dan upload fisik `data/uploads/` **terisolasi 100% dan tidak pernah disentuh oleh runner pengujian**.
+
+6. **Checklist UAT Manual Perangkat Asli:**
+   Tersedia di `docs/UAT_CHECKLIST.md` untuk menguji pembukaan aplikasi WhatsApp nyata di smartphone fisik, interaksi gestur sentuhan, dan review "vibe" estetika bersama calon target pasar.
+
 ## Blocker & pertanyaan terbuka
 
 - (kosong)
 
 ## Ringkasan sesi terakhir
 
-- Tahap 10 selesai. Dibuat metadata SEO lengkap (title template, canonical, Open Graph, Twitter cards). Dibuat generator sitemap dinamis `app/sitemap.ts` yang mencakup semua rute inti dan seluruh produk aktif dari SQLite. Dibuat generator Open Graph image dinamis 1200x630 `app/opengraph-image.tsx` via `ImageResponse`. Dibuat manifest web `app/manifest.ts` dan ikon SVG cake neo-brutal `app/icon.svg`. Ditambahkan JSON-LD schema `Bakery` pada `app/(public)/layout.tsx` dan `Product` dengan `offers` pada `app/(public)/menu/[slug]/page.tsx`. Dipasang skip link aksesibilitas keyboard (`#main-content`). Dibuat halaman error boundary `app/error.tsx` dan loading skeleton `app/(public)/loading.tsx` bergaya neo-brutal. Semua pengujian verifikasi rute SEO, lint, dan build lulus 100%.
+- Tahap 10b selesai. Dikonfigurasi dan diimplementasikan rangkaian pengujian otomatis lengkap menggunakan Playwright (`@playwright/test`, `@axe-core/playwright`) dan Vitest. Seluruh 37 unit & integration test Vitest lulus. Seluruh 57 kasus uji Playwright E2E pada project desktop dan mobile lulus tanpa kegagalan (Total 94 test lulus). Terbukti: alur pemesanan WhatsApp 3-ketukan bekerja presisi, alur manajemen admin lengkap berfungsi, keamanan dasar tertutup rapat (auth guard, path traversal protection, SVG/MIME spoof upload blocking, rate limiter login & analitik, cookie session flags), aksesibilitas axe-core 0 violation serious/critical, dan 0 scroll horizontal. Tangkapan layar desktop (1280px) dan mobile (375px) dihasilkan di `e2e/screenshots/`. Checklist manual UAT perangkat fisik dibuat di `docs/UAT_CHECKLIST.md`. Lint (0 errors, 0 warnings) dan build produksi lulus 100%.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 10b
+- Dikerjakan:
+  1. Pasang dev dependency `@playwright/test`, `@axe-core/playwright`, `vitest`, `dotenv`. Install browser Chromium engine via `npx playwright install chromium`. Catat keputusan D-015 di `docs/DECISIONS.md`.
+  2. Buat konfigurasi `.env.test`, `vitest.config.ts`, dan `playwright.config.ts` (project `setup`, `desktop` 1280×800, `mobile` Pixel 7, serial execution, headless webServer di port 3100 dengan database terisolasi `data/test.db` & uploads `data/test-uploads`).
+  3. Buat `e2e/global-setup.ts` (migrasi Drizzle, seed data uji, dan pembuatan admin tes bersih) dan `e2e/auth.setup.ts` (simpan sesi login admin ke `e2e/.auth/admin.json`).
+  4. Tulis 37 unit & integration tests di `tests/unit/` (`format`, `whatsapp`, `slug`, `hours`, `validation`) dan `tests/integration/queries.test.ts` -> 37 passed.
+  5. Tulis 4 file spesifikasi Playwright E2E di `e2e/`:
+     - `pub-flows.spec.ts` (PUB-01 s/d PUB-09)
+     - `admin-flows.spec.ts` (ADM-01 s/d ADM-09)
+     - `security.spec.ts` (SEC-01 s/d SEC-06)
+     - `quality.spec.ts` (QLT-01 s/d QLT-04)
+  6. Perbaikan bugs & a11y yang ditemukan selama penulisan tes:
+     - Perbaiki query `saveProductAction` di `actions/products.ts` (sebelumnya `.orderBy(products.sortOrder)` pada SELECT dari `productImages` yang memicu SQLite error, diperbaiki menjadi `.orderBy(productImages.sortOrder)`).
+     - Perbaiki contrast ratio teks tombol WhatsApp ke `text-ink` (> 10:1) untuk memenuhi standar WCAG AAA.
+     - Perbaiki label-content mismatch pada `FloatingWhatsApp` dan `ProductCard`.
+     - Tambahkan isolasi IP `x-forwarded-for` per-request pada pengujian rate limiting SEC-05.
+     - Tangani sinkronisasi response Server Action di SEC-04 dan ADM-09.
+  7. Hasilkan tangkapan layar visual penuh 375px dan 1280px ke `e2e/screenshots/`.
+  8. Buat dokumen `docs/UAT_CHECKLIST.md` untuk pengujian aplikasi fisik WhatsApp, jaringan 4G lambat, touch feel di HP, dan evaluasi vibe Gen-Z.
+  9. Jalankan verifikasi lint (`npm run lint`), build (`npm run build`), dan suite pengujian penuh (`npm run test:all`) -> seluruhnya 100% lulus.
+- File penting yang diubah/dibuat: `playwright.config.ts`, `vitest.config.ts`, `.env.test`, `.gitignore`, `package.json`, `docs/DECISIONS.md`, `docs/UAT_CHECKLIST.md`, `docs/PROGRESS.md`, `e2e/`, `tests/`, `actions/products.ts`, `components/public/FloatingWhatsApp.tsx`, `components/ui/Button.tsx`, `components/public/ProductCard.tsx`.
+- Keputusan baru: D-015 (Playwright dan Vitest untuk Testing Suite & E2E).
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run test:all` lulus (37 Vitest + 57 Playwright), `npm run lint` lulus (0 errors, 0 warnings), `npm run build` lulus.
+- Berikutnya: tahap 11 (Deploy & serah terima).
 
 ### 2026-11-07 — Tahap 10
 - Dikerjakan: lengkapi metadata SEO di `app/layout.tsx` (`metadataBase`, Open Graph, Twitter, canonical, robots). Buat `app/sitemap.ts` (dinamis dari database SQLite). Update `app/robots.ts` (blokir `/admin` & `/api`, izinkan `/`). Buat `app/opengraph-image.tsx` (kartu pratinjau sosial neo-brutal dinamis 1200x630 via `ImageResponse`). Buat `app/manifest.ts` dan `app/icon.svg`. Tambahkan JSON-LD structured data `Bakery` di `app/(public)/layout.tsx` dan `Product` dengan `offers` ketersediaan di `app/(public)/menu/[slug]/page.tsx`. Pasang skip link aksesibilitas `#main-content` di layout publik. Buat boundary error `app/error.tsx` dan skeleton loading `app/(public)/loading.tsx`. Optimasi ukuran thumbnail foto kue di `ProductDetailClient.tsx` (`sizes="80px"`). Uji verifikasi aturan robots dan url sitemap.

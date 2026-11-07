@@ -25,13 +25,13 @@ export function FloatingWhatsApp({
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-wa text-white font-extrabold text-sm sm:text-base px-4 py-2.5 rounded-full border-2 border-ink hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer shadow-[var(--shadow-brutal-sm)]"
-          aria-label="Chat WhatsApp dengan Niken Bakery"
+          aria-label="Pesan via WA"
+          className="inline-flex items-center gap-2 bg-wa text-ink font-extrabold text-sm sm:text-base px-4 py-2.5 rounded-full border-2 border-ink hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer shadow-[var(--shadow-brutal-sm)]"
         >
           <span className="text-lg" aria-hidden="true">
             💬
           </span>
-          <span className="hidden xs:inline sm:inline">Pesan via WA</span>
+          <span>Pesan via WA</span>
         </a>
       </div>
     </aside>

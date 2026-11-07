@@ -10,6 +10,11 @@
 
 # testing
 /coverage
+e2e/.auth/
+playwright-report/
+test-results/
+e2e/screenshots/
+data/test*
 
 # next.js
 /.next/

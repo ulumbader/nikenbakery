@@ -52,34 +52,39 @@ export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
       : "butter";
 
   return (
-    <div className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] flex flex-col h-full overflow-hidden transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--shadow-brutal-sm)]">
+    <div
+      data-testid="product-card"
+      className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] flex flex-col h-full overflow-hidden transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--shadow-brutal-sm)]"
+    >
       {/* Gambar / Placeholder */}
-      <Link
-        href={`/menu/${product.slug}`}
-        className="block relative aspect-[4/3] border-b-3 border-ink bg-cream overflow-hidden group focus-visible:outline-none"
-        aria-label={`Lihat detail ${product.name}`}
-      >
-        {product.coverImage ? (
-          <Image
-            src={product.coverImage.thumbName || product.coverImage.fileName}
-            alt={product.coverImage.alt || product.name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-200"
-          />
-        ) : (
-          <PlaceholderCake
-            color={categoryColor}
-            className="w-full h-full rounded-none border-0 group-hover:scale-105 transition-transform duration-200"
-          />
-        )}
-        <div className="absolute top-3 left-3 z-10">
+      <div className="relative aspect-[4/3] border-b-3 border-ink bg-cream overflow-hidden group">
+        <Link
+          href={`/menu/${product.slug}`}
+          className="block w-full h-full focus-visible:outline-none"
+          aria-label={`Lihat detail ${product.name}`}
+        >
+          {product.coverImage ? (
+            <Image
+              src={product.coverImage.thumbName || product.coverImage.fileName}
+              alt={product.coverImage.alt || product.name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-200"
+            />
+          ) : (
+            <PlaceholderCake
+              color={categoryColor}
+              className="w-full h-full rounded-none border-0 group-hover:scale-105 transition-transform duration-200"
+            />
+          )}
+        </Link>
+        <div className="absolute top-3 left-3 z-10 pointer-events-none">
           <StatusBadge
             status={product.status}
             preorderNote={product.preorderNote ?? undefined}
           />
         </div>
-      </Link>
+      </div>
 
       {/* Konten Produk */}
       <div className="p-4 flex flex-col flex-1 justify-between gap-3">

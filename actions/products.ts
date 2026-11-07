@@ -362,7 +362,7 @@ export async function saveProductAction(formData: FormData) {
     .select()
     .from(productImages)
     .where(eq(productImages.productId, targetProductId))
-    .orderBy(products.sortOrder)
+    .orderBy(productImages.sortOrder)
     .all();
 
   if (allImages.length > 0) {

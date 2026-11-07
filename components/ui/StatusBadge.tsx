@@ -9,7 +9,7 @@ interface StatusBadgeProps {
 const statusConfig: Record<Status, { label: string; color: string }> = {
   ready: { label: "Ready", color: "bg-mint text-ink" },
   preorder: { label: "Pre-order", color: "bg-butter text-ink" },
-  soldout: { label: "Habis", color: "bg-danger text-white" },
+  soldout: { label: "Habis", color: "bg-danger text-ink font-bold" },
 };
 
 export function StatusBadge({ status, preorderNote, className = "" }: StatusBadgeProps) {

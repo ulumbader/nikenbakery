@@ -6,7 +6,7 @@ export type ButtonSize = "default" | "sm" | "lg";
 export const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-butter border-ink text-ink shadow-[var(--shadow-brutal-sm)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px] active:shadow-none",
-  wa: "bg-wa border-ink text-white shadow-[var(--shadow-brutal-sm)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px] active:shadow-none",
+  wa: "bg-wa border-ink text-ink shadow-[var(--shadow-brutal-sm)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[3px] active:translate-y-[3px] active:shadow-none",
   ghost:
     "bg-transparent border-ink text-ink shadow-none hover:bg-cream",
   danger:

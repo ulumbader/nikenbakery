@@ -127,7 +127,7 @@ export default function HomePage() {
                 />
                 <div className="flex items-center justify-between pt-1">
                   <div>
-                    <span className="text-xs font-bold text-pink uppercase tracking-wide">
+                    <span className="text-xs font-extrabold text-ink bg-pink px-2 py-0.5 rounded-[4px] border border-ink uppercase tracking-wide">
                       Favorit Pelanggan
                     </span>
                     <h3 className="font-extrabold text-base">
@@ -356,7 +356,7 @@ export default function HomePage() {
                         {testi.name}
                       </span>
                       {testi.handle && (
-                        <span className="text-xs text-ink/60 font-mono">
+                        <span className="text-xs text-ink/80 font-mono">
                           {testi.handle}
                         </span>
                       )}

@@ -11,7 +11,7 @@ const colorClasses: Record<BadgeColor, string> = {
   butter: "bg-butter text-ink",
   mint: "bg-mint text-ink",
   lavender: "bg-lavender text-ink",
-  danger: "bg-danger text-white",
+  danger: "bg-danger text-ink font-bold",
   ink: "bg-ink text-cream",
 };
 

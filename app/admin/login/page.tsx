@@ -49,7 +49,7 @@ export default async function AdminLoginPage() {
           <LoginForm />
 
           <div className="pt-4 border-t-2 border-ink/10 text-center">
-            <p className="text-xs text-ink/60">
+            <p className="text-xs text-ink/80 font-medium">
               🔒 Akses khusus pengelola Niken Bakery. Lupa password? Hubungi
               administrator server.
             </p>

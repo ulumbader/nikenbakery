@@ -22,9 +22,7 @@ export async function generateMetadata({
   const product = getProductBySlug(slug);
 
   if (!product) {
-    return {
-      title: "Kue Tidak Ditemukan",
-    };
+    notFound();
   }
 
   const settings = getSettings();

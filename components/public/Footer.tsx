@@ -111,7 +111,7 @@ export function Footer() {
               rel="noopener noreferrer"
               variant="wa"
               size="sm"
-              className="w-full text-xs font-bold text-white shadow-none"
+              className="w-full text-xs font-bold shadow-none"
             >
               💬 WhatsApp Langsung
             </Button>
