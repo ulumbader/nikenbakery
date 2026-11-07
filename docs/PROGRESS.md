@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 10b — Testing E2E (Playwright) & UAT
+- **Tahap aktif:** 11 — Deploy & serah terima
 - **Status:** selesai ✅
-- **Kondisi repo:** Pengujian otomatis E2E dan Unit Test selesai 100%. Terpasang Playwright (`@playwright/test`, `@axe-core/playwright`) dan Vitest. Seluruh 37 unit/integration test Vitest lulus. Seluruh 57 skenario uji Playwright E2E (PUB-01 s/d PUB-09, ADM-01 s/d ADM-09, SEC-01 s/d SEC-06, QLT-01 s/d QLT-04) lulus di project `desktop` (1280×800) dan `mobile` (Pixel 7). Zero pelanggaran axe-core (serious/critical), zero unhandled console error, zero scroll horizontal. Screenshot visual 375px & 1280px tersimpan di `e2e/screenshots/`. Checklist pengujian manual dibuat di `docs/UAT_CHECKLIST.md`. Lint (0 errors, 0 warnings) dan build produksi 100% lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/11-deploy-handoff.md` (Tahap 11 — Deploy & serah terima).
+- **Kondisi repo:** Packaging produksi, Docker containerization, script pencadangan & pemulihan konsisten (Linux & Windows), dokumentasi deploy VPS (`docs/DEPLOY.md`), panduan pemilik non-teknis (`docs/ADMIN_GUIDE.md`), serta `README.md` utama telah selesai dan teruji penuh. Bug visual dropdown menu mobile telah diperbaiki (hoist drawer ke luar header agar tidak terkurung containing-block backdrop-filter, background solid `bg-cream`). Lint (0 errors, 0 warnings), build produksi (`output: "standalone"`), dan suite pengujian (37 Vitest + 57 Playwright) 100% lulus.
+- **Langkah berikutnya:** proyek inti Niken Bakery telah selesai dan siap diserahterimakan ke pengguna/pemilik toko. Tahap 12 (opsional: form custom order) dapat dikerjakan bila pengguna membutuhkan fitur kustomisasi kue khusus.
 
 ## Checklist tahap
 
@@ -25,7 +25,7 @@
 | 09 | Analitik dasar & dashboard ringkasan | [x] |
 | 10 | Polish: SEO, performa, aksesibilitas, QA | [x] |
 | 10b | Testing E2E (Playwright) & UAT | [x] |
-| 11 | Deploy & serah terima | [ ] |
+| 11 | Deploy & serah terima | [x] |
 | 12 | (Opsional) Form custom order | [ ] |
 
 Status: `[ ]` belum · `[~]` sedang dikerjakan · `[x]` selesai (lint + build lulus, commit dibuat).
@@ -118,11 +118,33 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Ringkasan sesi terakhir
 
-- Tahap 10b selesai. Dikonfigurasi dan diimplementasikan rangkaian pengujian otomatis lengkap menggunakan Playwright (`@playwright/test`, `@axe-core/playwright`) dan Vitest. Seluruh 37 unit & integration test Vitest lulus. Seluruh 57 kasus uji Playwright E2E pada project desktop dan mobile lulus tanpa kegagalan (Total 94 test lulus). Terbukti: alur pemesanan WhatsApp 3-ketukan bekerja presisi, alur manajemen admin lengkap berfungsi, keamanan dasar tertutup rapat (auth guard, path traversal protection, SVG/MIME spoof upload blocking, rate limiter login & analitik, cookie session flags), aksesibilitas axe-core 0 violation serious/critical, dan 0 scroll horizontal. Tangkapan layar desktop (1280px) dan mobile (375px) dihasilkan di `e2e/screenshots/`. Checklist manual UAT perangkat fisik dibuat di `docs/UAT_CHECKLIST.md`. Lint (0 errors, 0 warnings) dan build produksi lulus 100%.
+- Tahap 11 selesai. Dilakukan packaging produksi penuh dengan Next.js `output: "standalone"` dan multi-stage `Dockerfile` (Node 20 Bookworm Slim untuk kompatibilitas native `better-sqlite3` dan `sharp`), `.dockerignore`, dan `docker-compose.yml` dengan volume persisten `./data:/app/data` dan healthcheck.
+- Dibuat skrip startup dan migrasi aman: `scripts/migrate.js`, `scripts/docker-entrypoint.sh`, dan `scripts/start.sh`.
+- Dibuat utilitas backup konsisten SQLite (WAL mode safe via `better-sqlite3` online backup) dan arsip media uploads untuk Linux (`scripts/backup.sh`, `scripts/restore.sh`) dan Windows (`scripts/backup.ps1`, `scripts/restore.ps1`). Uji pemulihan data (restore) telah diverifikasi berhasil.
+- Disusun panduan arsitektur deployment teknis `docs/DEPLOY.md` (VPS Ubuntu/Debian, Docker Compose, reverse proxy HTTPS dengan Caddy/Nginx, cron backup, jalur migrasi Turso/libSQL untuk serverless, dan Production Checklist).
+- Disusun buku panduan pengelola non-teknis `docs/ADMIN_GUIDE.md` dalam Bahasa Indonesia ramah awam mencakup seluruh alur pengelolaan kue, foto, banner, promo, info kontak, jam buka toko, dan reset password admin.
+- Ditulis ulang `README.md` utama secara komprehensif.
+- Diperbaiki kendala dropdown menu mobile yang tumpang tindih (hoist drawer ke luar header agar bebas dari containing block backdrop-filter, dan gunakan background solid `bg-cream`).
+- Lint (0 errors, 0 warnings) dan build produksi 100% lulus. Seluruh test suite (37 Vitest + 57 Playwright) lulus.
 
 ## Log sesi (terbaru di atas)
 
-### 2026-11-07 — Tahap 10b
+### 2026-11-07 — Tahap 11
+- Dikerjakan:
+  1. Perbaiki dropdown menu mobile di `components/public/Navbar.tsx`: pindahkan drawer dialog ke luar elemen `<header>` (React Fragment `<>`) agar terhindar dari containing block yang diinduksi oleh `backdrop-filter` CSS, gunakan warna latar solid `bg-cream` (`#FFF4E0`) sesuai panduan neo-brutalism sehingga menu tidak lagi transparan dan tidak tumpang tindih dengan hero section. Verifikasi visual dengan screenshot `e2e/screenshots/mobile-menu-drawer.png`.
+  2. Konfigurasi `output: "standalone"` di `next.config.ts`.
+  3. Buat `Dockerfile` multi-stage (Node 20 Bookworm Slim), `.dockerignore`, dan `docker-compose.yml` dengan volume mount `./data:/app/data`, environment file, dan healthcheck `/api/health`.
+  4. Buat skrip migrasi mandiri `scripts/migrate.js` (CommonJS untuk standalone container), `scripts/docker-entrypoint.sh`, dan `scripts/start.sh`.
+  5. Buat sistem pencadangan konsisten SQLite WAL mode (`scripts/sqlite-backup.js`) serta skrip backup dan restore untuk Linux (`scripts/backup.sh`, `scripts/restore.sh`) dan Windows (`scripts/backup.ps1`, `scripts/restore.ps1`). Uji coba pemulihan data ke folder uji coba terisolasi berhasil 100%.
+  6. Buat `docs/DEPLOY.md` (deploy VPS, Docker, reverse proxy Caddy & Nginx, cron backup harian, jalur migrasi ke Turso/libSQL bila ingin pindah ke Vercel, dan Production Checklist).
+  7. Buat `docs/ADMIN_GUIDE.md` (panduan non-teknis berbahasa Indonesia awam untuk pemilik toko UMKM).
+  8. Tulis ulang `README.md` utama proyek secara komprehensif.
+  9. Jalankan verifikasi lint (`npm run lint`), build (`npm run build`), dan suite pengujian (`npm test` & Playwright E2E) -> seluruhnya 100% lulus.
+- File penting yang diubah/dibuat: `components/public/Navbar.tsx`, `next.config.ts`, `Dockerfile`, `.dockerignore`, `docker-compose.yml`, `scripts/migrate.js`, `scripts/docker-entrypoint.sh`, `scripts/start.sh`, `scripts/sqlite-backup.js`, `scripts/backup.sh`, `scripts/restore.sh`, `scripts/backup.ps1`, `scripts/restore.ps1`, `docs/DEPLOY.md`, `docs/ADMIN_GUIDE.md`, `README.md`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada (mengikuti D-004, D-007, D-009).
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` lulus (0 error, 0 warning), `npm run build` lulus, `powershell .\scripts\backup.ps1` berhasil membuat ZIP, `powershell .\scripts\restore.ps1` berhasil memulihkan data, screenshot visual mobile drawer bersih tanpa tumpang tindih.
+- Berikutnya: Proyek inti selesai dan siap serah terima. Tahap 12 (opsional: form custom order).
 - Dikerjakan:
   1. Pasang dev dependency `@playwright/test`, `@axe-core/playwright`, `vitest`, `dotenv`. Install browser Chromium engine via `npx playwright install chromium`. Catat keputusan D-015 di `docs/DECISIONS.md`.
   2. Buat konfigurasi `.env.test`, `vitest.config.ts`, dan `playwright.config.ts` (project `setup`, `desktop` 1280×800, `mobile` Pixel 7, serial execution, headless webServer di port 3100 dengan database terisolasi `data/test.db` & uploads `data/test-uploads`).
