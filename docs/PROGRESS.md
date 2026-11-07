@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 06 — Admin: auth & kerangka dashboard
+- **Tahap aktif:** 07 — Admin: produk, kategori, upload gambar
 - **Status:** selesai ✅
-- **Kondisi repo:** Autentikasi admin berbasis JWT HS256 (`jose`) + cookie httpOnly (`sameSite=lax`, `secure`), verifikasi password bcrypt (`bcryptjs`), rate limiting in-memory pada form login, proteksi lapis ganda via `proxy.ts` dan `requireAdmin()` di layout, script CLI `npm run admin:create` (validasi password minimal 10 karakter), kerangka dashboard admin neo-brutal bersih tanpa glass (sidebar desktop, mobile drawer, navigasi 8 modul), `robots.ts` disallow `/admin`, lint & build lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/07-admin-products.md` (Tahap 07).
+- **Kondisi repo:** Pipeline upload gambar aman dengan Sharp (WebP 1200w/480w, strip EXIF, tolak SVG & non-image, route `/media/[...path]` dengan cache immutable & proteksi path traversal), manajemen Kategori (`/admin/categories`) dengan sortir tombol naik/turun dan pengecekan produk terkait sebelum hapus, tabel produk responsif (`/admin/products`) dengan pencarian, filter, toggle cepat inline (status, published, featured), dialog konfirmasi hapus (otomatis un-link file gambar di disk), form produk lengkap (`/admin/products/new` dan `/[id]`) dengan auto-slug generator, pengelola varian dinamis, dan galeri foto multi-upload (preview instan, cover selector, alt text, reorder, delete). Lint & build lulus 100%.
+- **Langkah berikutnya:** kerjakan `docs/prompts/08-admin-content-settings.md` (Tahap 08).
 
 ## Checklist tahap
 
@@ -20,7 +20,7 @@
 | 04 | Menu, detail produk, order WhatsApp | [x] |
 | 05 | About Us & Social | [x] |
 | 06 | Admin: auth & kerangka dashboard | [x] |
-| 07 | Admin: produk, kategori, upload gambar | [ ] |
+| 07 | Admin: produk, kategori, upload gambar | [x] |
 | 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [ ] |
 | 09 | Analitik dasar & dashboard ringkasan | [ ] |
 | 10 | Polish: SEO, performa, aksesibilitas, QA | [ ] |
@@ -45,7 +45,7 @@ Status: `[ ]` belum · `[~]` sedang dikerjakan · `[x]` selesai (lint + build lu
 | Logo & warna brand Niken Bakery | Belum ada. Pakai palet default di `03-DESIGN_SYSTEM.md` |
 | Nomor WhatsApp | Belum ada. Pakai nilai CONTOH |
 | Alamat, jam buka, link Maps | Belum ada. Pakai nilai CONTOH |
-| Foto produk | Belum ada. Pakai `PlaceholderCake` |
+| Foto produk | Belum ada. Pakai `PlaceholderCake` / Upload WebP |
 | Cerita brand (About) | Belum ada. Pakai teks CONTOH |
 | Akun Instagram/TikTok | Belum ada. Pakai nilai CONTOH |
 
@@ -70,9 +70,17 @@ Perbarui tabel ini begitu pengguna memberi data asli.
 
 ## Ringkasan sesi terakhir
 
-- Tahap 06 selesai. Dipasang `jose`, `bcryptjs`, dan `zod`. Dibuat helper auth `lib/auth/password.ts`, `lib/auth/session.ts` (JWT HS256, cookie httpOnly, validasi `SESSION_SECRET` >= 32 karakter di prod), dan `lib/auth/require-admin.ts`. Script `npm run admin:create` berhasil dibuat dan diuji. Dibuat Server Action `loginAction` dengan in-memory rate limiting (5 percobaan / 15 menit) dan pesan generik, serta `logoutAction`. Dibuat halaman login `/admin/login` memakai `useActionState`. Proteksi lapis ganda diimplementasikan lewat `proxy.ts` (konvensi Next.js 16, D-014) dan `requireAdmin()` di `admin/(dashboard)/layout.tsx`. Kerangka dashboard neo-brutal selesai dengan sidebar desktop, drawer mobile, header akun, serta 7 halaman stub modul admin. `app/robots.ts` me-disallow akses `/admin`. Lint & build lulus.
+- Tahap 07 selesai. Dipasang library `sharp`. Dibuat pipeline upload `lib/upload.ts` (validasi batas 5 MB, verifikasi format via Sharp, auto-orientasi EXIF, konversi WebP 1200w dan 480w tanpa EXIF, tolak SVG). Dibuat route handler `app/media/[...path]/route.ts` dengan proteksi path traversal dan caching immutable. Dibuat Server Action `actions/categories.ts` dan komponen `CategoryManager.tsx` pada `/admin/categories` (CRUD kategori, sorting urutan naik/turun, verifikasi produk sebelum hapus dengan pemilih kategori pengganti). Dibuat Server Action `actions/products.ts` (toggle cepat stok, publish, featured, penghapusan produk beserta file fisik di disk, simpan/edit produk). Dibuat tabel produk `components/admin/ProductListTable.tsx` pada `/admin/products` (pencarian, filter kategori/status, toggle cepat inline, dialog hapus). Dibuat `components/admin/ProductForm.tsx` serta halaman `app/admin/(dashboard)/products/new/page.tsx` dan `app/admin/(dashboard)/products/[id]/page.tsx` (auto-slug, pengelola varian harga, galeri multi-upload foto dengan preview, cover selector, reorder, delete). Lint dan build lulus 100%.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 07
+- Dikerjakan: pasang `sharp`. Buat `lib/upload.ts` (validasi ukuran 5MB, format JPEG/PNG/WebP/AVIF via Sharp, auto-rotate, WebP 1200w dan 480w, strip EXIF, proteksi SVG, `deleteUploadedFile`). Buat route `app/media/[...path]/route.ts` (anti path-traversal, header MIME dan `Cache-Control` immutable). Buat Server Actions `actions/categories.ts` (CRUD, sorting, reassignment dialog) dan komponen `components/admin/CategoryManager.tsx` pada `/admin/categories`. Buat Server Actions `actions/products.ts` (toggle cepat status/publish/featured, hapus produk beserta file fisik di disk, simpan/update produk dengan varian dan gambar). Buat tabel produk responsif `components/admin/ProductListTable.tsx` pada `/admin/products` (search, category filter, status filter, inline toggle, delete dialog). Buat form produk `components/admin/ProductForm.tsx` serta halaman tambah `/admin/products/new` dan edit `/admin/products/[id]` (auto-slug, manajemen varian dinamis, galeri multi-upload foto).
+- File penting yang diubah/dibuat: `lib/upload.ts`, `app/media/[...path]/route.ts`, `actions/categories.ts`, `actions/products.ts`, `components/admin/CategoryManager.tsx`, `components/admin/ProductListTable.tsx`, `components/admin/ProductForm.tsx`, `app/admin/(dashboard)/categories/page.tsx`, `app/admin/(dashboard)/products/**`, `package.json`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada (mengikuti D-007)
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: pipeline test scratch script lulus (SVG ditolak, non-image ditolak, path traversal terblokir), `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅.
+- Berikutnya: tahap 08 (Admin: banner, testimoni, social, FAQ, pengaturan)
 
 ### 2026-11-07 — Tahap 06
 - Dikerjakan: pasang `jose`, `bcryptjs`, `zod`, `@types/bcryptjs`. Buat `lib/auth/password.ts` (hash & compare bcrypt), `lib/auth/session.ts` (SignJWT & jwtVerify HS256, cookie httpOnly 7 hari), `lib/auth/require-admin.ts`. Buat script CLI `scripts/create-admin.ts` dan script npm `admin:create` (validasi password minimal 10 karakter). Buat Server Action `actions/auth.ts` (`loginAction` dengan rate limiting dan zod, `logoutAction`). Buat form login `components/admin/LoginForm.tsx` (`useActionState`) dan halaman `app/admin/login/page.tsx`. Buat proteksi ganda: `proxy.ts` (konvensi Next.js 16 pengganti `middleware.ts`, D-014) dan `requireAdmin()` di layout dashboard. Buat kerangka admin `components/admin/AdminNav.tsx` dan `app/admin/(dashboard)/layout.tsx` (neo-brutal bersih, tanpa glass). Buat halaman overview `app/admin/(dashboard)/page.tsx` dan 7 stub rute admin (`products`, `categories`, `banners`, `testimonials`, `social`, `faqs`, `settings`). Buat `app/robots.ts` (disallow `/admin`).
