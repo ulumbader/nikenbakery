@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 03 — Layout publik & Home
+- **Tahap aktif:** 04 — Menu, detail produk, order WhatsApp
 - **Status:** selesai ✅
-- **Kondisi repo:** Layout publik lengkap (Navbar glass sticky dengan dialog mobile terkelola, Footer solid, Floating WhatsApp safe-area), Home page interaktif dengan 8 section terintegrasi data database, kartu produk solid dengan link order WhatsApp, stub pages (/menu, /social, /about), lint & build lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/04-menu-product-whatsapp.md` (Tahap 04).
+- **Kondisi repo:** Halaman `/menu` (katalog, search input debounced, filter kategori link shareable, empty state) dan `/menu/[slug]` (galeri foto/placeholder, pemilih varian reaktif harga & pesan WA, tombol share dengan copy toast, bahan & alergen, sticky glass bar mobile, produk terkait), halaman 404 neo-brutal, komponen sentral `WhatsAppButton`, lint & build lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/05-about-social.md` (Tahap 05).
 
 ## Checklist tahap
 
@@ -17,7 +17,7 @@
 | 01 | Foundation & setup (audit, token, komponen UI dasar, styleguide) | [x] |
 | 02 | Database & seed (Drizzle, skema, query, data contoh) | [x] |
 | 03 | Layout publik & Home | [x] |
-| 04 | Menu, detail produk, order WhatsApp | [ ] |
+| 04 | Menu, detail produk, order WhatsApp | [x] |
 | 05 | About Us & Social | [ ] |
 | 06 | Admin: auth & kerangka dashboard | [ ] |
 | 07 | Admin: produk, kategori, upload gambar | [ ] |
@@ -57,9 +57,17 @@ Perbarui tabel ini begitu pengguna memberi data asli.
 
 ## Ringkasan sesi terakhir
 
-- Tahap 03 selesai. Route group `(public)` dibuat lengkap dengan `Navbar` (glass sticky + menu mobile), `Footer` (solid + jam buka + kontak), `FloatingWhatsApp` (wadah glass safe-area). Halaman Home memiliki 8 section berurutan (Hero, Marquee, Produk Andalan, Banner Promo, Cara Pesan, Testimoni, Preview Social, Penutup). Dibuat helper `lib/whatsapp.ts`, komponen `ProductCard`, serta stub pages `/menu`, `/social`, `/about`. Lint & build lulus.
+- Tahap 04 selesai. Halaman `/menu` dibuat lengkap dengan pencarian debounced `SearchInput`, filter kategori link `CategoryPills`, grid produk dan `EmptyState`. Halaman `/menu/[slug]` menyajikan detail produk lengkap, galeri thumbnail, pemilih varian reaktif yang memperbarui harga dan template chat WhatsApp secara real-time, tombol share/salin tautan, info bahan & alergen, sticky glass summary bar di mobile, rekomendasi produk terkait, serta penanganan 404 `notFound()`. Dibuat `WhatsAppButton` terpusat dan halaman `app/not-found.tsx`. Lint & build lulus.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 04
+- Dikerjakan: buat `components/public/WhatsAppButton.tsx`, refactor `ProductCard` memakai `WhatsAppButton`. Buat `components/public/SearchInput.tsx` (debounced search), `components/public/CategoryPills.tsx` (link filter kategori shareable). Buat `app/(public)/menu/page.tsx` membaca `searchParams` bertipe Promise di Next 16, menampilkan grid produk dan `EmptyState`. Buat `components/public/ProductDetailClient.tsx` (galeri foto, pemilih varian, update harga & pesan WA dinamis, share button dengan fallback toast copy clipboard, sticky mobile glass bar). Buat `app/(public)/menu/[slug]/page.tsx` dengan metadata produk dinamis, pengecekan 404, dan rekomendasi produk terkait. Buat `app/not-found.tsx` bergaya neo-brutal.
+- File penting yang diubah/dibuat: `components/public/WhatsAppButton.tsx`, `components/public/SearchInput.tsx`, `components/public/CategoryPills.tsx`, `components/public/ProductDetailClient.tsx`, `components/public/ProductCard.tsx`, `components/public/index.ts`, `app/(public)/menu/page.tsx`, `app/(public)/menu/[slug]/page.tsx`, `app/not-found.tsx`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, uji filter & pencarian di `/menu`, uji ganti varian di `/menu/strawberry-shortcake`, uji slug ngawur di `/menu/kue-ngawur-404` mengarah ke not-found.
+- Berikutnya: tahap 05 (About Us & Social)
 
 ### 2026-11-07 — Tahap 03
 - Dikerjakan: buat `lib/whatsapp.ts` (`normalizePhone`, `buildWhatsAppLink`, `generalMessage`, `orderMessage`, `inquiryMessage`). Buat komponen publik di `components/public/` (`Navbar`, `Footer`, `FloatingWhatsApp`, `ProductCard`). Buat route group `app/(public)/layout.tsx` dan `app/(public)/page.tsx` dengan 8 section berurutan sesuai brief. Buat halaman stub `/menu`, `/social`, `/about`. Update `Button` untuk mendukung link polymorphic (`href`). Nonaktifkan `cacheComponents`/`partialPrefetching` di `next.config.ts` untuk dynamic rendering UMKM yang stabil (D-013).

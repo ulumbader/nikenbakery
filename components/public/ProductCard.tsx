@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/format";
 import { buildWhatsAppLink, orderMessage, inquiryMessage } from "@/lib/whatsapp";
-import { StatusBadge, PlaceholderCake, Button } from "@/components/ui";
+import { StatusBadge, PlaceholderCake } from "@/components/ui";
+import { WhatsAppButton } from "@/components/public/WhatsAppButton";
 
 export type ProductCardData = {
   id: number;
@@ -109,16 +110,13 @@ export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
             <span>{formatRupiah(product.displayPrice)}</span>
           </div>
 
-          <Button
+          <WhatsAppButton
             href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
             variant={isSoldOut ? "ghost" : "wa"}
             size="default"
             className="w-full text-sm font-bold shadow-none hover:shadow-none"
-          >
-            {isSoldOut ? "Tanya via WhatsApp" : "Pesan via WhatsApp"}
-          </Button>
+            label={isSoldOut ? "Tanya via WhatsApp" : "Pesan via WhatsApp"}
+          />
         </div>
       </div>
     </div>

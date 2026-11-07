@@ -1,23 +1,117 @@
-import { SectionHeading } from "@/components/ui";
+import Link from "next/link";
+import { getSettings } from "@/lib/settings";
+import { listCategories, listProducts } from "@/db/queries";
+import { ProductCard } from "@/components/public/ProductCard";
+import { SearchInput } from "@/components/public/SearchInput";
+import { CategoryPills } from "@/components/public/CategoryPills";
+import { SectionHeading, EmptyState } from "@/components/ui";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Menu",
-  description: "Daftar koleksi kue lezat dari Niken Bakery.",
+  title: "Menu Koleksi Kue",
+  description:
+    "Jelajahi pilihan kue lezat, brownies, cookies, dan pastry dari Niken Bakery. Pesan langsung via WhatsApp!",
 };
 
-export default function MenuPage() {
+interface MenuPageProps {
+  searchParams: Promise<{
+    kategori?: string;
+    q?: string;
+  }>;
+}
+
+export default async function MenuPage({ searchParams }: MenuPageProps) {
+  const resolvedParams = await searchParams;
+  const currentCategorySlug = resolvedParams.kategori;
+  const currentQuery = resolvedParams.q;
+
+  const settings = getSettings();
+  const categories = listCategories();
+  const products = listProducts({
+    categorySlug: currentCategorySlug,
+    q: currentQuery,
+  });
+
+  const activeCategory = categories.find((c) => c.slug === currentCategorySlug);
+  const hasActiveFilters = Boolean(currentCategorySlug || currentQuery);
+
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-6 py-12">
-      <SectionHeading
-        title="Koleksi Menu Kue"
-        description="Pilihan cake, brownies, cookies, dan pastry segar setiap hari."
-      />
-      <div className="bg-white border-3 border-ink rounded-[14px] p-8 text-center shadow-[var(--shadow-brutal)]">
-        <p className="text-lg font-bold">Katalog lengkap sedang dipersiapkan ✨</p>
-        <p className="text-sm text-ink/70 mt-2">
-          Halaman ini akan terisi penuh di Tahap 04.
-        </p>
+    <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-8">
+      {/* ─── Header Menu ─── */}
+      <div className="space-y-4">
+        <SectionHeading
+          title="Koleksi Menu Niken Bakery"
+          description="Semua kue dibuat fresh setiap hari dari bahan pilihan premium. Pilih kue favoritmu dan pesan langsung via WhatsApp!"
+          className="mb-0"
+        />
+
+        {/* ─── Pencarian & Filter Kategori ─── */}
+        <div className="pt-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <SearchInput initialValue={currentQuery} />
+          <CategoryPills
+            categories={categories}
+            currentCategorySlug={currentCategorySlug}
+            currentQuery={currentQuery}
+          />
+        </div>
+
+        {/* ─── Bar Status Hasil & Reset ─── */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-sm border-b-2 border-ink/10 pb-4">
+          <p className="font-semibold text-ink/80">
+            Menampilkan <span className="text-ink font-bold">{products.length}</span>{" "}
+            kue
+            {activeCategory && (
+              <span>
+                {" "}
+                dalam kategori{" "}
+                <span className="font-bold underline text-ink">
+                  {activeCategory.name}
+                </span>
+              </span>
+            )}
+            {currentQuery && (
+              <span>
+                {" "}
+                untuk kata kunci &ldquo;
+                <span className="font-bold text-ink">{currentQuery}</span>&rdquo;
+              </span>
+            )}
+          </p>
+
+          {hasActiveFilters && (
+            <Link
+              href="/menu"
+              className="text-xs font-bold text-danger hover:underline inline-flex items-center gap-1 bg-white px-2.5 py-1 border-2 border-ink rounded-[6px] shadow-[var(--shadow-brutal-sm)]"
+            >
+              <span>✕</span>
+              <span>Reset filter</span>
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* ─── Grid Produk ─── */}
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              whatsappNumber={settings.whatsapp_number}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)]">
+          <EmptyState
+            title="Yah, belum ada kue yang cocok"
+            description="Coba kata kunci pencarian lain atau pilih kategori kue lainnya, yuk!"
+            actionLabel="Lihat Semua Menu"
+            actionHref="/menu"
+          />
+        </div>
+      )}
     </main>
   );
 }
