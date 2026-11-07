@@ -28,18 +28,39 @@ export async function generateMetadata({
   }
 
   const settings = getSettings();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const description =
     product.description ||
     `Pesan ${product.name} lezat dari ${settings.business_name} via WhatsApp.`;
 
+  const coverImage = product.images[0]?.fileName || `${siteUrl}/opengraph-image`;
+  const fullImageUrl = coverImage.startsWith("http")
+    ? coverImage
+    : `${siteUrl}${coverImage}`;
+
   return {
     title: product.name,
     description,
+    alternates: {
+      canonical: `/menu/${product.slug}`,
+    },
     openGraph: {
       title: `${product.name} | ${settings.business_name}`,
       description,
+      url: `${siteUrl}/menu/${product.slug}`,
       type: "website",
-      images: product.images[0] ? [product.images[0].fileName] : [],
+      images: [
+        {
+          url: fullImageUrl,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | ${settings.business_name}`,
+      description,
+      images: [fullImageUrl],
     },
   };
 }
@@ -53,11 +74,41 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const settings = getSettings();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const relatedProducts = listRelatedProducts(product.id, 3);
   const { cookieHeaderValue } = await recordProductViewServer(product.id);
 
+  // Structured Data (JSON-LD) Product Schema
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((img) =>
+      img.fileName.startsWith("http") ? img.fileName : `${siteUrl}${img.fileName}`
+    ),
+    offers: {
+      "@type": "Offer",
+      price: product.basePrice,
+      priceCurrency: "IDR",
+      availability:
+        product.status === "ready"
+          ? "https://schema.org/InStock"
+          : product.status === "preorder"
+          ? "https://schema.org/PreOrder"
+          : "https://schema.org/OutOfStock",
+      url: `${siteUrl}/menu/${product.slug}`,
+    },
+  };
+
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-16">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-16">
+      {/* JSON-LD Product Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+
       {/* ─── Detail Produk Interaktif ─── */}
       <ProductDetailClient
         product={product}
@@ -84,6 +135,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 }

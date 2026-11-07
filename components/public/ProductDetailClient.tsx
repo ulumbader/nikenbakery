@@ -191,6 +191,7 @@ export function ProductDetailClient({
                     src={img.thumbName || img.fileName}
                     alt={img.alt || `${product.name} foto ${idx + 1}`}
                     fill
+                    sizes="80px"
                     className="object-cover"
                   />
                 </button>

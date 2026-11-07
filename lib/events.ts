@@ -68,3 +68,4 @@ export async function recordProductViewServer(productId: number): Promise<{
     return { recorded: false };
   }
 }
+

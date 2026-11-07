@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 09 — Analitik dasar & dashboard ringkasan
+- **Tahap aktif:** 10 — Polish: SEO, performa, aksesibilitas, QA
 - **Status:** selesai ✅
-- **Kondisi repo:** Analitik internal ringan, privat, dan etis tanpa script pihak ketiga: pelacakan `product_view` (server-side dengan bot filtering dan dedupe harian cookie anonim), pelacakan `wa_click` (`WhatsAppButton` via `navigator.sendBeacon` ke route `/api/events` dengan rate limiter in-memory dan pembatasan payload 2KB), dashboard ringkasan `/admin` berfitur lengkap (4 kartu ringkas, Top 5 produk dilihat & diklik WA, grafik batang tren 14 hari SVG/CSS murni, checklist kelengkapan data toko dengan direct link, pintasan aksi cepat), serta script pemangkasan data `npm run events:prune` (> 180 hari). Lint & build 100% lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/10-polish-qa.md` (Tahap 10).
+- **Kondisi repo:** Polish komprehensif selesai: Metadata SEO lengkap (title template, Open Graph, Twitter cards, canonical), sitemap dinamis (`app/sitemap.ts`) memuat seluruh halaman publik dan produk published dari DB, `robots.ts` memproteksi `/admin` & `/api`, Open Graph Image dinamis 1200x630 via Next.js `ImageResponse` (`app/opengraph-image.tsx`), web app manifest (`app/manifest.ts`), ikon SVG neo-brutal cake (`app/icon.svg`), JSON-LD Structured Data (`Bakery` & `Product` dengan `offers` schema.org), aksesibilitas keyboard (skip link `#main-content`, focus ring 3px, ukuran tap target, preferensi reduced-motion), error boundary neo-brutal (`app/error.tsx`), dan loading skeleton (`app/(public)/loading.tsx`). Lint & build 100% lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/11-deploy-handoff.md` (Tahap 11).
 
 ## Checklist tahap
 
@@ -23,7 +23,7 @@
 | 07 | Admin: produk, kategori, upload gambar | [x] |
 | 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [x] |
 | 09 | Analitik dasar & dashboard ringkasan | [x] |
-| 10 | Polish: SEO, performa, aksesibilitas, QA | [ ] |
+| 10 | Polish: SEO, performa, aksesibilitas, QA | [x] |
 | 11 | Deploy & serah terima | [ ] |
 | 12 | (Opsional) Form custom order | [ ] |
 
@@ -77,9 +77,17 @@ Script ini (`scripts/prune-events.ts`) menghapus seluruh baris di tabel `events`
 
 ## Ringkasan sesi terakhir
 
-- Tahap 09 selesai. Dibuat helper `lib/events.ts` (deteksi crawler/bot lewat regex user-agent, dedupe harian `product_view` berbasis cookie anonim `nb_pv`). Dibuat Route Handler `app/api/events/route.ts` yang memproses `wa_click` dan `product_view` dengan rate limit in-memory (maks 30 req/menit per IP), validasi zod, dan pembatasan payload 2KB tanpa mencatat IP ke database. Ditambahkan integrasi `navigator.sendBeacon` pada `components/public/WhatsAppButton.tsx` (`ProductCard` dan `ProductDetailClient`). Dibuat query analitik agregasi `db/queries/events.ts` (`getAnalyticsSummary()`) yang menghasilkan metrik 7/30 hari, Top 5 produk sering dilihat, Top 5 produk sering diklik WA, time-series 14 hari, dan checklist 5 butir kelengkapan toko. Dibuat visualisasi grafik batang `components/admin/AnalyticsChart.tsx` (SVG/CSS murni tanpa library pihak ketiga). Dashboard utama `/admin` diperbarui menampilkan ringkasan analitik lengkap, checklist toko dengan tombol aksi langsung, dan pintasan aksi cepat. Dibuat script pemeliharaan `scripts/prune-events.ts` dan script npm `events:prune`. Pengujian otomatis dan manual lulus 100%. Lint & build lulus.
+- Tahap 10 selesai. Dibuat metadata SEO lengkap (title template, canonical, Open Graph, Twitter cards). Dibuat generator sitemap dinamis `app/sitemap.ts` yang mencakup semua rute inti dan seluruh produk aktif dari SQLite. Dibuat generator Open Graph image dinamis 1200x630 `app/opengraph-image.tsx` via `ImageResponse`. Dibuat manifest web `app/manifest.ts` dan ikon SVG cake neo-brutal `app/icon.svg`. Ditambahkan JSON-LD schema `Bakery` pada `app/(public)/layout.tsx` dan `Product` dengan `offers` pada `app/(public)/menu/[slug]/page.tsx`. Dipasang skip link aksesibilitas keyboard (`#main-content`). Dibuat halaman error boundary `app/error.tsx` dan loading skeleton `app/(public)/loading.tsx` bergaya neo-brutal. Semua pengujian verifikasi rute SEO, lint, dan build lulus 100%.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 10
+- Dikerjakan: lengkapi metadata SEO di `app/layout.tsx` (`metadataBase`, Open Graph, Twitter, canonical, robots). Buat `app/sitemap.ts` (dinamis dari database SQLite). Update `app/robots.ts` (blokir `/admin` & `/api`, izinkan `/`). Buat `app/opengraph-image.tsx` (kartu pratinjau sosial neo-brutal dinamis 1200x630 via `ImageResponse`). Buat `app/manifest.ts` dan `app/icon.svg`. Tambahkan JSON-LD structured data `Bakery` di `app/(public)/layout.tsx` dan `Product` dengan `offers` ketersediaan di `app/(public)/menu/[slug]/page.tsx`. Pasang skip link aksesibilitas `#main-content` di layout publik. Buat boundary error `app/error.tsx` dan skeleton loading `app/(public)/loading.tsx`. Optimasi ukuran thumbnail foto kue di `ProductDetailClient.tsx` (`sizes="80px"`). Uji verifikasi aturan robots dan url sitemap.
+- File penting yang diubah/dibuat: `app/layout.tsx`, `app/robots.ts`, `app/sitemap.ts`, `app/manifest.ts`, `app/icon.svg`, `app/opengraph-image.tsx`, `app/(public)/layout.tsx`, `app/(public)/menu/[slug]/page.tsx`, `components/public/ProductDetailClient.tsx`, `app/error.tsx`, `app/(public)/loading.tsx`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: scratch test verifikasi robots disallow & sitemap listing 18 URLs lulus, `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅.
+- Berikutnya: tahap 11 (Deploy & serah terima)
 
 ### 2026-11-07 — Tahap 09
 - Dikerjakan: buat `lib/events.ts` (deteksi bot user-agent, dedupe harian cookie anonim). Buat route `app/api/events/route.ts` (POST event wa_click, validasi zod, batas ukuran 2KB, rate limiter in-memory tahan spam). Update `components/public/WhatsAppButton.tsx` (prop `productId`, pencatatan non-blocking via `navigator.sendBeacon`). Update `ProductCard.tsx` dan `ProductDetailClient.tsx` (sertakan `productId` ke `WhatsAppButton`, sinkronisasi cookie dedupe). Update `app/(public)/menu/[slug]/page.tsx` (catat `product_view` server-side). Buat query agregasi `db/queries/events.ts` (`getAnalyticsSummary`, time-series 14 hari, checklist toko) dan ekspor ke `db/queries/index.ts`. Buat grafik batang neo-brutal responsif `components/admin/AnalyticsChart.tsx`. Rombak total halaman utama `app/admin/(dashboard)/page.tsx` (4 kartu metrik, checklist kelengkapan toko interaktif, grafik batang 14 hari, Top 5 produk views/WA clicks, pintasan aksi cepat). Buat script pemangkasan data `scripts/prune-events.ts` dan script `npm run events:prune`.

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Neo-brutal background with thick border -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#FFD93D" stroke="#2B1B17" stroke-width="4" />
+  
+  <!-- Cake Base Layer -->
+  <rect x="14" y="34" width="36" height="16" rx="4" fill="#FFF4E0" stroke="#2B1B17" stroke-width="3" />
+  
+  <!-- Chocolate/Jam Stripe -->
+  <rect x="14" y="40" width="36" height="4" fill="#FF8FAB" />
+  
+  <!-- Cake Frosting Layer -->
+  <path d="M14 34 Q 20 38, 26 34 Q 32 38, 38 34 Q 44 38, 50 34 L 50 30 Q 32 28, 14 30 Z" fill="#FF8FAB" stroke="#2B1B17" stroke-width="2" />
+  
+  <!-- Strawberry on top -->
+  <circle cx="32" cy="22" r="6" fill="#FF5A4E" stroke="#2B1B17" stroke-width="2" />
+  <!-- Strawberry Leaf -->
+  <path d="M30 16 Q 32 13, 34 16 Q 33 18, 30 16 Z" fill="#8EE3C8" stroke="#2B1B17" stroke-width="1.5" />
+</svg>
