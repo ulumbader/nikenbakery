@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 05 — About Us & Social
+- **Tahap aktif:** 06 — Admin: auth & kerangka dashboard
 - **Status:** selesai ✅
-- **Kondisi repo:** Halaman `/about` (cerita brand, 3 nilai toko, lokasi dengan Google Maps, jam operasional dengan penanda real-time Buka/Tutup via `lib/hours.ts`, info pengiriman & kebijakan, FAQ neo-brutal native `<details>/<summary>`, kontak CTA) dan `/social` (galeri kartu post Instagram/TikTok tanpa embed pihak ketiga, tombol ikuti akun, ajakan tag), lint & build lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/06-admin-auth.md` (Tahap 06).
+- **Kondisi repo:** Autentikasi admin berbasis JWT HS256 (`jose`) + cookie httpOnly (`sameSite=lax`, `secure`), verifikasi password bcrypt (`bcryptjs`), rate limiting in-memory pada form login, proteksi lapis ganda via `proxy.ts` dan `requireAdmin()` di layout, script CLI `npm run admin:create` (validasi password minimal 10 karakter), kerangka dashboard admin neo-brutal bersih tanpa glass (sidebar desktop, mobile drawer, navigasi 8 modul), `robots.ts` disallow `/admin`, lint & build lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/07-admin-products.md` (Tahap 07).
 
 ## Checklist tahap
 
@@ -19,7 +19,7 @@
 | 03 | Layout publik & Home | [x] |
 | 04 | Menu, detail produk, order WhatsApp | [x] |
 | 05 | About Us & Social | [x] |
-| 06 | Admin: auth & kerangka dashboard | [ ] |
+| 06 | Admin: auth & kerangka dashboard | [x] |
 | 07 | Admin: produk, kategori, upload gambar | [ ] |
 | 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [ ] |
 | 09 | Analitik dasar & dashboard ringkasan | [ ] |
@@ -51,15 +51,36 @@ Status: `[ ]` belum · `[~]` sedang dikerjakan · `[x]` selesai (lint + build lu
 
 Perbarui tabel ini begitu pengguna memberi data asli.
 
+## Cara Membuat Akun Admin Pertama
+1. Buka `.env.local` dan pastikan konfigurasi berikut terisi:
+   ```env
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=password_minimal_10_karakter
+   SESSION_SECRET=secret_acak_minimal_32_karakter
+   ```
+2. Jalankan perintah di terminal:
+   ```bash
+   npm run admin:create
+   ```
+3. Akun admin otomatis dibuat/diperbarui di database SQLite.
+
 ## Blocker & pertanyaan terbuka
 
 - (kosong)
 
 ## Ringkasan sesi terakhir
 
-- Tahap 05 selesai. Helper `lib/hours.ts` dibuat dan diverifikasi murni untuk menghitung status buka/tutup toko saat ini berdasarkan jadwal jam buka dan zona waktu `Asia/Jakarta`. Halaman `/about` mengintegrasikan cerita brand, 3 nilai toko, info lokasi, jadwal jam buka dengan penanda status aktif, info pengiriman & kebijakan pesanan, FAQ interaktif berbasis native `<details>/<summary>`, dan CTA kontak. Halaman `/social` menyajikan galeri postingan media sosial solid tanpa embed script pihak ketiga, tombol ikuti Instagram/TikTok, serta ajakan tag akun. Lint & build lulus.
+- Tahap 06 selesai. Dipasang `jose`, `bcryptjs`, dan `zod`. Dibuat helper auth `lib/auth/password.ts`, `lib/auth/session.ts` (JWT HS256, cookie httpOnly, validasi `SESSION_SECRET` >= 32 karakter di prod), dan `lib/auth/require-admin.ts`. Script `npm run admin:create` berhasil dibuat dan diuji. Dibuat Server Action `loginAction` dengan in-memory rate limiting (5 percobaan / 15 menit) dan pesan generik, serta `logoutAction`. Dibuat halaman login `/admin/login` memakai `useActionState`. Proteksi lapis ganda diimplementasikan lewat `proxy.ts` (konvensi Next.js 16, D-014) dan `requireAdmin()` di `admin/(dashboard)/layout.tsx`. Kerangka dashboard neo-brutal selesai dengan sidebar desktop, drawer mobile, header akun, serta 7 halaman stub modul admin. `app/robots.ts` me-disallow akses `/admin`. Lint & build lulus.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 06
+- Dikerjakan: pasang `jose`, `bcryptjs`, `zod`, `@types/bcryptjs`. Buat `lib/auth/password.ts` (hash & compare bcrypt), `lib/auth/session.ts` (SignJWT & jwtVerify HS256, cookie httpOnly 7 hari), `lib/auth/require-admin.ts`. Buat script CLI `scripts/create-admin.ts` dan script npm `admin:create` (validasi password minimal 10 karakter). Buat Server Action `actions/auth.ts` (`loginAction` dengan rate limiting dan zod, `logoutAction`). Buat form login `components/admin/LoginForm.tsx` (`useActionState`) dan halaman `app/admin/login/page.tsx`. Buat proteksi ganda: `proxy.ts` (konvensi Next.js 16 pengganti `middleware.ts`, D-014) dan `requireAdmin()` di layout dashboard. Buat kerangka admin `components/admin/AdminNav.tsx` dan `app/admin/(dashboard)/layout.tsx` (neo-brutal bersih, tanpa glass). Buat halaman overview `app/admin/(dashboard)/page.tsx` dan 7 stub rute admin (`products`, `categories`, `banners`, `testimonials`, `social`, `faqs`, `settings`). Buat `app/robots.ts` (disallow `/admin`).
+- File penting yang diubah/dibuat: `lib/auth/*.ts`, `actions/auth.ts`, `scripts/create-admin.ts`, `components/admin/*.tsx`, `proxy.ts`, `app/admin/login/page.tsx`, `app/admin/(dashboard)/**`, `app/robots.ts`, `package.json`, `docs/DECISIONS.md`, `docs/PROGRESS.md`.
+- Keputusan baru: D-014 (gunakan `proxy.ts` sesuai konvensi Next.js 16)
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: `npm run admin:create` berhasil, akses `/admin` tanpa cookie diredirect ke `/admin/login`, `npm run lint` ✅, `npm run build` ✅.
+- Berikutnya: tahap 07 (Admin: produk, kategori, upload gambar)
 
 ### 2026-11-07 — Tahap 05
 - Dikerjakan: buat `lib/hours.ts` (`isOpenNow`, `timeToMinutes`) dengan kemampuan uji tanggal custom, verifikasi logika penanda buka/tutup toko. Buat komponen `components/public/FaqAccordion.tsx` berbasis HTML native `<details>` dan `<summary>` dengan styling neo-brutal (aksesibel via keyboard). Perbarui `app/(public)/about/page.tsx` dengan cerita brand, 3 kartu nilai, lokasi & link Google Maps (iframe kondisional), penanda jam buka aktif, kebijakan & pengiriman, FAQ, dan CTA kontak. Perbarui `app/(public)/social/page.tsx` dengan galeri post solid (Instagram/TikTok), tombol follow sosmed, dan ajakan tag. Pastikan seluruh bagian kosong kondisional dan tidak merender wadah kosong.
