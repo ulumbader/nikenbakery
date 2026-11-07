@@ -23,3 +23,4 @@ export function StatusBadge({ status, preorderNote, className = "" }: StatusBadg
     </span>
   );
 }
+

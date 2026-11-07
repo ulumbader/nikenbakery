@@ -38,3 +38,4 @@ export function PlaceholderCake({ color = "pink", className = "" }: PlaceholderC
     </div>
   );
 }
+

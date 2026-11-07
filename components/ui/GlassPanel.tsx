@@ -10,3 +10,4 @@ export function GlassPanel({ children, className = "" }: GlassPanelProps) {
     </div>
   );
 }
+

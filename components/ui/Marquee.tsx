@@ -56,3 +56,4 @@ export function Marquee({ children, speed = 40, className = "" }: MarqueeProps) 
     </div>
   );
 }
+

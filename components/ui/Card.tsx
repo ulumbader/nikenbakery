@@ -17,3 +17,4 @@ export function Card({ children, interactive = false, className = "" }: CardProp
     </div>
   );
 }
+

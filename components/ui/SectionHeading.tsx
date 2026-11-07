@@ -14,3 +14,4 @@ export function SectionHeading({ title, description, className = "" }: SectionHe
     </div>
   );
 }
+
