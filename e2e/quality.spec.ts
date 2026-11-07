@@ -98,5 +98,18 @@ test.describe("Kualitas Lintas Halaman (QLT-01 s/d QLT-04)", () => {
         fullPage: true,
       });
     }
+
+    // Tangkapan layar khusus menu drawer mobile saat terbuka
+    if (projectName === "mobile") {
+      await page.goto("/");
+      const hamburger = page.getByRole("button", { name: /buka menu navigasi/i });
+      if (await hamburger.isVisible()) {
+        await hamburger.click();
+        await page.waitForSelector("#mobile-navigation");
+        await page.screenshot({
+          path: path.join(screenshotsDir, "mobile-menu-drawer.png"),
+        });
+      }
+    }
   });
 });
