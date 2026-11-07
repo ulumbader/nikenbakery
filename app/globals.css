@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-cream: #FFF4E0;
+  --color-ink: #2B1B17;
+  --color-pink: #FF8FAB;
+  --color-butter: #FFD93D;
+  --color-mint: #8EE3C8;
+  --color-lavender: #C9B6FF;
+  --color-wa: #25D366;
+  --color-danger: #FF5A4E;
+  --shadow-brutal-sm: 3px 3px 0 #2B1B17;
+  --shadow-brutal: 5px 5px 0 #2B1B17;
+  --shadow-brutal-lg: 8px 8px 0 #2B1B17;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+/* Frosted glass layer */
+.glass {
+  background: rgb(255 255 255 / 0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 3px solid var(--color-ink);
+  box-shadow: var(--shadow-brutal);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass {
+    background: rgb(255 255 255 / 0.95);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Focus ring: thick and visible */
+*:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Tabular nums for prices */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
