@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 07 — Admin: produk, kategori, upload gambar
+- **Tahap aktif:** 08 — Admin: banner, testimoni, social, FAQ, pengaturan
 - **Status:** selesai ✅
-- **Kondisi repo:** Pipeline upload gambar aman dengan Sharp (WebP 1200w/480w, strip EXIF, tolak SVG & non-image, route `/media/[...path]` dengan cache immutable & proteksi path traversal), manajemen Kategori (`/admin/categories`) dengan sortir tombol naik/turun dan pengecekan produk terkait sebelum hapus, tabel produk responsif (`/admin/products`) dengan pencarian, filter, toggle cepat inline (status, published, featured), dialog konfirmasi hapus (otomatis un-link file gambar di disk), form produk lengkap (`/admin/products/new` dan `/[id]`) dengan auto-slug generator, pengelola varian dinamis, dan galeri foto multi-upload (preview instan, cover selector, alt text, reorder, delete). Lint & build lulus 100%.
-- **Langkah berikutnya:** kerjakan `docs/prompts/08-admin-content-settings.md` (Tahap 08).
+- **Kondisi repo:** Manajemen konten lengkap di admin tanpa sentuh kode: Banner promo (`/admin/banners`) dengan penjadwalan tayang otomatis dan upload foto via Sharp, Testimoni pelanggan (`/admin/testimonials`) dengan rating bintang dan sortir urutan, Postingan kurasi sosial (`/admin/social`) untuk Instagram/TikTok dengan upload gambar, Tanya Jawab FAQ (`/admin/faqs`), serta Pengaturan Toko komprehensif (`/admin/settings`) bertab (Identitas, normalisasi nomor WhatsApp & tombol tes interaktif, Jam operasional 7 hari, Lokasi Google Maps, Konten profil/About/Kebijakan dengan upload foto dapur, Akun sosmed & custom cake). Lint & build 100% lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/09-analytics-dashboard.md` (Tahap 09).
 
 ## Checklist tahap
 
@@ -21,7 +21,7 @@
 | 05 | About Us & Social | [x] |
 | 06 | Admin: auth & kerangka dashboard | [x] |
 | 07 | Admin: produk, kategori, upload gambar | [x] |
-| 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [ ] |
+| 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [x] |
 | 09 | Analitik dasar & dashboard ringkasan | [ ] |
 | 10 | Polish: SEO, performa, aksesibilitas, QA | [ ] |
 | 11 | Deploy & serah terima | [ ] |
@@ -43,11 +43,11 @@ Status: `[ ]` belum · `[~]` sedang dikerjakan · `[x]` selesai (lint + build lu
 | Item | Status |
 |---|---|
 | Logo & warna brand Niken Bakery | Belum ada. Pakai palet default di `03-DESIGN_SYSTEM.md` |
-| Nomor WhatsApp | Belum ada. Pakai nilai CONTOH |
-| Alamat, jam buka, link Maps | Belum ada. Pakai nilai CONTOH |
-| Foto produk | Belum ada. Pakai `PlaceholderCake` / Upload WebP |
-| Cerita brand (About) | Belum ada. Pakai teks CONTOH |
-| Akun Instagram/TikTok | Belum ada. Pakai nilai CONTOH |
+| Nomor WhatsApp | Nilai awal CONTOH, dapat diubah via `/admin/settings` |
+| Alamat, jam buka, link Maps | Nilai awal CONTOH, dapat diubah via `/admin/settings` |
+| Foto produk & foto About | Dapat diunggah via admin (WebP otomatis) |
+| Cerita brand (About) | Nilai awal CONTOH, dapat diubah via `/admin/settings` |
+| Akun Instagram/TikTok | Nilai awal CONTOH, dapat diubah via `/admin/settings` |
 
 Perbarui tabel ini begitu pengguna memberi data asli.
 
@@ -70,9 +70,17 @@ Perbarui tabel ini begitu pengguna memberi data asli.
 
 ## Ringkasan sesi terakhir
 
-- Tahap 07 selesai. Dipasang library `sharp`. Dibuat pipeline upload `lib/upload.ts` (validasi batas 5 MB, verifikasi format via Sharp, auto-orientasi EXIF, konversi WebP 1200w dan 480w tanpa EXIF, tolak SVG). Dibuat route handler `app/media/[...path]/route.ts` dengan proteksi path traversal dan caching immutable. Dibuat Server Action `actions/categories.ts` dan komponen `CategoryManager.tsx` pada `/admin/categories` (CRUD kategori, sorting urutan naik/turun, verifikasi produk sebelum hapus dengan pemilih kategori pengganti). Dibuat Server Action `actions/products.ts` (toggle cepat stok, publish, featured, penghapusan produk beserta file fisik di disk, simpan/edit produk). Dibuat tabel produk `components/admin/ProductListTable.tsx` pada `/admin/products` (pencarian, filter kategori/status, toggle cepat inline, dialog hapus). Dibuat `components/admin/ProductForm.tsx` serta halaman `app/admin/(dashboard)/products/new/page.tsx` dan `app/admin/(dashboard)/products/[id]/page.tsx` (auto-slug, pengelola varian harga, galeri multi-upload foto dengan preview, cover selector, reorder, delete). Lint dan build lulus 100%.
+- Tahap 08 selesai. Dibuat Server Actions `actions/banners.ts`, `actions/testimonials.ts`, `actions/social.ts`, `actions/faqs.ts`, dan `actions/settings.ts` lengkap dengan validasi zod, `requireAdmin()`, dan `revalidatePath`. Dibuat komponen admin neo-brutal responsif `BannerManager.tsx`, `TestimonialManager.tsx`, `SocialManager.tsx`, `FaqManager.tsx`, dan `SettingsManager.tsx`. Halaman `/admin/banners`, `/admin/testimonials`, `/admin/social`, `/admin/faqs`, dan `/admin/settings` kini beroperasi penuh mengelola seluruh konten website toko. Uji banner scheduling lulus (masa depan/lampau tidak tayang di Home). Uji normalisasi WhatsApp dan jam buka terintegrasi langsung dengan halaman publik. Lint dan build lulus 100%.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 08
+- Dikerjakan: buat `actions/banners.ts` (CRUD banner promo, validasi jadwal mulai/selesai & URL, upload/hapus gambar via Sharp, sortir urutan, toggle aktif), buat `components/admin/BannerManager.tsx` dan perbarui `app/admin/(dashboard)/banners/page.tsx`. Buat `actions/testimonials.ts` (CRUD testimoni, rating 1-5, sortir, toggle publish), buat `components/admin/TestimonialManager.tsx` dan perbarui `app/admin/(dashboard)/testimonials/page.tsx`. Buat `actions/social.ts` (CRUD kurasi sosmed Instagram/TikTok, validasi URL http/https, upload foto, sortir, toggle publish), buat `components/admin/SocialManager.tsx` dan perbarui `app/admin/(dashboard)/social/page.tsx`. Buat `actions/faqs.ts` (CRUD tanya-jawab, sortir, toggle publish), buat `components/admin/FaqManager.tsx` dan perbarui `app/admin/(dashboard)/faqs/page.tsx`. Buat `actions/settings.ts` (kelola identitas toko, normalisasi WA, jam operasional 7 hari, Google Maps URL/embed, cerita & 3 nilai brand, upload foto About, kebijakan, pengiriman, kehalalan, akun sosmed, dan custom order) serta `components/admin/SettingsManager.tsx` bertab lengkap dengan tombol tes link WA interaktif dan perbarui `app/admin/(dashboard)/settings/page.tsx`.
+- File penting yang diubah/dibuat: `actions/banners.ts`, `actions/testimonials.ts`, `actions/social.ts`, `actions/faqs.ts`, `actions/settings.ts`, `components/admin/BannerManager.tsx`, `components/admin/TestimonialManager.tsx`, `components/admin/SocialManager.tsx`, `components/admin/FaqManager.tsx`, `components/admin/SettingsManager.tsx`, `app/admin/(dashboard)/**`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: script uji banner scheduling lulus (banner masa depan dan lampau tidak tampil di `listActiveBanners()`), `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅ (semua route berhasil dioptimasi).
+- Berikutnya: tahap 09 (Analitik dasar & dashboard ringkasan)
 
 ### 2026-11-07 — Tahap 07
 - Dikerjakan: pasang `sharp`. Buat `lib/upload.ts` (validasi ukuran 5MB, format JPEG/PNG/WebP/AVIF via Sharp, auto-rotate, WebP 1200w dan 480w, strip EXIF, proteksi SVG, `deleteUploadedFile`). Buat route `app/media/[...path]/route.ts` (anti path-traversal, header MIME dan `Cache-Control` immutable). Buat Server Actions `actions/categories.ts` (CRUD, sorting, reassignment dialog) dan komponen `components/admin/CategoryManager.tsx` pada `/admin/categories`. Buat Server Actions `actions/products.ts` (toggle cepat status/publish/featured, hapus produk beserta file fisik di disk, simpan/update produk dengan varian dan gambar). Buat tabel produk responsif `components/admin/ProductListTable.tsx` pada `/admin/products` (search, category filter, status filter, inline toggle, delete dialog). Buat form produk `components/admin/ProductForm.tsx` serta halaman tambah `/admin/products/new` dan edit `/admin/products/[id]` (auto-slug, manajemen varian dinamis, galeri multi-upload foto).

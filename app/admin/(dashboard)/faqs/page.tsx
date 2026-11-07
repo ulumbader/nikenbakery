@@ -1,25 +1,24 @@
-import { SectionHeading, Card } from "@/components/ui";
+import { asc } from "drizzle-orm";
+import { db } from "@/db";
+import { faqs } from "@/db/schema";
+import { FaqManager, type FaqItem } from "@/components/admin/FaqManager";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Kelola FAQ",
+  title: "Kelola Tanya Jawab (FAQ) | Admin Niken Bakery",
 };
 
 export default function AdminFaqsPage() {
+  const allFaqs = db
+    .select()
+    .from(faqs)
+    .orderBy(asc(faqs.sortOrder))
+    .all();
+
   return (
-    <div className="space-y-6 max-w-5xl">
-      <SectionHeading
-        title="Daftar Pertanyaan Umum (FAQ)"
-        description="Kelola pertanyaan dan jawaban yang tampil di halaman About Us."
-      />
-      <Card className="p-8 text-center bg-white">
-        <span className="text-3xl block mb-2" aria-hidden="true">
-          ❓
-        </span>
-        <h3 className="font-bold text-lg">Modul FAQ Segera Hadir</h3>
-        <p className="text-sm text-ink/70 mt-1">
-          Fitur tambah, edit, dan urutkan FAQ akan dibangun di Tahap 08.
-        </p>
-      </Card>
+    <div className="space-y-6">
+      <FaqManager initialFaqs={allFaqs as FaqItem[]} />
     </div>
   );
 }
