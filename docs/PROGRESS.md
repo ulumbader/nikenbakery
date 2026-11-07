@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 04 — Menu, detail produk, order WhatsApp
+- **Tahap aktif:** 05 — About Us & Social
 - **Status:** selesai ✅
-- **Kondisi repo:** Halaman `/menu` (katalog, search input debounced, filter kategori link shareable, empty state) dan `/menu/[slug]` (galeri foto/placeholder, pemilih varian reaktif harga & pesan WA, tombol share dengan copy toast, bahan & alergen, sticky glass bar mobile, produk terkait), halaman 404 neo-brutal, komponen sentral `WhatsAppButton`, lint & build lulus.
-- **Langkah berikutnya:** kerjakan `docs/prompts/05-about-social.md` (Tahap 05).
+- **Kondisi repo:** Halaman `/about` (cerita brand, 3 nilai toko, lokasi dengan Google Maps, jam operasional dengan penanda real-time Buka/Tutup via `lib/hours.ts`, info pengiriman & kebijakan, FAQ neo-brutal native `<details>/<summary>`, kontak CTA) dan `/social` (galeri kartu post Instagram/TikTok tanpa embed pihak ketiga, tombol ikuti akun, ajakan tag), lint & build lulus.
+- **Langkah berikutnya:** kerjakan `docs/prompts/06-admin-auth.md` (Tahap 06).
 
 ## Checklist tahap
 
@@ -18,7 +18,7 @@
 | 02 | Database & seed (Drizzle, skema, query, data contoh) | [x] |
 | 03 | Layout publik & Home | [x] |
 | 04 | Menu, detail produk, order WhatsApp | [x] |
-| 05 | About Us & Social | [ ] |
+| 05 | About Us & Social | [x] |
 | 06 | Admin: auth & kerangka dashboard | [ ] |
 | 07 | Admin: produk, kategori, upload gambar | [ ] |
 | 08 | Admin: banner, testimoni, social, FAQ, pengaturan | [ ] |
@@ -57,9 +57,17 @@ Perbarui tabel ini begitu pengguna memberi data asli.
 
 ## Ringkasan sesi terakhir
 
-- Tahap 04 selesai. Halaman `/menu` dibuat lengkap dengan pencarian debounced `SearchInput`, filter kategori link `CategoryPills`, grid produk dan `EmptyState`. Halaman `/menu/[slug]` menyajikan detail produk lengkap, galeri thumbnail, pemilih varian reaktif yang memperbarui harga dan template chat WhatsApp secara real-time, tombol share/salin tautan, info bahan & alergen, sticky glass summary bar di mobile, rekomendasi produk terkait, serta penanganan 404 `notFound()`. Dibuat `WhatsAppButton` terpusat dan halaman `app/not-found.tsx`. Lint & build lulus.
+- Tahap 05 selesai. Helper `lib/hours.ts` dibuat dan diverifikasi murni untuk menghitung status buka/tutup toko saat ini berdasarkan jadwal jam buka dan zona waktu `Asia/Jakarta`. Halaman `/about` mengintegrasikan cerita brand, 3 nilai toko, info lokasi, jadwal jam buka dengan penanda status aktif, info pengiriman & kebijakan pesanan, FAQ interaktif berbasis native `<details>/<summary>`, dan CTA kontak. Halaman `/social` menyajikan galeri postingan media sosial solid tanpa embed script pihak ketiga, tombol ikuti Instagram/TikTok, serta ajakan tag akun. Lint & build lulus.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-07 — Tahap 05
+- Dikerjakan: buat `lib/hours.ts` (`isOpenNow`, `timeToMinutes`) dengan kemampuan uji tanggal custom, verifikasi logika penanda buka/tutup toko. Buat komponen `components/public/FaqAccordion.tsx` berbasis HTML native `<details>` dan `<summary>` dengan styling neo-brutal (aksesibel via keyboard). Perbarui `app/(public)/about/page.tsx` dengan cerita brand, 3 kartu nilai, lokasi & link Google Maps (iframe kondisional), penanda jam buka aktif, kebijakan & pengiriman, FAQ, dan CTA kontak. Perbarui `app/(public)/social/page.tsx` dengan galeri post solid (Instagram/TikTok), tombol follow sosmed, dan ajakan tag. Pastikan seluruh bagian kosong kondisional dan tidak merender wadah kosong.
+- File penting yang diubah/dibuat: `lib/hours.ts`, `components/public/FaqAccordion.tsx`, `components/public/index.ts`, `app/(public)/about/page.tsx`, `app/(public)/social/page.tsx`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada
+- Masalah / utang teknis: tidak ada
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, uji logika jam buka dengan script pengujian murni, periksa halaman `/about` dan `/social` di 375px dan 1280px (tanpa scroll horizontal, tidak ada script pihak ketiga).
+- Berikutnya: tahap 06 (Admin: auth & kerangka dashboard)
 
 ### 2026-11-07 — Tahap 04
 - Dikerjakan: buat `components/public/WhatsAppButton.tsx`, refactor `ProductCard` memakai `WhatsAppButton`. Buat `components/public/SearchInput.tsx` (debounced search), `components/public/CategoryPills.tsx` (link filter kategori shareable). Buat `app/(public)/menu/page.tsx` membaca `searchParams` bertipe Promise di Next 16, menampilkan grid produk dan `EmptyState`. Buat `components/public/ProductDetailClient.tsx` (galeri foto, pemilih varian, update harga & pesan WA dinamis, share button dengan fallback toast copy clipboard, sticky mobile glass bar). Buat `app/(public)/menu/[slug]/page.tsx` dengan metadata produk dinamis, pengecekan 404, dan rekomendasi produk terkait. Buat `app/not-found.tsx` bergaya neo-brutal.

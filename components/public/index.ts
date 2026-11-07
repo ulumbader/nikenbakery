@@ -3,3 +3,7 @@ export { Footer } from "./Footer";
 export { FloatingWhatsApp } from "./FloatingWhatsApp";
 export { ProductCard } from "./ProductCard";
 export { WhatsAppButton } from "./WhatsAppButton";
+export { SearchInput } from "./SearchInput";
+export { CategoryPills } from "./CategoryPills";
+export { FaqAccordion } from "./FaqAccordion";
+export { ProductDetailClient } from "./ProductDetailClient";

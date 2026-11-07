@@ -1,23 +1,166 @@
-import { SectionHeading } from "@/components/ui";
+import Image from "next/image";
+import { getSettings } from "@/lib/settings";
+import { listSocialPosts } from "@/db/queries";
+import {
+  SectionHeading,
+  PlaceholderCake,
+  Button,
+  Badge,
+  EmptyState,
+} from "@/components/ui";
 
-export const metadata = {
-  title: "Social",
-  description: "Aktivitas seru dan kreasi kue di dapur Niken Bakery.",
-};
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const settings = getSettings();
+  return {
+    title: `Dapur & Media Sosial | ${settings.business_name}`,
+    description: `Ikuti keseharian, proses memanggang, dan keseruan kreasi kue manis di media sosial ${settings.business_name}.`,
+  };
+}
 
 export default function SocialPage() {
+  const settings = getSettings();
+  const posts = listSocialPosts();
+
+  const placeholderColors: Array<"pink" | "butter" | "mint" | "lavender"> = [
+    "pink",
+    "butter",
+    "mint",
+    "lavender",
+  ];
+
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-6 py-12">
-      <SectionHeading
-        title="Dapur & Media Sosial"
-        description="Ikuti proses pembuatan kue dan update menu terbaru dari kami."
-      />
-      <div className="bg-white border-3 border-ink rounded-[14px] p-8 text-center shadow-[var(--shadow-brutal)]">
-        <p className="text-lg font-bold">Galeri kurasi media sosial segera hadir ✨</p>
-        <p className="text-sm text-ink/70 mt-2">
-          Halaman ini akan terisi penuh di Tahap 05.
-        </p>
+    <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-12 md:space-y-16">
+      {/* ─── Header Halaman & Tombol Ikuti ─── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-3 border-ink">
+        <SectionHeading
+          title="Dapur & Media Sosial"
+          description="Intip proses pembuatan kue, tips memanggang, dan momen manis pelanggan kami di Instagram & TikTok."
+          className="mb-0"
+        />
+
+        {/* Tombol Ikuti Akun */}
+        <div className="flex flex-wrap items-center gap-3">
+          {settings.instagram_url && (
+            <Button
+              href={settings.instagram_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="primary"
+              className="bg-pink text-ink hover:bg-pink/80 font-bold text-sm shadow-[var(--shadow-brutal-sm)]"
+            >
+              <span>📸</span>
+              <span>Instagram</span>
+              <span aria-hidden="true">↗</span>
+            </Button>
+          )}
+
+          {settings.tiktok_url && (
+            <Button
+              href={settings.tiktok_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="primary"
+              className="bg-mint text-ink hover:bg-mint/80 font-bold text-sm shadow-[var(--shadow-brutal-sm)]"
+            >
+              <span>🎵</span>
+              <span>TikTok</span>
+              <span aria-hidden="true">↗</span>
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* ─── Grid Postingan Media Sosial ─── */}
+      {posts.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {posts.map((post, idx) => {
+            const isInstagram = post.platform === "instagram";
+            const platformBadgeColor = isInstagram ? "pink" : "mint";
+            const placeholderColor =
+              placeholderColors[idx % placeholderColors.length];
+
+            return (
+              <article
+                key={post.id}
+                className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] overflow-hidden flex flex-col justify-between hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--shadow-brutal-sm)] transition-all group"
+              >
+                {/* Gambar Postingan */}
+                <div className="relative aspect-[4/3] w-full border-b-3 border-ink bg-cream overflow-hidden">
+                  {post.imageFile ? (
+                    <Image
+                      src={post.imageFile}
+                      alt={post.caption || "Postingan media sosial Niken Bakery"}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                  ) : (
+                    <PlaceholderCake
+                      color={placeholderColor}
+                      className="w-full h-full rounded-none border-0 group-hover:scale-105 transition-transform duration-200"
+                    />
+                  )}
+                  <div className="absolute top-3 left-3 z-10">
+                    <Badge color={platformBadgeColor} className="text-xs font-bold uppercase">
+                      {isInstagram ? "📸 Instagram" : "🎵 TikTok"}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Konten & Caption */}
+                <div className="p-5 flex flex-col flex-1 justify-between gap-4">
+                  <p className="text-sm md:text-base text-ink font-medium leading-relaxed">
+                    {post.caption}
+                  </p>
+
+                  <div className="pt-3 border-t-2 border-ink/10 flex items-center justify-between">
+                    <a
+                      href={post.postUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-ink hover:underline"
+                    >
+                      <span>Lihat di {isInstagram ? "Instagram" : "TikTok"}</span>
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                    <span className="text-xs text-ink/50 font-bold" aria-hidden="true">
+                      ● Niken Bakery
+                    </span>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)]">
+          <EmptyState
+            title="Belum ada postingan"
+            description="Postingan kurasi media sosial sedang dipersiapkan. Cek langsung akun Instagram dan TikTok kami!"
+            actionLabel="Buka Instagram"
+            actionHref={settings.instagram_url || "#"}
+          />
+        </div>
+      )}
+
+      {/* ─── Ajakan "Tag Kami!" ─── */}
+      <section className="bg-butter border-3 border-ink rounded-[14px] p-8 md:p-12 shadow-[var(--shadow-brutal-lg)] text-center space-y-4">
+        <span className="text-3xl" aria-hidden="true">
+          📸
+        </span>
+        <div className="max-w-xl mx-auto space-y-2">
+          <h2 className="text-2xl md:text-4xl font-extrabold text-ink">
+            Punya Momen Manis Bersama Kue Kami?
+          </h2>
+          <p className="text-sm md:text-base text-ink/80 font-medium leading-relaxed">
+            Abadikan momen spesialmu dan jangan lupa tag kami di Instagram{" "}
+            <span className="font-bold underline">@nikenbakery</span> atau TikTok{" "}
+            <span className="font-bold underline">@nikenbakery</span>. Kami senang
+            sekali melihat senyum bahagiamu! 💕
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
