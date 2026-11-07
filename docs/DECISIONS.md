@@ -17,3 +17,4 @@ Tambahkan keputusan baru di bawah (ID berurutan). Jangan menghapus keputusan lam
 | D-010 | UI dan konten Bahasa Indonesia; kode Bahasa Inggris; commit Conventional Commits Inggris | Usulan | Konsistensi |
 | D-011 | Font: Bricolage Grotesque (heading) + Figtree (body). Bisa diganti jika brand punya font sendiri | Usulan | Karakter kuat untuk heading, body tetap mudah dibaca |
 | D-012 | Proyek tidak memakai `src/` — file langsung di root (`app/`, `components/`, `lib/`, dll). Path di `02-ARCHITECTURE.md` disesuaikan | Usulan | Hasil `create-next-app` v16 tidak membuat `src/`; alias `@/*` → `./*` sudah benar |
+| D-013 | Nonaktifkan opsi `cacheComponents` dan `partialPrefetching` di `next.config.ts`, gunakan dynamic rendering pada halaman publik yang membaca data langsung | Usulan | Sesuai `02-ARCHITECTURE.md`: perubahan admin harus langsung tampak di publik dan menghindari konflik prerender `new Date()` pada Next 16 |
