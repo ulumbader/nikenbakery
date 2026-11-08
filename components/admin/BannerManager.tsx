@@ -9,6 +9,7 @@ import {
   deleteBannerAction,
 } from "@/actions/banners";
 import { Button, Card, Badge } from "@/components/ui";
+import { IconClose, IconHome, IconGlobe, IconMegaphone } from "@/components/ui/Icons";
 import { type TokenColor, COLORS } from "@/db/schema";
 
 export interface BannerItem {
@@ -212,9 +213,10 @@ export function BannerManager({
             <button
               type="button"
               onClick={handleCloseForm}
-              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer"
+              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer inline-flex items-center gap-1"
             >
-              ✕ Batal
+              <IconClose className="w-4 h-4 text-ink" />
+              <span>Batal</span>
             </button>
           </div>
 
@@ -330,7 +332,7 @@ export function BannerManager({
                         : "text-ink/70 hover:text-ink hover:bg-white/50"
                     }`}
                   >
-                    <span>🏠</span>
+                    <IconHome className="w-3.5 h-3.5 text-ink" />
                     <span>Halaman Toko</span>
                   </button>
                   <button
@@ -342,7 +344,7 @@ export function BannerManager({
                         : "text-ink/70 hover:text-ink hover:bg-white/50"
                     }`}
                   >
-                    <span>🌐</span>
+                    <IconGlobe className="w-3.5 h-3.5 text-ink" />
                     <span>Link Luar / Sosmed</span>
                   </button>
                 </div>
@@ -356,16 +358,16 @@ export function BannerManager({
                       className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-pink"
                     >
                       <optgroup label="Halaman Utama Website">
-                        <option value="/menu">🍰 Halaman Menu Katalog</option>
-                        <option value="/about">ℹ️ Halaman Tentang Kami & Kontak</option>
-                        <option value="/social">📸 Halaman Media Sosial & Galeri</option>
-                        <option value="/">🧁 Halaman Beranda Depan</option>
+                        <option value="/menu">Halaman Menu Katalog (/menu)</option>
+                        <option value="/about">Halaman Tentang Kami & Kontak (/about)</option>
+                        <option value="/social">Halaman Media Sosial & Galeri (/social)</option>
+                        <option value="/">Halaman Beranda Depan (/)</option>
                       </optgroup>
                       {categories.length > 0 && (
                         <optgroup label="Kategori Menu Pilihan">
                           {categories.map((c) => (
                             <option key={c.id} value={`/menu?kategori=${c.slug}`}>
-                              🏷️ Kategori: {c.name}
+                              Kategori: {c.name} (/menu?kategori={c.slug})
                             </option>
                           ))}
                         </optgroup>
@@ -374,7 +376,7 @@ export function BannerManager({
                         !categories.some((c) => `/menu?kategori=${c.slug}` === internalUrl) &&
                         internalUrl.startsWith("/") && (
                           <optgroup label="Halaman Pilihan">
-                            <option value={internalUrl}>🔗 Halaman Pilihan Khusus</option>
+                            <option value={internalUrl}>Halaman Pilihan Khusus</option>
                           </optgroup>
                         )}
                     </select>
@@ -508,9 +510,7 @@ export function BannerManager({
                         : "bg-pink"
                     } shadow-[var(--shadow-brutal-sm)]`}
                   >
-                    <span className="text-2xl" aria-hidden="true">
-                      📢
-                    </span>
+                    <IconMegaphone className="w-6 h-6 text-ink" />
                   </div>
 
                   <div className="space-y-1 min-w-0 flex-1">

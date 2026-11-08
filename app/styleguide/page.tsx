@@ -14,6 +14,10 @@ import {
   Textarea,
   PlaceholderCake,
   EmptyState,
+  IconCake,
+  IconCakeSlice,
+  IconSparkle,
+  IconCupcake,
 } from "@/components/ui";
 import { formatRupiah, formatDate } from "@/lib/format";
 
@@ -171,10 +175,22 @@ export default function StyleguidePage() {
       {/* ─── Marquee ─── */}
       <Section title="Marquee">
         <Marquee>
-          <span className="text-lg font-bold">🎂 Kue segar setiap hari</span>
-          <span className="text-lg font-bold">🍰 Pesan sekarang!</span>
-          <span className="text-lg font-bold">✨ Niken Bakery</span>
-          <span className="text-lg font-bold">🧁 Dibuat dengan cinta</span>
+          <span className="inline-flex items-center gap-2 text-lg font-bold">
+            <IconCake className="w-5 h-5 text-pink" />
+            <span>Kue segar setiap hari</span>
+          </span>
+          <span className="inline-flex items-center gap-2 text-lg font-bold">
+            <IconCakeSlice className="w-5 h-5 text-butter" />
+            <span>Pesan sekarang!</span>
+          </span>
+          <span className="inline-flex items-center gap-2 text-lg font-bold">
+            <IconSparkle className="w-5 h-5 text-pink" />
+            <span>Niken Bakery</span>
+          </span>
+          <span className="inline-flex items-center gap-2 text-lg font-bold">
+            <IconCupcake className="w-5 h-5 text-mint" />
+            <span>Dibuat dengan cinta</span>
+          </span>
         </Marquee>
       </Section>
 

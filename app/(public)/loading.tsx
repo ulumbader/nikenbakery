@@ -1,3 +1,5 @@
+import { IconCake } from "@/components/ui/Icons";
+
 export default function PublicLoading() {
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-12 animate-pulse">
@@ -15,8 +17,8 @@ export default function PublicLoading() {
             key={i}
             className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] overflow-hidden flex flex-col h-80"
           >
-            <div className="w-full h-44 bg-cream border-b-3 border-ink flex items-center justify-center text-3xl opacity-40">
-              🎂
+            <div className="w-full h-44 bg-cream border-b-3 border-ink flex items-center justify-center opacity-40">
+              <IconCake className="w-10 h-10 text-ink" />
             </div>
             <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
               <div className="space-y-2">

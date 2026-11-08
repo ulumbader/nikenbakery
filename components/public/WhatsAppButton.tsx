@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, type ButtonVariant, type ButtonSize } from "@/components/ui/Button";
+import { IconWhatsApp } from "@/components/ui/Icons";
 
 interface WhatsAppButtonProps {
   href: string;
@@ -68,7 +69,7 @@ export function WhatsAppButton({
       className={`font-bold ${className}`}
       onClick={handleClick}
     >
-      {icon && <span aria-hidden="true">💬</span>}
+      {icon && <IconWhatsApp className="w-5 h-5 text-ink shrink-0" />}
       {children || label}
     </Button>
   );

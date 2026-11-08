@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { IconCakeSlice, IconHome } from "@/components/ui/Icons";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-cream text-ink text-center">
       <div className="w-24 h-24 bg-butter border-3 border-ink rounded-full flex items-center justify-center mb-6 shadow-[var(--shadow-brutal)]">
-        <span className="text-4xl" aria-hidden="true">
-          🍰
-        </span>
+        <IconCakeSlice className="w-12 h-12 text-ink" />
       </div>
 
       <span className="inline-block bg-pink text-ink font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-[6px] border-2 border-ink mb-3 shadow-[var(--shadow-brutal-sm)] -rotate-1">
@@ -25,13 +24,15 @@ export default function NotFound() {
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Link href="/menu">
-          <Button variant="primary" size="lg" className="shadow-[var(--shadow-brutal)]">
-            🍰 Lihat Menu Kue
+          <Button variant="primary" size="lg" className="shadow-[var(--shadow-brutal)] inline-flex items-center gap-1.5">
+            <IconCakeSlice className="w-5 h-5 text-ink" />
+            <span>Lihat Menu Kue</span>
           </Button>
         </Link>
         <Link href="/">
-          <Button variant="ghost" size="lg" className="border-2 bg-white hover:bg-cream">
-            🏠 Kembali ke Home
+          <Button variant="ghost" size="lg" className="border-2 bg-white hover:bg-cream inline-flex items-center gap-1.5">
+            <IconHome className="w-5 h-5 text-ink" />
+            <span>Kembali ke Home</span>
           </Button>
         </Link>
       </div>

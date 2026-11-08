@@ -1,4 +1,5 @@
 import { buildWhatsAppLink, generalMessage } from "@/lib/whatsapp";
+import { IconWhatsApp } from "@/components/ui/Icons";
 
 interface FloatingWhatsAppProps {
   whatsappNumber: string;
@@ -28,9 +29,7 @@ export function FloatingWhatsApp({
           aria-label="Pesan via WA"
           className="inline-flex items-center gap-2 bg-wa text-ink font-extrabold text-sm sm:text-base px-4 py-2.5 rounded-full border-2 border-ink hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer shadow-[var(--shadow-brutal-sm)]"
         >
-          <span className="text-lg" aria-hidden="true">
-            💬
-          </span>
+          <IconWhatsApp className="w-5 h-5 text-ink shrink-0" />
           <span>Pesan via WA</span>
         </a>
       </div>

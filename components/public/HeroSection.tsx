@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui";
+import {
+  IconWhatsApp,
+  IconCakeSlice,
+  IconMapPin,
+  IconClock,
+  IconSparkle,
+} from "@/components/ui/Icons";
 
 interface HeroSectionProps {
   generalWaLink: string;
@@ -180,7 +187,7 @@ export function HeroSection({
             </svg>
 
             <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-[10px] sm:rounded-[12px] bg-[#FFAEC8] border-2 sm:border-3 border-ink shadow-[2px_2px_0px_#2B1B17] sm:shadow-[3px_3px_0px_#2B1B17]">
-              <span className="text-white text-xs sm:text-sm drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">✦</span>
+              <IconSparkle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white flex-shrink-0" />
               <span className="font-heading font-black text-xs sm:text-sm text-ink tracking-wide">
                 Dipanggang Segar Setiap Pagi!
               </span>
@@ -254,7 +261,7 @@ export function HeroSection({
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-[var(--shadow-brutal)]"
             >
-              <span>💬</span>
+              <IconWhatsApp className="w-5 h-5 text-ink" />
               <span>Pesan via WhatsApp</span>
             </Button>
             <Link href="/menu" className="w-full sm:w-auto">
@@ -263,7 +270,7 @@ export function HeroSection({
                 size="lg"
                 className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-[var(--shadow-brutal)]"
               >
-                <span>🍰</span>
+                <IconCakeSlice className="w-5 h-5 text-ink" />
                 <span>Lihat Koleksi Menu</span>
               </Button>
             </Link>
@@ -272,7 +279,7 @@ export function HeroSection({
           {/* Info Cepat Toko */}
           <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold text-ink/80">
             <div className="flex items-center gap-1.5">
-              <span>📍</span>
+              <IconMapPin className="w-4 h-4 text-ink" />
               <span>Toko di {shortAddress}</span>
             </div>
             <span
@@ -282,7 +289,7 @@ export function HeroSection({
               |
             </span>
             <div className="flex items-center gap-1.5">
-              <span>⏰</span>
+              <IconClock className="w-4 h-4 text-ink" />
               <span>Hari ini: {hoursText}</span>
             </div>
           </div>

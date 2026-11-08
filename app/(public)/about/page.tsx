@@ -13,6 +13,19 @@ import {
   Button,
   PlaceholderCake,
 } from "@/components/ui";
+import {
+  IconHeart,
+  IconLeaf,
+  IconSparkle,
+  IconCupcake,
+  IconHandshake,
+  IconMapPin,
+  IconMap,
+  IconArrowRight,
+  IconMotorcycle,
+  IconClipboard,
+  IconMail,
+} from "@/components/ui/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -49,8 +62,9 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Kolom Teks Cerita */}
           <div className="lg:col-span-7 space-y-4">
-            <Sticker color="butter" className="inline-block mb-2">
-              Dibuat Dengan Cinta Sejak 2020 💕
+            <Sticker color="butter" className="inline-flex items-center gap-1.5 mb-2">
+              <span>Dibuat Dengan Cinta Sejak 2020</span>
+              <IconHeart className="w-3.5 h-3.5 text-danger fill-danger" />
             </Sticker>
             <div className="prose prose-lg text-ink/90 leading-relaxed space-y-4">
               <p className="text-base md:text-lg">
@@ -67,7 +81,7 @@ export default function AboutPage() {
             {/* Info Halal / Komitmen (bila ada) */}
             {settings.halal_info && (
               <div className="inline-flex items-center gap-2 p-3 bg-mint/30 border-2 border-ink rounded-[10px] text-sm font-bold text-ink">
-                <span>🍃</span>
+                <IconLeaf className="w-4 h-4 text-ink shrink-0" />
                 <span>{settings.halal_info}</span>
               </div>
             )}
@@ -122,7 +136,6 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
             {aboutValues.map((val, idx) => {
               const colors = ["bg-pink", "bg-butter", "bg-mint"];
-              const icons = ["✨", "🧁", "🤝"];
               const cardColor = colors[idx % colors.length];
 
               return (
@@ -130,9 +143,15 @@ export default function AboutPage() {
                   key={idx}
                   className={`${cardColor} border-3 border-ink rounded-[14px] p-4 sm:p-6 shadow-[var(--shadow-brutal)] flex flex-col justify-between gap-3 sm:gap-4`}
                 >
-                  <span className="text-3xl" aria-hidden="true">
-                    {icons[idx % icons.length]}
-                  </span>
+                  <div className="w-10 h-10 rounded-[10px] bg-white border-2 border-ink flex items-center justify-center shadow-[var(--shadow-brutal-sm)]">
+                    {idx === 0 ? (
+                      <IconSparkle className="w-6 h-6 text-ink" />
+                    ) : idx === 1 ? (
+                      <IconCupcake className="w-6 h-6 text-ink" />
+                    ) : (
+                      <IconHandshake className="w-6 h-6 text-ink" />
+                    )}
+                  </div>
                   <div>
                     <span className="font-extrabold text-xs uppercase tracking-wider text-ink block mb-1">
                       Poin 0{idx + 1}
@@ -163,8 +182,9 @@ export default function AboutPage() {
                 <span className="text-xs font-bold uppercase text-ink/70 tracking-wider">
                   Alamat Toko
                 </span>
-                <p className="text-base md:text-lg font-bold text-ink mt-1">
-                  📍 {settings.address}
+                <p className="text-base md:text-lg font-bold text-ink mt-1 flex items-center gap-1.5">
+                  <IconMapPin className="w-4 h-4 text-ink shrink-0" />
+                  <span>{settings.address}</span>
                 </p>
               </div>
 
@@ -175,9 +195,10 @@ export default function AboutPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     variant="primary"
-                    className="shadow-[var(--shadow-brutal-sm)] text-sm"
+                    className="shadow-[var(--shadow-brutal-sm)] text-sm inline-flex items-center gap-1.5"
                   >
-                    🗺 Buka di Google Maps ↗
+                    <IconMap className="w-4 h-4 text-ink" />
+                    <span>Buka di Google Maps ↗</span>
                   </Button>
                 </div>
               )}
@@ -229,7 +250,7 @@ export default function AboutPage() {
                       }`}
                     >
                       <span className="flex items-center gap-2">
-                        {isToday && <span>👉</span>}
+                        {isToday && <IconArrowRight className="w-4 h-4 text-ink" />}
                         <span>{h.day}</span>
                       </span>
                       <span>
@@ -254,7 +275,7 @@ export default function AboutPage() {
           {settings.delivery_info && (
             <Card className="p-6 space-y-3">
               <div className="w-10 h-10 rounded-[8px] bg-mint border-2 border-ink flex items-center justify-center text-xl shadow-[var(--shadow-brutal-sm)]">
-                🛵
+                <IconMotorcycle className="w-6 h-6 text-ink" />
               </div>
               <h3 className="text-xl font-bold">Informasi Pengiriman</h3>
               <p className="text-sm text-ink/85 leading-relaxed">
@@ -266,7 +287,7 @@ export default function AboutPage() {
           {settings.order_policy && (
             <Card className="p-6 space-y-3">
               <div className="w-10 h-10 rounded-[8px] bg-lavender border-2 border-ink flex items-center justify-center text-xl shadow-[var(--shadow-brutal-sm)]">
-                📋
+                <IconClipboard className="w-6 h-6 text-ink" />
               </div>
               <h3 className="text-xl font-bold">Kebijakan Pemesanan</h3>
               <p className="text-sm text-ink/85 leading-relaxed">
@@ -314,9 +335,10 @@ export default function AboutPage() {
                 href={`mailto:${settings.email}`}
                 variant="ghost"
                 size="lg"
-                className="w-full sm:w-auto bg-white hover:bg-cream border-2 shadow-[var(--shadow-brutal)] font-bold"
+                className="w-full sm:w-auto bg-white hover:bg-cream border-2 shadow-[var(--shadow-brutal)] font-bold inline-flex items-center gap-1.5"
               >
-                ✉️ Email: {settings.email}
+                <IconMail className="w-4 h-4 text-ink" />
+                <span>Email: {settings.email}</span>
               </Button>
             )}
           </div>

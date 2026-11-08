@@ -8,6 +8,12 @@ import {
   Badge,
   EmptyState,
 } from "@/components/ui";
+import {
+  IconInstagram,
+  IconTikTok,
+  IconCamera,
+  IconHeart,
+} from "@/components/ui/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -48,9 +54,9 @@ export default function SocialPage() {
               target="_blank"
               rel="noopener noreferrer"
               variant="primary"
-              className="bg-pink text-ink hover:bg-pink/80 font-bold text-sm shadow-[var(--shadow-brutal-sm)]"
+              className="bg-pink text-ink hover:bg-pink/80 font-bold text-sm shadow-[var(--shadow-brutal-sm)] inline-flex items-center gap-2"
             >
-              <span>📸</span>
+              <IconInstagram className="w-4 h-4 text-ink" />
               <span>Instagram</span>
               <span aria-hidden="true">↗</span>
             </Button>
@@ -62,9 +68,9 @@ export default function SocialPage() {
               target="_blank"
               rel="noopener noreferrer"
               variant="primary"
-              className="bg-mint text-ink hover:bg-mint/80 font-bold text-sm shadow-[var(--shadow-brutal-sm)]"
+              className="bg-mint text-ink hover:bg-mint/80 font-bold text-sm shadow-[var(--shadow-brutal-sm)] inline-flex items-center gap-2"
             >
-              <span>🎵</span>
+              <IconTikTok className="w-4 h-4 text-ink" />
               <span>TikTok</span>
               <span aria-hidden="true">↗</span>
             </Button>
@@ -102,8 +108,18 @@ export default function SocialPage() {
                     />
                   )}
                   <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-10">
-                    <Badge color={platformBadgeColor} className="text-[10px] sm:text-xs font-bold uppercase px-1.5 sm:px-2.5 py-0.5">
-                      {isInstagram ? "📸 IG" : "🎵 TikTok"}
+                    <Badge color={platformBadgeColor} className="text-[10px] sm:text-xs font-bold uppercase px-1.5 sm:px-2.5 py-0.5 inline-flex items-center gap-1">
+                      {isInstagram ? (
+                        <>
+                          <IconInstagram className="w-3 h-3 text-ink" />
+                          <span>IG</span>
+                        </>
+                      ) : (
+                        <>
+                          <IconTikTok className="w-3 h-3 text-ink" />
+                          <span>TikTok</span>
+                        </>
+                      )}
                     </Badge>
                   </div>
                 </div>
@@ -146,9 +162,9 @@ export default function SocialPage() {
 
       {/* ─── Ajakan "Tag Kami!" ─── */}
       <section className="bg-butter border-3 border-ink rounded-[14px] p-8 md:p-12 shadow-[var(--shadow-brutal-lg)] text-center space-y-4">
-        <span className="text-3xl" aria-hidden="true">
-          📸
-        </span>
+        <div className="w-12 h-12 mx-auto rounded-full bg-white border-2 border-ink flex items-center justify-center shadow-[var(--shadow-brutal-sm)]">
+          <IconCamera className="w-6 h-6 text-ink" />
+        </div>
         <div className="max-w-xl mx-auto space-y-2">
           <h2 className="text-2xl md:text-4xl font-extrabold text-ink">
             Punya Momen Manis Bersama Kue Kami?
@@ -157,7 +173,8 @@ export default function SocialPage() {
             Abadikan momen spesialmu dan jangan lupa tag kami di Instagram{" "}
             <span className="font-bold underline">@nikenbakery</span> atau TikTok{" "}
             <span className="font-bold underline">@nikenbakery</span>. Kami senang
-            sekali melihat senyum bahagiamu! 💕
+            sekali melihat senyum bahagiamu!{" "}
+            <IconHeart className="w-4 h-4 text-danger fill-danger inline ml-1" />
           </p>
         </div>
       </section>

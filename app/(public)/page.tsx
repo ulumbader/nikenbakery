@@ -16,6 +16,19 @@ import {
   SectionHeading,
   PlaceholderCake,
 } from "@/components/ui";
+import {
+  IconCake,
+  IconSparkle,
+  IconCakeSlice,
+  IconPackage,
+  IconCupcake,
+  IconParty,
+  IconStar,
+  IconInstagram,
+  IconTikTok,
+  IconWhatsApp,
+  IconMapPin,
+} from "@/components/ui/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -60,20 +73,25 @@ export default function HomePage() {
       {/* ─── 2. STRIP MARQUEE ─── */}
       <section aria-label="Sorotan keunggulan">
         <Marquee speed={45}>
-          <span className="font-extrabold text-base md:text-lg">
-            🎂 Dipanggang segar setiap pagi
+          <span className="font-extrabold text-base md:text-lg inline-flex items-center gap-2">
+            <IconCake className="w-5 h-5 text-ink" />
+            <span>Dipanggang segar setiap pagi</span>
           </span>
-          <span className="font-extrabold text-base md:text-lg">
-            ✨ Bahan premium pilihan tanpa pengawet
+          <span className="font-extrabold text-base md:text-lg inline-flex items-center gap-2">
+            <IconSparkle className="w-4 h-4 text-ink" />
+            <span>Bahan premium pilihan tanpa pengawet</span>
           </span>
-          <span className="font-extrabold text-base md:text-lg">
-            🍰 Terima pesanan kue custom
+          <span className="font-extrabold text-base md:text-lg inline-flex items-center gap-2">
+            <IconCakeSlice className="w-5 h-5 text-ink" />
+            <span>Terima pesanan kue custom</span>
           </span>
-          <span className="font-extrabold text-base md:text-lg">
-            📦 Pre-order praktis via WhatsApp
+          <span className="font-extrabold text-base md:text-lg inline-flex items-center gap-2">
+            <IconPackage className="w-5 h-5 text-ink" />
+            <span>Pre-order praktis via WhatsApp</span>
           </span>
-          <span className="font-extrabold text-base md:text-lg">
-            🧁 100% Halal & higienis
+          <span className="font-extrabold text-base md:text-lg inline-flex items-center gap-2">
+            <IconCupcake className="w-5 h-5 text-ink" />
+            <span>100% Halal & higienis</span>
           </span>
         </Marquee>
       </section>
@@ -108,8 +126,9 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="bg-white border-3 border-ink rounded-[14px] p-6 sm:p-8 text-center shadow-[var(--shadow-brutal)]">
-            <p className="text-sm sm:text-base font-semibold">
-              Kue andalan sedang dipersiapkan di dapur! 🧁
+            <p className="text-sm sm:text-base font-semibold flex items-center justify-center gap-2">
+              <span>Kue andalan sedang dipersiapkan di dapur!</span>
+              <IconCupcake className="w-5 h-5 text-ink" />
             </p>
           </div>
         )}
@@ -135,8 +154,9 @@ export default function HomePage() {
                   className={`${bannerBg} border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6`}
                 >
                   <div className="space-y-1.5 sm:space-y-2 max-w-xl">
-                    <span className="inline-block bg-white text-ink text-[10px] sm:text-xs font-extrabold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-[6px] border-2 border-ink">
-                      Promo Spesial 🎉
+                    <span className="inline-flex items-center gap-1.5 bg-white text-ink text-[10px] sm:text-xs font-extrabold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-[6px] border-2 border-ink">
+                      <span>Promo Spesial</span>
+                      <IconParty className="w-3.5 h-3.5 text-ink" />
                     </span>
                     <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-ink leading-tight">
                       {banner.title}
@@ -244,11 +264,9 @@ export default function HomePage() {
                 >
                   <div className="space-y-2 sm:space-y-3">
                     {/* Bintang */}
-                    <div className="flex items-center gap-1 text-butter text-base sm:text-lg">
+                    <div className="flex items-center gap-1 text-butter">
                       {Array.from({ length: testi.rating }).map((_, i) => (
-                        <span key={i} aria-hidden="true">
-                          ★
-                        </span>
+                        <IconStar key={i} className="w-4 h-4 text-butter fill-butter" />
                       ))}
                     </div>
                     <p className="text-xs sm:text-sm md:text-base font-medium text-ink italic leading-relaxed">
@@ -267,9 +285,7 @@ export default function HomePage() {
                         </span>
                       )}
                     </div>
-                    <span className="text-lg sm:text-xl" aria-hidden="true">
-                      🧁
-                    </span>
+                    <IconCupcake className="w-5 h-5 text-ink/60" />
                   </div>
                 </div>
               );
@@ -323,10 +339,18 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold text-ink/70">
-                    <span className="uppercase truncate">
-                      {post.platform === "instagram"
-                        ? "📸 Instagram"
-                        : "🎵 TikTok"}
+                    <span className="uppercase truncate inline-flex items-center gap-1">
+                      {post.platform === "instagram" ? (
+                        <>
+                          <IconInstagram className="w-3.5 h-3.5 text-ink" />
+                          <span>Instagram</span>
+                        </>
+                      ) : (
+                        <>
+                          <IconTikTok className="w-3.5 h-3.5 text-ink" />
+                          <span>TikTok</span>
+                        </>
+                      )}
                     </span>
                     <span className="text-ink group-hover:underline shrink-0 ml-1">Buka ↗</span>
                   </div>
@@ -362,7 +386,8 @@ export default function HomePage() {
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-[var(--shadow-brutal)]"
             >
-              💬 Hubungi via WhatsApp
+              <IconWhatsApp className="w-5 h-5 text-ink mr-2" />
+              <span>Hubungi via WhatsApp</span>
             </Button>
             <Link href="/about" className="w-full sm:w-auto">
               <Button
@@ -370,13 +395,15 @@ export default function HomePage() {
                 size="lg"
                 className="w-full sm:w-auto bg-white hover:bg-cream text-sm sm:text-base font-extrabold shadow-[var(--shadow-brutal)]"
               >
-                📍 Lokasi & Info Toko
+                <IconMapPin className="w-5 h-5 text-ink mr-2" />
+                <span>Lokasi & Info Toko</span>
               </Button>
             </Link>
           </div>
 
-          <p className="text-xs text-ink/70 font-semibold pt-1 sm:pt-2">
-            📍 {settings.address} · Melayani pesanan harian dan pre-order
+          <p className="text-xs text-ink/70 font-semibold pt-1 sm:pt-2 flex items-center justify-center gap-1.5">
+            <IconMapPin className="w-3.5 h-3.5 text-ink/70" />
+            <span>{settings.address} · Melayani pesanan harian dan pre-order</span>
           </p>
         </div>
       </section>

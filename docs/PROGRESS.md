@@ -231,6 +231,23 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Cara verifikasi: `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅, `npm test` ✅ (40/40 tests passed), E2E test `ADM-08` ✅.
 - Berikutnya: Proyek stabil dan teruji penuh.
 
+### 2026-11-09 — Penggantian Semua Emoji Menjadi Custom Neo-Brutal SVG Icon Set
+- Dikerjakan:
+  1. Buat pustaka ikon SVG kustom `components/ui/Icons.tsx` bergaya neo-brutal (stroke tebal 2.5px, rounded join & cap, `currentColor`, `aria-hidden="true"`) dan ekspor melalui `components/ui/index.ts`.
+  2. Ganti seluruh icon emoji di aplikasi publik dan panel admin tanpa menyisakan raw emoji di antarmuka pengguna:
+     - Header, Navbar, Footer, HeroSection, FloatingWhatsApp, WhatsAppButton.
+     - ProductDetailClient, SearchInput, CategoryPills, Menu (filter reset), About Us, Social, Loading skeleton, NotFound, Error boundary, OpenGraph generator.
+     - Admin dashboard overview, AdminNav, CategoryManager, BannerManager, ProductListTable, ProductForm, SettingsManager, SocialManager, TestimonialManager, FaqManager.
+     - Halaman demo Styleguide.
+  3. Memastikan semua tombol interaktif memiliki `aria-label` yang jelas dan mempertahankan kompatibilitas dengan suite pengujian otomatis Playwright.
+  4. Jalankan scan menyeluruh memastikan 0 emoji tersisa di seluruh komponen UI (`app/` dan `components/`).
+  5. Verifikasi: `npm run lint` (0 error, 0 warning), `npm run build` (lulus bersih), `npm test` (40/40 tests lulus), `playwright test` (45/45 E2E desktop & mobile lulus).
+- File penting yang diubah/dibuat: `components/ui/Icons.tsx`, `components/ui/index.ts`, `components/public/*`, `components/admin/*`, `app/(public)/*`, `app/admin/*`, `docs/PROGRESS.md`.
+- Keputusan baru: D-017 (Custom Neo-Brutal SVG Icon Set pengganti raw emoji).
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅ (40 passed), `npx playwright test` ✅ (45 passed).
+- Berikutnya: Proyek inti dan polish visual telah lengkap.
+
 ### 2026-11-07 — Tahap 11
 - Dikerjakan:
   1. Perbaiki dropdown menu mobile di `components/public/Navbar.tsx`: pindahkan drawer dialog ke luar elemen `<header>` (React Fragment `<>`) agar terhindar dari containing block yang diinduksi oleh `backdrop-filter` CSS, gunakan warna latar solid `bg-cream` (`#FFF4E0`) sesuai panduan neo-brutalism sehingga menu tidak lagi transparan dan tidak tumpang tindih dengan hero section. Verifikasi visual dengan screenshot `e2e/screenshots/mobile-menu-drawer.png`.

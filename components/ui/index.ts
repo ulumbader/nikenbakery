@@ -9,4 +9,5 @@ export { SectionHeading } from "./SectionHeading";
 export { Input, Select, Textarea } from "./FormFields";
 export { PlaceholderCake } from "./PlaceholderCake";
 export { EmptyState } from "./EmptyState";
+export * from "./Icons";
 

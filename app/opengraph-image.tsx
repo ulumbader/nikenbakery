@@ -60,7 +60,17 @@ export default async function Image() {
               marginBottom: "28px",
             }}
           >
-            🎂 KATALOG KUE UMKM KEKINIAN
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="#2B1B17"
+              stroke="#2B1B17"
+              strokeWidth="2"
+            >
+              <path d="M12 2 L14 9 L21 11 L14 13 L12 20 L10 13 L3 11 L10 9 Z" />
+            </svg>
+            <span>KATALOG KUE UMKM KEKINIAN</span>
           </div>
 
           {/* Main Title */}
@@ -115,7 +125,7 @@ export default async function Image() {
                 boxShadow: "4px 4px 0px #2B1B17",
               }}
             >
-              💬 Order via WhatsApp
+              Order via WhatsApp
             </div>
 
             <div
@@ -133,7 +143,7 @@ export default async function Image() {
                 boxShadow: "4px 4px 0px #2B1B17",
               }}
             >
-              🍰 Ready & Pre-order
+              Ready & Pre-order
             </div>
           </div>
         </div>

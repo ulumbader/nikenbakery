@@ -1,4 +1,5 @@
 import { Button } from "./Button";
+import { IconCakeSlice } from "./Icons";
 
 interface EmptyStateProps {
   title: string;
@@ -21,7 +22,7 @@ export function EmptyState({
     <div className={`flex flex-col items-center justify-center py-16 px-4 text-center ${className}`}>
       {/* Simple illustration */}
       <div className="w-20 h-20 bg-butter border-3 border-ink rounded-full flex items-center justify-center mb-6 shadow-[var(--shadow-brutal-sm)]">
-        <span className="text-3xl" aria-hidden="true">🍰</span>
+        <IconCakeSlice className="w-10 h-10 text-ink" />
       </div>
       <h3 className="text-xl font-bold mb-2">{title}</h3>
       <p className="text-base max-w-sm mb-6">{description}</p>

@@ -8,7 +8,7 @@ import {
   reorderTestimonialAction,
   deleteTestimonialAction,
 } from "@/actions/testimonials";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, IconClose, IconPlus, IconStar } from "@/components/ui";
 
 export interface TestimonialItem {
   id: number;
@@ -117,8 +117,14 @@ export function TestimonialManager({
           </p>
         </div>
         {!isFormOpen && (
-          <Button variant="primary" onClick={handleOpenCreate}>
-            + Tambah Testimoni
+          <Button
+            variant="primary"
+            onClick={handleOpenCreate}
+            aria-label="+ Tambah Testimoni"
+            className="inline-flex items-center gap-1.5"
+          >
+            <IconPlus className="w-4 h-4" />
+            <span>Tambah Testimoni</span>
           </Button>
         )}
       </div>
@@ -133,9 +139,10 @@ export function TestimonialManager({
             <button
               type="button"
               onClick={handleCloseForm}
-              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer"
+              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer inline-flex items-center gap-1"
             >
-              ✕ Batal
+              <IconClose className="w-3.5 h-3.5" />
+              <span>Batal</span>
             </button>
           </div>
 
@@ -178,17 +185,22 @@ export function TestimonialManager({
                 <label className="text-xs font-black uppercase text-ink">
                   Rating Bintang
                 </label>
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-1 pt-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
-                      className={`text-2xl transition-transform hover:scale-110 cursor-pointer ${
-                        star <= rating ? "text-[#E5A910]" : "text-ink/20"
-                      }`}
+                      className="p-1 transition-transform hover:scale-110 cursor-pointer"
+                      aria-label={`${star} bintang`}
                     >
-                      ★
+                      <IconStar
+                        className={`w-6 h-6 ${
+                          star <= rating
+                            ? "fill-[#E5A910] text-[#E5A910]"
+                            : "text-ink/20"
+                        }`}
+                      />
                     </button>
                   ))}
                   <span className="text-sm font-black text-ink ml-2">
@@ -289,10 +301,21 @@ export function TestimonialManager({
                       {t.handle}
                     </span>
                   )}
-                  <span className="text-sm tracking-wider text-[#E5A910]">
-                    {"★".repeat(t.rating)}
-                    {"☆".repeat(5 - t.rating)}
-                  </span>
+                  <div
+                    className="flex items-center gap-0.5 text-[#E5A910]"
+                    aria-label={`${t.rating} dari 5 bintang`}
+                  >
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <IconStar
+                        key={i}
+                        className={`w-3.5 h-3.5 ${
+                          i < t.rating
+                            ? "fill-[#E5A910] text-[#E5A910]"
+                            : "text-ink/20"
+                        }`}
+                      />
+                    ))}
+                  </div>
                   <span
                     className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-ink ${
                       t.isPublished ? "bg-mint text-ink" : "bg-danger text-white"

@@ -1,4 +1,5 @@
 import { type ComponentPropsWithoutRef } from "react";
+import { IconAlert } from "./Icons";
 
 /* ─── Input ─── */
 interface InputProps extends ComponentPropsWithoutRef<"input"> {
@@ -23,8 +24,9 @@ export function Input({ label, error, id, className = "", ...props }: InputProps
         {...props}
       />
       {error && (
-        <p id={`${inputId}-error`} className="text-sm text-danger flex items-center gap-1">
-          <span aria-hidden="true">⚠</span> {error}
+        <p id={`${inputId}-error`} className="text-sm text-danger flex items-center gap-1.5">
+          <IconAlert className="w-3.5 h-3.5 text-danger shrink-0" />
+          <span>{error}</span>
         </p>
       )}
     </div>
@@ -61,8 +63,9 @@ export function Select({ label, error, id, options, className = "", ...props }: 
         ))}
       </select>
       {error && (
-        <p id={`${selectId}-error`} className="text-sm text-danger flex items-center gap-1">
-          <span aria-hidden="true">⚠</span> {error}
+        <p id={`${selectId}-error`} className="text-sm text-danger flex items-center gap-1.5">
+          <IconAlert className="w-3.5 h-3.5 text-danger shrink-0" />
+          <span>{error}</span>
         </p>
       )}
     </div>
@@ -92,8 +95,9 @@ export function Textarea({ label, error, id, className = "", ...props }: Textare
         {...props}
       />
       {error && (
-        <p id={`${textareaId}-error`} className="text-sm text-danger flex items-center gap-1">
-          <span aria-hidden="true">⚠</span> {error}
+        <p id={`${textareaId}-error`} className="text-sm text-danger flex items-center gap-1.5">
+          <IconAlert className="w-3.5 h-3.5 text-danger shrink-0" />
+          <span>{error}</span>
         </p>
       )}
     </div>

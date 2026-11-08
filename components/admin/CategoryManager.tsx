@@ -8,6 +8,7 @@ import {
   deleteCategoryAction,
 } from "@/actions/categories";
 import { Input, Button, Badge } from "@/components/ui";
+import { IconCheck, IconAlert, IconPlus } from "@/components/ui/Icons";
 import { COLORS, type TokenColor } from "@/db/schema";
 
 export interface CategoryWithCount {
@@ -129,7 +130,11 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
               : "bg-danger text-white"
           }`}
         >
-          <span>{feedback.type === "success" ? "✓" : "⚠️"}</span>
+          {feedback.type === "success" ? (
+            <IconCheck className="w-4 h-4 text-ink shrink-0" />
+          ) : (
+            <IconAlert className="w-4 h-4 text-white shrink-0" />
+          )}
           <span>{feedback.text}</span>
         </div>
       )}
@@ -137,7 +142,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       {/* ─── Form Tambah Kategori Baru ─── */}
       <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)]">
         <h2 className="text-lg font-extrabold mb-4 flex items-center gap-2">
-          <span>➕</span>
+          <IconPlus className="w-5 h-5 text-ink shrink-0" />
           <span>Tambah Kategori Baru</span>
         </h2>
 
@@ -352,7 +357,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
         >
           <div className="bg-white border-3 border-ink rounded-[14px] p-6 max-w-md w-full shadow-[var(--shadow-brutal-lg)] space-y-4">
             <h3 className="text-lg font-extrabold text-danger flex items-center gap-2">
-              <span>⚠️</span>
+              <IconAlert className="w-5 h-5 text-danger shrink-0" />
               <span>Hapus Kategori &ldquo;{deleteTarget.name}&rdquo;?</span>
             </h3>
 

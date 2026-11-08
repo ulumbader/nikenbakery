@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "@/actions/auth";
 import { Input, Button } from "@/components/ui";
+import { IconAlert } from "@/components/ui/Icons";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState<LoginState, FormData>(
@@ -17,7 +18,7 @@ export function LoginForm() {
           role="alert"
           className="p-3 bg-danger/10 border-2 border-danger rounded-[8px] text-danger text-sm font-bold flex items-center gap-2"
         >
-          <span aria-hidden="true">⚠️</span>
+          <IconAlert className="w-4 h-4 text-danger shrink-0" />
           <span>{state.error}</span>
         </div>
       )}

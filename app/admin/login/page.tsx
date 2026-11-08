@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { LoginForm } from "@/components/admin/LoginForm";
+import { IconCupcake, IconLock } from "@/components/ui/Icons";
 
 export const metadata = {
   title: "Login Admin",
@@ -35,8 +36,9 @@ export default async function AdminLoginPage() {
         {/* Kartu Login */}
         <div className="bg-white border-3 border-ink rounded-[14px] p-6 md:p-8 shadow-[var(--shadow-brutal-lg)] space-y-6">
           <div className="space-y-2 text-center">
-            <span className="inline-block bg-butter text-ink text-xs font-extrabold uppercase px-3 py-1 rounded-[6px] border-2 border-ink shadow-[var(--shadow-brutal-sm)] -rotate-1 mb-2">
-              🧁 Niken Bakery Admin
+            <span className="inline-flex items-center gap-1.5 bg-butter text-ink text-xs font-extrabold uppercase px-3 py-1 rounded-[6px] border-2 border-ink shadow-[var(--shadow-brutal-sm)] -rotate-1 mb-2">
+              <IconCupcake className="w-4 h-4 text-ink" />
+              <span>Niken Bakery Admin</span>
             </span>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               Masuk Dashboard
@@ -49,9 +51,9 @@ export default async function AdminLoginPage() {
           <LoginForm />
 
           <div className="pt-4 border-t-2 border-ink/10 text-center">
-            <p className="text-xs text-ink/80 font-medium">
-              🔒 Akses khusus pengelola Niken Bakery. Lupa password? Hubungi
-              administrator server.
+            <p className="text-xs text-ink/80 font-medium flex items-center justify-center gap-1.5">
+              <IconLock className="w-3.5 h-3.5 text-ink shrink-0" />
+              <span>Akses khusus pengelola Niken Bakery. Lupa password? Hubungi administrator server.</span>
             </p>
           </div>
         </div>

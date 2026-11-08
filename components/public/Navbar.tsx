@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { buildWhatsAppLink, generalMessage } from "@/lib/whatsapp";
 import { Button } from "@/components/ui";
+import { IconCupcake, IconWhatsApp } from "@/components/ui/Icons";
 
 interface NavbarProps {
   businessName: string;
@@ -73,7 +74,7 @@ export function Navbar({
             href="/"
             className="inline-flex items-center gap-2 font-extrabold text-xl md:text-2xl tracking-tight bg-butter text-ink px-3 py-1 border-2 border-ink rounded-[8px] shadow-[var(--shadow-brutal-sm)] -rotate-1 hover:rotate-0 transition-transform"
           >
-            <span>🧁</span>
+            <IconCupcake className="w-6 h-6 text-ink" />
             <span>{businessName}</span>
           </Link>
 
@@ -113,7 +114,7 @@ export function Navbar({
               size="sm"
               className="shadow-[var(--shadow-brutal-sm)] text-sm"
             >
-              <span aria-hidden="true">💬</span>
+              <IconWhatsApp className="w-4 h-4 text-ink" />
               <span>Tanya via WhatsApp</span>
             </Button>
           </div>
@@ -164,8 +165,9 @@ export function Navbar({
           aria-label="Menu navigasi mobile"
         >
           <div className="flex items-center justify-between pb-4 border-b-3 border-ink shrink-0">
-            <span className="font-extrabold text-xl bg-butter px-3 py-1 border-2 border-ink rounded-[8px] shadow-[var(--shadow-brutal-sm)] -rotate-1">
-              🧁 {businessName}
+            <span className="font-extrabold text-xl bg-butter px-3 py-1 border-2 border-ink rounded-[8px] shadow-[var(--shadow-brutal-sm)] -rotate-1 inline-flex items-center gap-1.5">
+              <IconCupcake className="w-5 h-5 text-ink" />
+              <span>{businessName}</span>
             </span>
             <button
               ref={closeButtonRef}
@@ -222,7 +224,8 @@ export function Navbar({
               size="lg"
               className="w-full text-base font-bold shadow-[var(--shadow-brutal-sm)]"
             >
-              💬 Tanya via WhatsApp
+              <IconWhatsApp className="w-5 h-5 text-ink" />
+              <span>Tanya via WhatsApp</span>
             </Button>
           </div>
         </div>

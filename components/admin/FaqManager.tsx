@@ -8,7 +8,7 @@ import {
   reorderFaqAction,
   deleteFaqAction,
 } from "@/actions/faqs";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, IconClose, IconPlus } from "@/components/ui";
 
 export interface FaqItem {
   id: number;
@@ -108,8 +108,14 @@ export function FaqManager({ initialFaqs }: FaqManagerProps) {
           </p>
         </div>
         {!isFormOpen && (
-          <Button variant="primary" onClick={handleOpenCreate}>
-            + Tambah FAQ
+          <Button
+            variant="primary"
+            onClick={handleOpenCreate}
+            aria-label="+ Tambah FAQ"
+            className="inline-flex items-center gap-1.5"
+          >
+            <IconPlus className="w-4 h-4" />
+            <span>Tambah FAQ</span>
           </Button>
         )}
       </div>
@@ -124,9 +130,10 @@ export function FaqManager({ initialFaqs }: FaqManagerProps) {
             <button
               type="button"
               onClick={handleCloseForm}
-              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer"
+              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer inline-flex items-center gap-1"
             >
-              ✕ Batal
+              <IconClose className="w-3.5 h-3.5" />
+              <span>Batal</span>
             </button>
           </div>
 

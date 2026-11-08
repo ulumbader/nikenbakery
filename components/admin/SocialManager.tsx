@@ -9,7 +9,15 @@ import {
   reorderSocialPostAction,
   deleteSocialPostAction,
 } from "@/actions/social";
-import { Button, Card, Badge } from "@/components/ui";
+import {
+  Button,
+  Card,
+  Badge,
+  IconClose,
+  IconPlus,
+  IconInstagram,
+  IconTikTok,
+} from "@/components/ui";
 
 export interface SocialPostItem {
   id: number;
@@ -131,8 +139,14 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
           </p>
         </div>
         {!isFormOpen && (
-          <Button variant="primary" onClick={handleOpenCreate}>
-            + Tambah Postingan
+          <Button
+            variant="primary"
+            onClick={handleOpenCreate}
+            aria-label="+ Tambah Postingan"
+            className="inline-flex items-center gap-1.5"
+          >
+            <IconPlus className="w-4 h-4" />
+            <span>Tambah Postingan</span>
           </Button>
         )}
       </div>
@@ -147,9 +161,10 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
             <button
               type="button"
               onClick={handleCloseForm}
-              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer"
+              className="text-sm font-bold text-ink/70 hover:text-ink cursor-pointer inline-flex items-center gap-1"
             >
-              ✕ Batal
+              <IconClose className="w-3.5 h-3.5" />
+              <span>Batal</span>
             </button>
           </div>
 
@@ -250,10 +265,11 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
                       setImagePreview(null);
                       setSelectedFile(null);
                     }}
-                    className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer"
+                    className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer flex items-center justify-center"
                     title="Hapus gambar"
+                    aria-label="Hapus gambar"
                   >
-                    ✕
+                    <IconClose className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
@@ -333,7 +349,13 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
                       unoptimized
                     />
                   ) : (
-                    <span>{p.platform === "instagram" ? "📸 IG" : "🎵 TT"}</span>
+                    <span className="flex items-center justify-center">
+                      {p.platform === "instagram" ? (
+                        <IconInstagram className="w-6 h-6 text-pink" />
+                      ) : (
+                        <IconTikTok className="w-6 h-6 text-ink" />
+                      )}
+                    </span>
                   )}
                 </div>
 

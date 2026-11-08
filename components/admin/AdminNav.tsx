@@ -4,20 +4,40 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "@/actions/auth";
+import {
+  IconCupcake,
+  IconChart,
+  IconCakeSlice,
+  IconTag,
+  IconMegaphone,
+  IconStar,
+  IconCamera,
+  IconQuestion,
+  IconSettings,
+  IconGlobe,
+  IconLogout,
+  type IconProps,
+} from "@/components/ui/Icons";
 
 interface AdminNavProps {
   username: string;
 }
 
-const navItems = [
-  { href: "/admin", label: "Ringkasan", icon: "📊" },
-  { href: "/admin/products", label: "Produk", icon: "🍰" },
-  { href: "/admin/categories", label: "Kategori", icon: "🏷️" },
-  { href: "/admin/banners", label: "Banner Promo", icon: "📢" },
-  { href: "/admin/testimonials", label: "Testimoni", icon: "⭐" },
-  { href: "/admin/social", label: "Media Sosial", icon: "📸" },
-  { href: "/admin/faqs", label: "FAQ", icon: "❓" },
-  { href: "/admin/settings", label: "Pengaturan Toko", icon: "⚙️" },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<IconProps>;
+}
+
+const navItems: NavItem[] = [
+  { href: "/admin", label: "Ringkasan", icon: IconChart },
+  { href: "/admin/products", label: "Produk", icon: IconCakeSlice },
+  { href: "/admin/categories", label: "Kategori", icon: IconTag },
+  { href: "/admin/banners", label: "Banner Promo", icon: IconMegaphone },
+  { href: "/admin/testimonials", label: "Testimoni", icon: IconStar },
+  { href: "/admin/social", label: "Media Sosial", icon: IconCamera },
+  { href: "/admin/faqs", label: "FAQ", icon: IconQuestion },
+  { href: "/admin/settings", label: "Pengaturan Toko", icon: IconSettings },
 ];
 
 export function AdminNav({ username }: AdminNavProps) {
@@ -38,7 +58,7 @@ export function AdminNav({ username }: AdminNavProps) {
             href="/admin"
             className="inline-flex items-center gap-2 font-extrabold text-xl bg-butter text-ink px-3 py-1 border-2 border-ink rounded-[8px] shadow-[var(--shadow-brutal-sm)] -rotate-1"
           >
-            <span>🧁</span>
+            <IconCupcake className="w-5 h-5 text-ink" />
             <span>Niken Admin</span>
           </Link>
           <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-ink/70">
@@ -52,6 +72,7 @@ export function AdminNav({ username }: AdminNavProps) {
         <nav className="space-y-1.5" aria-label="Menu Admin">
           {navItems.map((item) => {
             const active = isItemActive(item.href);
+            const ItemIcon = item.icon;
             return (
               <Link
                 key={item.href}
@@ -63,9 +84,7 @@ export function AdminNav({ username }: AdminNavProps) {
                     : "bg-white text-ink border-transparent hover:border-ink hover:bg-cream"
                 }`}
               >
-                <span className="text-base" aria-hidden="true">
-                  {item.icon}
-                </span>
+                <ItemIcon className="w-5 h-5 text-ink shrink-0" />
                 <span>{item.label}</span>
               </Link>
             );
@@ -80,7 +99,7 @@ export function AdminNav({ username }: AdminNavProps) {
           target="_blank"
           className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-ink hover:underline bg-cream border border-ink rounded-[6px]"
         >
-          <span>🌐</span>
+          <IconGlobe className="w-4 h-4 text-ink shrink-0" />
           <span>Buka Website Publik ↗</span>
         </Link>
 
@@ -89,7 +108,7 @@ export function AdminNav({ username }: AdminNavProps) {
             type="submit"
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-white bg-danger border-2 border-ink rounded-[6px] shadow-[var(--shadow-brutal-sm)] hover:translate-x-[1px] hover:translate-y-[1px] cursor-pointer"
           >
-            <span>🚪</span>
+            <IconLogout className="w-4 h-4 text-white shrink-0" />
             <span>Keluar (Logout)</span>
           </button>
         </form>
@@ -108,9 +127,10 @@ export function AdminNav({ username }: AdminNavProps) {
       <header className="md:hidden sticky top-0 z-30 w-full bg-white border-b-3 border-ink p-4 flex items-center justify-between">
         <Link
           href="/admin"
-          className="font-extrabold text-lg bg-butter px-2.5 py-1 border-2 border-ink rounded-[6px] shadow-[var(--shadow-brutal-sm)]"
+          className="inline-flex items-center gap-1.5 font-extrabold text-lg bg-butter px-2.5 py-1 border-2 border-ink rounded-[6px] shadow-[var(--shadow-brutal-sm)]"
         >
-          🧁 Niken Admin
+          <IconCupcake className="w-4 h-4 text-ink" />
+          <span>Niken Admin</span>
         </Link>
 
         <button

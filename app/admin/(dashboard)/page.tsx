@@ -3,6 +3,15 @@ import Image from "next/image";
 import { getAnalyticsSummary } from "@/db/queries/events";
 import { Card, Button } from "@/components/ui";
 import { AnalyticsChart } from "@/components/admin/AnalyticsChart";
+import {
+  IconParty,
+  IconClipboard,
+  IconCheck,
+  IconCake,
+  IconMegaphone,
+  IconSettings,
+  IconFolder,
+} from "@/components/ui/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -49,9 +58,11 @@ export default function AdminOverviewPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-ink/20 pb-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg" aria-hidden="true">
-                {isAllChecklistComplete ? "🎉" : "📋"}
-              </span>
+              {isAllChecklistComplete ? (
+                <IconParty className="w-5 h-5 text-ink" />
+              ) : (
+                <IconClipboard className="w-5 h-5 text-ink" />
+              )}
               <h2 className="font-heading text-base font-black uppercase text-ink">
                 Checklist Kelengkapan Toko
               </h2>
@@ -77,11 +88,11 @@ export default function AdminOverviewPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-black text-white shrink-0 ${
+                    className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-black shrink-0 ${
                       item.isComplete ? "bg-mint text-ink" : "bg-danger text-white"
                     }`}
                   >
-                    {item.isComplete ? "✓" : "!"}
+                    {item.isComplete ? <IconCheck className="w-3 h-3 text-ink" /> : "!"}
                   </span>
                   <span className="font-heading font-black text-xs text-ink truncate">
                     {item.label}
@@ -189,7 +200,7 @@ export default function AdminOverviewPage() {
                       #{idx + 1}
                     </span>
 
-                    <div className="relative w-9 h-9 rounded-[6px] border border-ink overflow-hidden bg-cream shrink-0">
+                    <div className="relative w-9 h-9 rounded-[6px] border border-ink overflow-hidden bg-cream shrink-0 flex items-center justify-center">
                       {p.coverUrl ? (
                         <Image
                           src={p.coverUrl}
@@ -199,7 +210,7 @@ export default function AdminOverviewPage() {
                           unoptimized
                         />
                       ) : (
-                        <span className="text-xs flex items-center justify-center h-full">🎂</span>
+                        <IconCake className="w-4 h-4 text-ink/40" />
                       )}
                     </div>
 
@@ -242,7 +253,7 @@ export default function AdminOverviewPage() {
                       #{idx + 1}
                     </span>
 
-                    <div className="relative w-9 h-9 rounded-[6px] border border-ink overflow-hidden bg-cream shrink-0">
+                    <div className="relative w-9 h-9 rounded-[6px] border border-ink overflow-hidden bg-cream shrink-0 flex items-center justify-center">
                       {p.coverUrl ? (
                         <Image
                           src={p.coverUrl}
@@ -252,7 +263,7 @@ export default function AdminOverviewPage() {
                           unoptimized
                         />
                       ) : (
-                        <span className="text-xs flex items-center justify-center h-full">🎂</span>
+                        <IconCake className="w-4 h-4 text-ink/40" />
                       )}
                     </div>
 
@@ -285,7 +296,7 @@ export default function AdminOverviewPage() {
             href="/admin/products/new"
             className="p-4 rounded-[10px] border-3 border-ink bg-white shadow-hard hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex flex-col justify-between"
           >
-            <span className="text-2xl mb-2 block">🎂</span>
+            <IconCake className="w-7 h-7 text-ink mb-2 block" />
             <span className="text-xs font-black uppercase text-ink">
               + Tambah Produk Baru
             </span>
@@ -295,7 +306,7 @@ export default function AdminOverviewPage() {
             href="/admin/banners"
             className="p-4 rounded-[10px] border-3 border-ink bg-white shadow-hard hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex flex-col justify-between"
           >
-            <span className="text-2xl mb-2 block">📢</span>
+            <IconMegaphone className="w-7 h-7 text-ink mb-2 block" />
             <span className="text-xs font-black uppercase text-ink">
               Atur Promo Banner
             </span>
@@ -305,7 +316,7 @@ export default function AdminOverviewPage() {
             href="/admin/settings"
             className="p-4 rounded-[10px] border-3 border-ink bg-white shadow-hard hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex flex-col justify-between"
           >
-            <span className="text-2xl mb-2 block">⚙️</span>
+            <IconSettings className="w-7 h-7 text-ink mb-2 block" />
             <span className="text-xs font-black uppercase text-ink">
               Edit Pengaturan Toko
             </span>
@@ -315,7 +326,7 @@ export default function AdminOverviewPage() {
             href="/admin/categories"
             className="p-4 rounded-[10px] border-3 border-ink bg-white shadow-hard hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex flex-col justify-between"
           >
-            <span className="text-2xl mb-2 block">📂</span>
+            <IconFolder className="w-7 h-7 text-ink mb-2 block" />
             <span className="text-xs font-black uppercase text-ink">
               Kelola Kategori
             </span>

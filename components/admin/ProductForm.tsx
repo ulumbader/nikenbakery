@@ -6,7 +6,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { generateSlug } from "@/lib/slug";
 import { saveProductAction } from "@/actions/products";
-import { Input, Textarea, Button } from "@/components/ui";
+import {
+  Input,
+  Textarea,
+  Button,
+  IconAlert,
+  IconCupcake,
+  IconRuler,
+  IconClose,
+  IconCamera,
+  IconStar,
+  IconEdit,
+  IconEye,
+  IconSave,
+  IconPlus,
+  IconArrowLeft,
+} from "@/components/ui";
 
 export interface ExistingImage {
   id: number;
@@ -250,7 +265,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
           role="alert"
           className="p-4 bg-danger/15 border-3 border-danger rounded-[10px] text-danger font-bold text-sm flex items-center gap-2"
         >
-          <span aria-hidden="true">⚠️</span>
+          <IconAlert className="w-5 h-5 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -258,7 +273,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
       {/* ─── 1. INFORMASI DASAR ─── */}
       <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
         <h2 className="text-lg font-extrabold pb-3 border-b-2 border-ink/10 flex items-center gap-2">
-          <span>🧁</span>
+          <IconCupcake className="w-5 h-5 text-ink flex-shrink-0" />
           <span>Informasi Dasar Produk</span>
         </h2>
 
@@ -361,7 +376,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
         <div className="flex items-center justify-between pb-3 border-b-2 border-ink/10">
           <div>
             <h2 className="text-lg font-extrabold flex items-center gap-2">
-              <span>📏</span>
+              <IconRuler className="w-5 h-5 text-ink flex-shrink-0" />
               <span>Pilihan Ukuran & Varian</span>
             </h2>
             <p className="text-xs text-ink/70">
@@ -373,9 +388,11 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
             variant="primary"
             size="sm"
             onClick={addVariant}
-            className="text-xs font-bold"
+            aria-label="+ Tambah Varian"
+            className="text-xs font-bold inline-flex items-center gap-1"
           >
-            + Tambah Varian
+            <IconPlus className="w-3.5 h-3.5" />
+            <span>Tambah Varian</span>
           </Button>
         </div>
 
@@ -418,9 +435,10 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
                 <button
                   type="button"
                   onClick={() => removeVariant(idx)}
-                  className="px-2.5 py-2 text-xs font-bold text-danger bg-danger/10 border-2 border-danger rounded-[6px] hover:bg-danger hover:text-white"
+                  className="px-2.5 py-2 text-xs font-bold text-danger bg-danger/10 border-2 border-danger rounded-[6px] hover:bg-danger hover:text-white inline-flex items-center gap-1 cursor-pointer"
                 >
-                  ✕ Hapus
+                  <IconClose className="w-3.5 h-3.5" />
+                  <span>Hapus</span>
                 </button>
               </div>
             ))}
@@ -436,7 +454,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
       <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
         <div className="pb-3 border-b-2 border-ink/10">
           <h2 className="text-lg font-extrabold flex items-center gap-2">
-            <span>📸</span>
+            <IconCamera className="w-5 h-5 text-ink flex-shrink-0" />
             <span>Galeri Foto Produk</span>
           </h2>
           <p className="text-xs text-ink/70">
@@ -479,13 +497,20 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
                       <button
                         type="button"
                         onClick={() => setCoverImage(img.id)}
-                        className={`px-2 py-0.5 text-[10px] font-extrabold rounded border ${
+                        className={`px-2 py-0.5 text-[10px] font-extrabold rounded border inline-flex items-center gap-1 ${
                           img.isCover
                             ? "bg-mint text-ink border-ink"
                             : "bg-white text-ink/60 border-ink/30 hover:border-ink"
                         }`}
                       >
-                        {img.isCover ? "★ Foto Utama (Cover)" : "Jadikan Cover"}
+                        {img.isCover ? (
+                          <>
+                            <IconStar className="w-3 h-3 fill-current" />
+                            <span>Foto Utama (Cover)</span>
+                          </>
+                        ) : (
+                          "Jadikan Cover"
+                        )}
                       </button>
 
                       <button
@@ -541,10 +566,10 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
                   <button
                     type="button"
                     onClick={() => removeNewFile(item.id)}
-                    className="absolute top-1 right-1 p-1 bg-danger text-white rounded-full text-xs font-bold shadow"
+                    className="absolute top-1 right-1 p-1 bg-danger text-white rounded-full text-xs font-bold shadow flex items-center justify-center cursor-pointer"
                     aria-label="Batalkan foto ini"
                   >
-                    ✕
+                    <IconClose className="w-3 h-3" />
                   </button>
                 </div>
               ))}
@@ -570,7 +595,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
       {/* ─── 4. DESKRIPSI & BAHAN ─── */}
       <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
         <h2 className="text-lg font-extrabold pb-3 border-b-2 border-ink/10 flex items-center gap-2">
-          <span>📝</span>
+          <IconEdit className="w-5 h-5 text-ink flex-shrink-0" />
           <span>Deskripsi & Informasi Bahan</span>
         </h2>
 
@@ -604,7 +629,7 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
       {/* ─── 5. PENGATURAN VISIBILITAS ─── */}
       <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
         <h2 className="text-lg font-extrabold pb-3 border-b-2 border-ink/10 flex items-center gap-2">
-          <span>👁️</span>
+          <IconEye className="w-5 h-5 text-ink flex-shrink-0" />
           <span>Visibilitas Produk</span>
         </h2>
 
@@ -648,8 +673,9 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
       {/* ─── STICKY SUBMIT FOOTER BAR ─── */}
       <div className="sticky bottom-4 z-20 bg-white border-3 border-ink rounded-[14px] p-4 shadow-[var(--shadow-brutal-lg)] flex items-center justify-between gap-4">
         <Link href="/admin/products">
-          <Button type="button" variant="ghost" className="text-sm font-bold border-2">
-            ← Batal
+          <Button type="button" variant="ghost" className="text-sm font-bold border-2 inline-flex items-center gap-1.5">
+            <IconArrowLeft className="w-4 h-4" />
+            <span>Batal</span>
           </Button>
         </Link>
 
@@ -658,9 +684,16 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
           variant="primary"
           size="lg"
           disabled={isPending}
-          className="text-sm md:text-base font-extrabold shadow-[var(--shadow-brutal-sm)]"
+          className="text-sm md:text-base font-extrabold shadow-[var(--shadow-brutal-sm)] inline-flex items-center gap-2"
         >
-          {isPending ? "Menyimpan & Memproses Gambar..." : "💾 Simpan Produk"}
+          {isPending ? (
+            "Menyimpan & Memproses Gambar..."
+          ) : (
+            <>
+              <IconSave className="w-5 h-5" />
+              <span>Simpan Produk</span>
+            </>
+          )}
         </Button>
       </div>
     </form>

@@ -7,6 +7,7 @@ import { formatRupiah } from "@/lib/format";
 import { buildWhatsAppLink, orderMessage, inquiryMessage } from "@/lib/whatsapp";
 import { StatusBadge, PlaceholderCake, Badge, Button } from "@/components/ui";
 import { WhatsAppButton } from "@/components/public/WhatsAppButton";
+import { IconLink, IconCheck, IconWheat, IconAlert } from "@/components/ui/Icons";
 
 export type ProductDetailData = {
   id: number;
@@ -275,7 +276,7 @@ export function ProductDetailClient({
               onClick={handleShare}
               className="w-full text-sm font-bold border-2 bg-white hover:bg-cream"
             >
-              <span>🔗</span>
+              <IconLink className="w-4 h-4 text-ink" />
               <span>Bagikan Kue Ini</span>
             </Button>
           </div>
@@ -284,9 +285,10 @@ export function ProductDetailClient({
           {shareToast && (
             <div
               role="status"
-              className="p-3 bg-mint text-ink font-bold text-sm border-2 border-ink rounded-[8px] shadow-[var(--shadow-brutal-sm)] text-center animate-fade-in"
+              className="p-3 bg-mint text-ink font-bold text-sm border-2 border-ink rounded-[8px] shadow-[var(--shadow-brutal-sm)] text-center animate-fade-in flex items-center justify-center gap-2"
             >
-              ✓ Tautan kue berhasil disalin ke clipboard! 📋
+              <IconCheck className="w-4 h-4 text-ink" />
+              <span>Tautan kue berhasil disalin ke clipboard!</span>
             </div>
           )}
 
@@ -304,7 +306,7 @@ export function ProductDetailClient({
             {product.ingredients && (
               <div className="bg-white border-2 border-ink rounded-[10px] p-4 shadow-[var(--shadow-brutal-sm)]">
                 <h3 className="font-bold text-sm mb-1 text-ink flex items-center gap-1.5">
-                  <span>🌾</span>
+                  <IconWheat className="w-4 h-4 text-ink" />
                   <span>Komposisi & Bahan:</span>
                 </h3>
                 <p className="text-xs md:text-sm text-ink/80 leading-relaxed">
@@ -316,7 +318,7 @@ export function ProductDetailClient({
             {product.allergens && (
               <div className="bg-pink/20 border-2 border-ink rounded-[10px] p-4">
                 <h3 className="font-bold text-sm mb-1 text-danger flex items-center gap-1.5">
-                  <span>⚠️</span>
+                  <IconAlert className="w-4 h-4 text-danger" />
                   <span>Informasi Alergen:</span>
                 </h3>
                 <p className="text-xs text-ink/90 leading-relaxed">

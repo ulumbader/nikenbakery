@@ -4,7 +4,7 @@ import { listCategories, listProducts } from "@/db/queries";
 import { ProductCard } from "@/components/public/ProductCard";
 import { SearchInput } from "@/components/public/SearchInput";
 import { CategoryPills } from "@/components/public/CategoryPills";
-import { SectionHeading, EmptyState } from "@/components/ui";
+import { SectionHeading, EmptyState, IconClose } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +84,7 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
               href="/menu"
               className="text-[11px] sm:text-xs font-bold text-danger hover:underline inline-flex items-center gap-1 bg-white px-2 py-0.5 sm:px-2.5 sm:py-1 border-2 border-ink rounded-[6px] shadow-[var(--shadow-brutal-sm)]"
             >
-              <span>✕</span>
+              <IconClose className="w-3 h-3" />
               <span>Reset filter</span>
             </Link>
           )}

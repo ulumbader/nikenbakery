@@ -2,6 +2,14 @@ import Link from "next/link";
 import { getSettings, getOpeningHours } from "@/lib/settings";
 import { buildWhatsAppLink, generalMessage } from "@/lib/whatsapp";
 import { Button } from "@/components/ui";
+import {
+  IconCupcake,
+  IconMapPin,
+  IconWhatsApp,
+  IconInstagram,
+  IconTikTok,
+  IconHeart,
+} from "@/components/ui/Icons";
 
 export function Footer() {
   const settings = getSettings();
@@ -20,14 +28,15 @@ export function Footer() {
           {/* Kolom 1: Brand */}
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 font-extrabold text-2xl bg-butter text-ink px-3 py-1 border-2 border-ink rounded-[8px] shadow-[3px_3px_0_#FFF4E0] -rotate-1">
-              <span>🧁</span>
+              <IconCupcake className="w-6 h-6 text-ink" />
               <span>{settings.business_name}</span>
             </div>
             <p className="text-cream/80 text-sm max-w-xs leading-relaxed">
               {settings.tagline}
             </p>
-            <p className="text-xs text-cream/60">
-              📍 {settings.address}
+            <p className="text-xs text-cream/60 flex items-center gap-1.5">
+              <IconMapPin className="w-3.5 h-3.5 text-cream/70 shrink-0" />
+              <span>{settings.address}</span>
             </p>
           </div>
 
@@ -113,7 +122,8 @@ export function Footer() {
               size="sm"
               className="w-full text-xs font-bold shadow-none"
             >
-              💬 WhatsApp Langsung
+              <IconWhatsApp className="w-4 h-4 text-ink mr-1.5" />
+              <span>WhatsApp Langsung</span>
             </Button>
 
             {/* Media Sosial */}
@@ -123,10 +133,11 @@ export function Footer() {
                   href={settings.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 bg-cream text-ink rounded-full border-2 border-cream font-bold text-xs hover:bg-pink transition-colors"
+                  className="px-3 py-1.5 bg-cream text-ink rounded-full border-2 border-cream font-bold text-xs hover:bg-pink transition-colors inline-flex items-center gap-1.5"
                   aria-label="Instagram Niken Bakery"
                 >
-                  📸 Instagram
+                  <IconInstagram className="w-3.5 h-3.5 text-ink" />
+                  <span>Instagram</span>
                 </a>
               )}
               {settings.tiktok_url && (
@@ -134,10 +145,11 @@ export function Footer() {
                   href={settings.tiktok_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 bg-cream text-ink rounded-full border-2 border-cream font-bold text-xs hover:bg-mint transition-colors"
+                  className="px-3 py-1.5 bg-cream text-ink rounded-full border-2 border-cream font-bold text-xs hover:bg-mint transition-colors inline-flex items-center gap-1.5"
                   aria-label="TikTok Niken Bakery"
                 >
-                  🎵 TikTok
+                  <IconTikTok className="w-3.5 h-3.5 text-ink" />
+                  <span>TikTok</span>
                 </a>
               )}
             </div>
@@ -149,9 +161,9 @@ export function Footer() {
           <p>
             © {currentYear} {settings.business_name}. Semua hak cipta dilindungi.
           </p>
-          <p className="flex items-center gap-1">
+          <p className="flex items-center gap-1.5">
             <span>Dibuat dengan</span>
-            <span className="text-pink">♥</span>
+            <IconHeart className="w-3.5 h-3.5 text-pink fill-pink inline" />
             <span>untuk pecinta kue manis</span>
           </p>
         </div>

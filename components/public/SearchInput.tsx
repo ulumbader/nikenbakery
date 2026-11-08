@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTransition, useState, useEffect } from "react";
+import { IconSearch, IconClose } from "@/components/ui/Icons";
 
 export function SearchInput({ initialValue = "" }: { initialValue?: string }) {
   const router = useRouter();
@@ -44,10 +45,10 @@ export function SearchInput({ initialValue = "" }: { initialValue?: string }) {
       </label>
       <div className="relative">
         <span
-          className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-ink/60 font-bold"
+          className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-ink/60"
           aria-hidden="true"
         >
-          🔍
+          <IconSearch className="w-4 h-4 text-ink/60" />
         </span>
         <input
           id="menu-search-input"
@@ -61,10 +62,10 @@ export function SearchInput({ initialValue = "" }: { initialValue?: string }) {
           <button
             type="button"
             onClick={() => setSearchTerm("")}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-ink/60 hover:text-ink font-bold text-sm"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-ink/60 hover:text-ink cursor-pointer"
             aria-label="Hapus kata kunci pencarian"
           >
-            ✕
+            <IconClose className="w-4 h-4 text-ink" />
           </button>
         )}
       </div>

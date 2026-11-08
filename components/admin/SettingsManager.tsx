@@ -3,7 +3,7 @@
 import { useState, useActionState } from "react";
 import Image from "next/image";
 import { updateSettingsAction } from "@/actions/settings";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, IconWhatsApp, IconClose, IconSave } from "@/components/ui";
 import { normalizePhone, buildWhatsAppLink } from "@/lib/whatsapp";
 import type { OpeningHour } from "@/lib/settings";
 
@@ -281,9 +281,10 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                     href={testWaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-bold text-ink underline hover:text-pink"
+                    className="inline-flex items-center gap-1.5 font-bold text-ink underline hover:text-pink"
                   >
-                    💬 Tes Link WhatsApp Toko ↗
+                    <IconWhatsApp className="w-3.5 h-3.5 text-whatsapp" />
+                    <span>Tes Link WhatsApp Toko ↗</span>
                   </a>
                 </div>
               </div>
@@ -296,7 +297,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   name="wa_default_message"
                   value={waMessage}
                   onChange={(e) => setWaMessage(e.target.value)}
-                  placeholder="Contoh: Halo Niken Bakery! Aku mau tanya-tanya soal katalog kue 🙌"
+                  placeholder="Contoh: Halo Niken Bakery! Aku mau tanya-tanya soal katalog kue."
                   rows={2}
                   className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-medium text-ink"
                 />
@@ -517,10 +518,11 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                         setAboutImagePreview(null);
                         setSelectedAboutFile(null);
                       }}
-                      className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer"
+                      className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer flex items-center justify-center"
                       title="Hapus foto ini"
+                      aria-label="Hapus foto ini"
                     >
-                      ✕
+                      <IconClose className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : (
@@ -685,9 +687,16 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             variant="primary"
             size="default"
             disabled={isSubmitting}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto inline-flex items-center gap-1.5"
           >
-            {isSubmitting ? "Menyimpan Pengaturan..." : "💾 Simpan Semua Pengaturan"}
+            {isSubmitting ? (
+              "Menyimpan Pengaturan..."
+            ) : (
+              <>
+                <IconSave className="w-4 h-4" />
+                <span>Simpan Semua Pengaturan</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

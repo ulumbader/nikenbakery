@@ -10,7 +10,17 @@ import {
   toggleProductFeaturedAction,
   deleteProductAction,
 } from "@/actions/products";
-import { Button, Badge, PlaceholderCake } from "@/components/ui";
+import {
+  Button,
+  Badge,
+  PlaceholderCake,
+  IconCheck,
+  IconAlert,
+  IconSearch,
+  IconPlus,
+  IconClose,
+  IconStar,
+} from "@/components/ui";
 
 export interface AdminProductRow {
   id: number;
@@ -131,7 +141,11 @@ export function ProductListTable({
             toast.type === "success" ? "bg-mint text-ink" : "bg-danger text-white"
           }`}
         >
-          <span>{toast.type === "success" ? "✓" : "⚠️"}</span>
+          {toast.type === "success" ? (
+            <IconCheck className="w-4 h-4 text-ink flex-shrink-0" />
+          ) : (
+            <IconAlert className="w-4 h-4 text-white flex-shrink-0" />
+          )}
           <span>{toast.text}</span>
         </div>
       )}
@@ -139,13 +153,14 @@ export function ProductListTable({
       {/* ─── Bar Filter & Tombol Tambah ─── */}
       <div className="bg-white border-3 border-ink rounded-[14px] p-4 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="flex-1 max-w-sm">
+          <div className="relative flex-1 max-w-sm">
+            <IconSearch className="w-4 h-4 text-ink/50 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="search"
-              placeholder="🔍 Cari nama kue..."
+              placeholder="Cari nama kue..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-[8px] border-2 border-ink text-sm bg-white font-medium"
+              className="w-full pl-9 pr-3.5 py-2 rounded-[8px] border-2 border-ink text-sm bg-white font-medium"
             />
           </div>
 
@@ -153,9 +168,9 @@ export function ProductListTable({
             <Button
               variant="primary"
               size="default"
-              className="w-full sm:w-auto font-extrabold text-sm shadow-[var(--shadow-brutal-sm)]"
+              className="w-full sm:w-auto font-extrabold text-sm shadow-[var(--shadow-brutal-sm)] inline-flex items-center gap-1.5"
             >
-              <span>➕</span>
+              <IconPlus className="w-4 h-4" />
               <span>Tambah Produk Baru</span>
             </Button>
           </Link>
@@ -322,7 +337,11 @@ export function ProductListTable({
                         : "bg-white text-ink/30 border-ink/40"
                     }`}
                   >
-                    {p.isPublished ? "✓" : "✕"}
+                    {p.isPublished ? (
+                      <IconCheck className="w-3.5 h-3.5" />
+                    ) : (
+                      <IconClose className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </td>
 
@@ -339,7 +358,11 @@ export function ProductListTable({
                         : "bg-white text-ink/30 border-ink/40"
                     }`}
                   >
-                    {p.isFeatured ? "★" : "☆"}
+                    <IconStar
+                      className={`w-3.5 h-3.5 ${
+                        p.isFeatured ? "fill-current" : "opacity-30"
+                      }`}
+                    />
                   </button>
                 </td>
 
@@ -400,8 +423,9 @@ export function ProductListTable({
                     </Badge>
                   )}
                   {p.isFeatured && (
-                    <span className="text-xs bg-butter px-1 rounded border border-ink font-bold">
-                      ★ Featured
+                    <span className="inline-flex items-center gap-1 text-[11px] bg-butter px-1.5 py-0.5 rounded border border-ink font-bold">
+                      <IconStar className="w-3 h-3 fill-current" />
+                      <span>Featured</span>
                     </span>
                   )}
                 </div>
@@ -480,7 +504,7 @@ export function ProductListTable({
         >
           <div className="bg-white border-3 border-ink rounded-[14px] p-6 max-w-sm w-full shadow-[var(--shadow-brutal-lg)] space-y-4">
             <h3 className="text-lg font-extrabold text-danger flex items-center gap-2">
-              <span>⚠️</span>
+              <IconAlert className="w-5 h-5 flex-shrink-0" />
               <span>Hapus Produk?</span>
             </h3>
             <p className="text-sm text-ink/80 leading-relaxed">
