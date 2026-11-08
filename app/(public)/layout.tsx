@@ -1,7 +1,6 @@
 import { getSettings } from "@/lib/settings";
 import { Navbar } from "@/components/public/Navbar";
 import { Footer } from "@/components/public/Footer";
-import { FloatingWhatsApp } from "@/components/public/FloatingWhatsApp";
 
 export default function PublicLayout({
   children,
@@ -56,11 +55,6 @@ export default function PublicLayout({
       </main>
 
       <Footer />
-
-      <FloatingWhatsApp
-        whatsappNumber={settings.whatsapp_number}
-        defaultMessage={settings.wa_default_message}
-      />
     </div>
   );
 }

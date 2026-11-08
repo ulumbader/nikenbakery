@@ -814,6 +814,31 @@ export function IconArrowLeft({
   );
 }
 
+/** Ikon Kantong Belanja (Shopping Bag) */
+export function IconShoppingBag({
+  className = "w-4 h-4",
+  size,
+  strokeWidth = 2.5,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M6 8 L4 21 H20 L18 8 H6 Z" />
+      <path d="M9 10 V6 A3 3 0 0 1 15 6 V10" />
+    </svg>
+  );
+}
+
 // ─── 5. ADMIN & PENGELOLAAN ───
 
 /** Ikon Gembok (Lock / Keamanan) */

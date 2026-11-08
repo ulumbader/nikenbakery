@@ -1,9 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/format";
-import { buildWhatsAppLink, orderMessage, inquiryMessage } from "@/lib/whatsapp";
-import { StatusBadge, PlaceholderCake } from "@/components/ui";
-import { WhatsAppButton } from "@/components/public/WhatsAppButton";
+import { Button, StatusBadge, PlaceholderCake, IconShoppingBag } from "@/components/ui";
 
 export type ProductCardData = {
   id: number;
@@ -30,20 +28,11 @@ export type ProductCardData = {
 
 interface ProductCardProps {
   product: ProductCardData;
-  whatsappNumber: string;
+  whatsappNumber?: string;
 }
 
-export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const isSoldOut = product.status === "soldout";
-  const waLink = isSoldOut
-    ? buildWhatsAppLink(
-        whatsappNumber,
-        inquiryMessage({ productName: product.name })
-      )
-    : buildWhatsAppLink(
-        whatsappNumber,
-        orderMessage({ productName: product.name })
-      );
 
   const categoryColor =
     product.category?.color &&
@@ -105,7 +94,7 @@ export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
           )}
         </div>
 
-        {/* Harga & Tombol Pesan */}
+        {/* Harga & Tombol Beli */}
         <div className="pt-1.5 sm:pt-2 border-t sm:border-t-2 border-ink/10 flex flex-col gap-1.5 sm:gap-3">
           <div className="tabular-nums font-bold text-xs sm:text-lg text-ink leading-tight">
             {product.hasVariants ? (
@@ -116,20 +105,16 @@ export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
             <span>{formatRupiah(product.displayPrice)}</span>
           </div>
 
-          <WhatsAppButton
-            href={waLink}
-            productId={product.id}
-            variant={isSoldOut ? "ghost" : "wa"}
+          <Button
+            href={`/menu/${product.slug}`}
+            variant={isSoldOut ? "ghost" : "primary"}
             size="default"
-            className="w-full text-xs sm:text-sm font-bold shadow-none hover:shadow-none min-h-[38px] sm:min-h-[44px] py-1.5 sm:py-2 px-1 sm:px-3"
+            className="w-full text-xs sm:text-sm font-extrabold shadow-[var(--shadow-brutal-sm)] hover:shadow-none min-h-[36px] sm:min-h-[42px] py-1.5 sm:py-2 px-3 flex items-center justify-center gap-1.5"
+            aria-label={isSoldOut ? `Lihat detail ${product.name}` : `Beli ${product.name}`}
           >
-            <span className="sm:hidden text-[11px] font-extrabold whitespace-nowrap">
-              {isSoldOut ? "Tanya WA" : "Pesan WA"}
-            </span>
-            <span className="hidden sm:inline">
-              {isSoldOut ? "Tanya via WhatsApp" : "Pesan via WhatsApp"}
-            </span>
-          </WhatsAppButton>
+            <IconShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span>{isSoldOut ? "Lihat Detail" : "Beli"}</span>
+          </Button>
         </div>
       </div>
     </div>

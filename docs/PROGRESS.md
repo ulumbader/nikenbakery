@@ -231,6 +231,19 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Cara verifikasi: `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅, `npm test` ✅ (40/40 tests passed), E2E test `ADM-08` ✅.
 - Berikutnya: Proyek stabil dan teruji penuh.
 
+### 2026-11-09 — Hapus Floating WhatsApp Button & Tombol Beli pada Card
+- Dikerjakan:
+  1. Hapus komponen floating button (`FloatingWhatsApp`) secara bersih dari layout publik `app/(public)/layout.tsx` dan `components/public/index.ts`. Hapus file `components/public/FloatingWhatsApp.tsx` sehingga tidak ada kode mati.
+  2. Tambahkan ikon `IconShoppingBag` ke pustaka ikon neo-brutal `components/ui/Icons.tsx`.
+  3. Ganti tombol "Pesan via WhatsApp" pada kartu produk `components/public/ProductCard.tsx` menjadi tombol "Beli" bertema neo-brutal (`bg-butter` dengan hard shadow) yang langsung membuka detail produk (`/menu/[slug]`). Hal ini memastikan pembeli melihat dan memilih varian/opsi spesifik kue terlebih dahulu sebelum memesan via WhatsApp di halaman detail.
+  4. Bila produk habis (`soldout`), tombol otomatis menyesuaikan menjadi "Lihat Detail" dengan varian ghost.
+  5. Verifikasi pengujian: `npm run lint` (0 error, 0 warning), `npm run build` (lulus bersih), `npm test` (40/40 lulus), `npx playwright test` (45/45 lulus).
+- File penting yang diubah/dihapus: `components/public/FloatingWhatsApp.tsx` (dihapus), `app/(public)/layout.tsx`, `components/public/ProductCard.tsx`, `components/public/index.ts`, `components/ui/Icons.tsx`, `docs/DECISIONS.md`, `docs/PROGRESS.md`.
+- Keputusan baru: D-018 (Hapus Floating WhatsApp dan ganti tombol card dengan Beli).
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅ (40 passed), `npx playwright test` ✅ (45 passed).
+- Berikutnya: Selesai.
+
 ### 2026-11-09 — Penggantian Semua Emoji Menjadi Custom Neo-Brutal SVG Icon Set
 - Dikerjakan:
   1. Buat pustaka ikon SVG kustom `components/ui/Icons.tsx` bergaya neo-brutal (stroke tebal 2.5px, rounded join & cap, `currentColor`, `aria-hidden="true"`) dan ekspor melalui `components/ui/index.ts`.
