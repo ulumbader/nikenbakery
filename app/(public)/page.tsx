@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSettings, getOpeningHours } from "@/lib/settings";
 import {
   listFeaturedProducts,
@@ -223,30 +224,49 @@ export default function HomePage() {
                   ? "bg-lavender"
                   : "bg-pink";
 
+              const imageSrc = banner.imageFile
+                ? banner.imageFile.startsWith("/")
+                  ? banner.imageFile
+                  : `/media/${banner.imageFile}`
+                : null;
+
               return (
                 <div
                   key={banner.id}
-                  className={`${bannerBg} border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6`}
+                  className={`${bannerBg} border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 overflow-hidden`}
                 >
-                  <div className="space-y-2 max-w-xl">
-                    <span className="inline-block bg-white text-ink text-xs font-extrabold px-2.5 py-1 rounded-[6px] border-2 border-ink">
-                      Promo Spesial 🎉
-                    </span>
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-ink leading-tight">
-                      {banner.title}
-                    </h2>
-                    {banner.subtitle && (
-                      <p className="text-base font-medium text-ink/80">
-                        {banner.subtitle}
-                      </p>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 md:gap-6 flex-1">
+                    {imageSrc && (
+                      <div className="relative w-full sm:w-36 md:w-44 aspect-video sm:aspect-square shrink-0 rounded-[10px] border-2 border-ink overflow-hidden bg-white shadow-[var(--shadow-brutal-sm)]">
+                        <Image
+                          src={imageSrc}
+                          alt={banner.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 180px"
+                          className="object-cover"
+                        />
+                      </div>
                     )}
+                    <div className="space-y-2 max-w-xl">
+                      <span className="inline-block bg-white text-ink text-xs font-extrabold px-2.5 py-1 rounded-[6px] border-2 border-ink">
+                        Promo Spesial 🎉
+                      </span>
+                      <h2 className="text-2xl md:text-3xl font-extrabold text-ink leading-tight">
+                        {banner.title}
+                      </h2>
+                      {banner.subtitle && (
+                        <p className="text-base font-medium text-ink/80">
+                          {banner.subtitle}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {banner.ctaLabel && (
                     <Button
                       href={banner.ctaUrl || generalWaLink}
                       variant="primary"
-                      className="bg-white text-ink hover:bg-cream whitespace-nowrap font-bold"
+                      className="bg-white text-ink hover:bg-cream whitespace-nowrap font-bold shrink-0"
                     >
                       {banner.ctaLabel}
                     </Button>
