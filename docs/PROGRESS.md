@@ -198,6 +198,25 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ADM-06 & QLT-04 ✅.
 - Berikutnya: Proyek siap serah terima atau lanjut Tahap 12 (opsional).
 
+### 2026-11-09 — Redesign Hero Section Publik (Hapus Kartu Hero & Implementasi Desain Gelombang Pastel Neo-Brutal)
+- Dikerjakan:
+  1. Hapus kartu produk hero statis (`PlaceholderCake`, "FAVORIT PELANGGAN", "★ 4.9 Bintang") dari hero section sesuai permintaan pengguna.
+  2. Pertahankan desain topbar (`components/public/Navbar.tsx`) tanpa perubahan.
+  3. Buat komponen baru `components/public/HeroSection.tsx` dan integrasikan ke `app/(public)/page.tsx`.
+  4. Implementasikan layout hero beranda yang lapang, elegan, dan playful sesuai gambar referensi:
+     - Background gelombang pastel organik multi-lapis (kuning & pink lembut di kiri atas, kuning mentega di kanan atas & kiri bawah, serta signature double-layer rose-pink waves di kanan bawah).
+     - Elemen dekoratif mengambang (sparkle pink, sparkle kuning, titik aksen, dan garis aksen melengkung).
+     - Badge "✦ Dipanggang Segar Setiap Pagi!" berlatar pink neo-brutal dengan 3 garis sinar kuning (sunburst) di kanan atasnya.
+     - Tipografi judul "Kue Lezat, Momen Lebih Manis." dengan garis bawah lengkung pink ceria di bawah kata "Manis." dan dua aksen whisker pink di sebelah kanannya.
+     - Tombol aksi pill-shaped ganda: "💬 Pesan via WhatsApp" (hijau WA) dan "🍰 Lihat Koleksi Menu" (kuning mentega) dengan border tebal dan drop shadow neo-brutal.
+     - Bar informasi cepat toko: "📍 Toko di {alamat} | ⏰ Hari ini: {jam buka}".
+  5. Verifikasi visual: tangkapan layar `desktop-home.png` (1280px) dan `mobile-home.png` (375px) di `e2e/screenshots/` terverifikasi rapi, responsif, dan tanpa scroll horizontal (`QLT-01`).
+  6. Suite pengujian: Vitest (40/40 passed), Playwright E2E & Quality tests (27/27 passed), Lint (0 errors), Build sukses.
+- File penting yang diubah/dibuat: `components/public/HeroSection.tsx`, `components/public/index.ts`, `app/(public)/page.tsx`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E `pub-flows.spec.ts` & `quality.spec.ts` ✅.
+- Berikutnya: Proyek stabil dan siap digunakan.
+
 ### 2026-11-08 — Audit & Pengujian Siklus Upload Foto (Produk, Sosial, Pengaturan)
 - Dikerjakan:
   1. Audit komprehensif seluruh entitas yang memiliki fitur upload foto: Produk (`ProductForm.tsx`, `actions/products.ts`), Postingan Sosial (`SocialManager.tsx`, `actions/social.ts`), dan Pengaturan Toko (`SettingsManager.tsx`, `actions/settings.ts`).

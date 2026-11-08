@@ -7,3 +7,4 @@ export { SearchInput } from "./SearchInput";
 export { CategoryPills } from "./CategoryPills";
 export { FaqAccordion } from "./FaqAccordion";
 export { ProductDetailClient } from "./ProductDetailClient";
+export { HeroSection } from "./HeroSection";

@@ -8,11 +8,10 @@ import {
   listSocialPosts,
 } from "@/db/queries";
 import { buildWhatsAppLink, generalMessage } from "@/lib/whatsapp";
-import { ProductCard } from "@/components/public/ProductCard";
+import { ProductCard, HeroSection } from "@/components/public";
 import {
   Button,
   Card,
-  Sticker,
   Marquee,
   SectionHeading,
   PlaceholderCake,
@@ -50,107 +49,13 @@ export default function HomePage() {
   );
 
   return (
-    <main className="space-y-10 sm:space-y-16 md:space-y-24 pb-12 sm:pb-16 overflow-hidden">
+    <div className="space-y-10 sm:space-y-14 md:space-y-20 pb-12 sm:pb-16 overflow-hidden">
       {/* ─── 1. HERO SECTION ─── */}
-      <section className="max-w-6xl mx-auto px-4 md:px-6 pt-4 sm:pt-8 md:pt-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
-          {/* Kolom Kiri: Teks & Tombol */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left">
-            <div>
-              <Sticker color="pink" className="mb-2 sm:mb-4 inline-block text-xs sm:text-sm md:text-base">
-                ✨ Dipanggang Segar Setiap Pagi!
-              </Sticker>
-              <h1 className="text-[clamp(2.1rem,6vw,5.5rem)] leading-[1.08] tracking-tight">
-                Kue Lezat,
-                <br />
-                Momen Lebih Manis.
-              </h1>
-            </div>
-
-            <p className="text-sm sm:text-lg md:text-xl text-ink/80 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
-              {settings.tagline}. Pilihan cake, brownies, dan pastry istimewa
-              yang siap memeriahkan harimu. Pesan langsung tanpa ribet!
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 sm:pt-2">
-              <Button
-                href={generalWaLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="wa"
-                size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base font-bold shadow-[var(--shadow-brutal)]"
-              >
-                💬 Pesan via WhatsApp
-              </Button>
-              <Link href="/menu" className="w-full sm:w-auto">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-full sm:w-auto text-sm sm:text-base font-bold shadow-[var(--shadow-brutal)]"
-                >
-                  🍰 Lihat Koleksi Menu
-                </Button>
-              </Link>
-            </div>
-
-            {/* Info Cepat */}
-            <div className="pt-2 sm:pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-6 text-xs sm:text-sm font-semibold text-ink/80">
-              <div className="flex items-center gap-2">
-                <span>📍</span>
-                <span>Toko di {settings.address.split(",")[0]}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>⏰</span>
-                <span>
-                  Hari ini:{" "}
-                  {todayHour
-                    ? todayHour.closed
-                      ? "Tutup"
-                      : `${todayHour.open} - ${todayHour.close}`
-                    : "08:00 - 20:00"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Kolom Kanan: Foto Hero / Showcase */}
-          <div className="lg:col-span-5 flex justify-center">
-            <div className="relative w-full max-w-xs sm:max-w-md">
-              {/* Background decorative offset card */}
-              <div className="absolute inset-0 bg-butter rounded-[14px] border-3 border-ink translate-x-2 translate-y-2 sm:translate-x-3 sm:translate-y-3" />
-              
-              {/* Main showcase container */}
-              <div className="relative bg-white rounded-[14px] border-3 border-ink p-3 sm:p-4 shadow-[var(--shadow-brutal-lg)] space-y-2 sm:space-y-3">
-                <PlaceholderCake
-                  color="pink"
-                  className="w-full rounded-[10px] border-2"
-                />
-                <div className="flex items-center justify-between pt-1">
-                  <div>
-                    <span className="text-[10px] sm:text-xs font-extrabold text-ink bg-pink px-1.5 sm:px-2 py-0.5 rounded-[4px] border border-ink uppercase tracking-wide">
-                      Favorit Pelanggan
-                    </span>
-                    <h3 className="font-extrabold text-sm sm:text-base">
-                      Strawberry Shortcake
-                    </h3>
-                  </div>
-                  <span className="bg-mint text-ink text-[10px] sm:text-xs font-extrabold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-[6px] border-2 border-ink">
-                    Ready
-                  </span>
-                </div>
-              </div>
-
-              {/* Float sticker badge */}
-              <div className="absolute -top-3 -right-2 sm:-top-4 sm:-right-2 z-10">
-                <Sticker color="butter" className="shadow-[var(--shadow-brutal-sm)] text-xs sm:text-sm">
-                  ★ 4.9 Bintang
-                </Sticker>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection
+        generalWaLink={generalWaLink}
+        address={settings.address}
+        todayHour={todayHour}
+      />
 
       {/* ─── 2. STRIP MARQUEE ─── */}
       <section aria-label="Sorotan keunggulan">
@@ -475,6 +380,6 @@ export default function HomePage() {
           </p>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
