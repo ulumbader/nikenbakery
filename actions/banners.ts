@@ -6,7 +6,7 @@ import { eq, asc, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { banners, COLORS, type TokenColor } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { processAndSaveImage, deleteUploadedFile } from "@/lib/upload";
+import { deleteUploadedFile } from "@/lib/upload";
 
 function isValidUrlOrPath(url: string): boolean {
   if (!url || url.trim() === "" || url === "#") return true;
@@ -78,18 +78,6 @@ export async function createBannerAction(_prevState: unknown, formData: FormData
     return { error: "Waktu selesai promo tidak boleh lebih awal dari waktu mulai promo" };
   }
 
-  // Handle image upload jika ada
-  let imageFileUrl: string | null = null;
-  const imageUpload = formData.get("image") as File | null;
-  if (imageUpload && imageUpload.size > 0 && imageUpload.name !== "undefined") {
-    try {
-      const uploadRes = await processAndSaveImage(imageUpload);
-      imageFileUrl = uploadRes.largeUrl;
-    } catch (err: unknown) {
-      return { error: (err as Error).message || "Gagal memproses gambar banner" };
-    }
-  }
-
   // Hitung sort order berikutnya
   const lastBanner = db
     .select({ sortOrder: banners.sortOrder })
@@ -107,7 +95,7 @@ export async function createBannerAction(_prevState: unknown, formData: FormData
       color,
       ctaLabel: ctaLabel || null,
       ctaUrl: ctaUrl || null,
-      imageFile: imageFileUrl,
+      imageFile: null,
       isActive,
       startsAt,
       endsAt,
@@ -145,7 +133,6 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
   const isActive = formData.get("isActive") === "true" || formData.get("isActive") === "on";
   const startsAtRaw = formData.get("startsAt")?.toString();
   const endsAtRaw = formData.get("endsAt")?.toString();
-  const removeImage = formData.get("removeImage") === "true";
 
   const validation = bannerSchema.safeParse({
     title,
@@ -170,24 +157,9 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
     return { error: "Waktu selesai promo tidak boleh lebih awal dari waktu mulai promo" };
   }
 
-  let finalImageFile = existing.imageFile;
-
-  if (removeImage && existing.imageFile) {
+  // Jika banner lama memiliki file gambar lama, hapus berkas fisik dari disk
+  if (existing.imageFile) {
     await deleteUploadedFile(existing.imageFile);
-    finalImageFile = null;
-  }
-
-  const imageUpload = formData.get("image") as File | null;
-  if (imageUpload && imageUpload.size > 0 && imageUpload.name !== "undefined") {
-    try {
-      const uploadRes = await processAndSaveImage(imageUpload);
-      if (existing.imageFile) {
-        await deleteUploadedFile(existing.imageFile);
-      }
-      finalImageFile = uploadRes.largeUrl;
-    } catch (err: unknown) {
-      return { error: (err as Error).message || "Gagal memproses gambar banner" };
-    }
   }
 
   db.update(banners)
@@ -197,7 +169,7 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
       color,
       ctaLabel: ctaLabel || null,
       ctaUrl: ctaUrl || null,
-      imageFile: finalImageFile,
+      imageFile: null,
       isActive,
       startsAt,
       endsAt,

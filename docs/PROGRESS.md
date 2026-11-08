@@ -129,6 +129,20 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-08 — Penghapusan Fitur Gambar pada Banner Promo
+- Dikerjakan:
+  1. Hapus seluruh fitur dan keterkaitan gambar pada banner promo sesuai instruksi pengguna:
+     - Di `components/admin/BannerManager.tsx`: hapus input file upload gambar, state preview dan removal gambar, serta render avatar gambar di daftar banner (diganti dengan avatar blok warna tema banner dan ikon megafon yang seragam).
+     - Di `actions/banners.ts`: hapus pembacaan upload file gambar dan pemrosesan `processAndSaveImage`, set `imageFile: null`, serta tambahkan pembersihan otomatis file gambar fisik lama jika ada banner lama yang diperbarui atau dihapus.
+     - Di `app/(public)/page.tsx`: kembalikan komponen banner promo menjadi blok warna penuh dengan judul, subjudul, dan tombol CTA yang bersih dan proporsional tanpa gambar.
+     - Di `docs/DECISIONS.md`: catat keputusan D-016 (banner fokus pada pengumuman teks ringkas, warna tema, dan tombol CTA).
+  2. Jalankan seluruh pengujian: `npm test` (37 unit tests), Playwright E2E (`e2e/pub-flows.spec.ts`, `e2e/admin-flows.spec.ts`), `npm run lint` (0 error, 0 warning), dan `npm run build` (sukses).
+- File penting yang diubah/dibuat: `components/admin/BannerManager.tsx`, `actions/banners.ts`, `app/(public)/page.tsx`, `docs/DECISIONS.md`, `docs/PROGRESS.md`.
+- Keputusan baru: D-016
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ADM-06 & QLT-04 ✅.
+- Berikutnya: Proyek siap serah terima atau lanjut Tahap 12 (opsional).
+
 ### 2026-11-08 — Perbaikan UX: Pemilih Link Tujuan Tombol Banner Promo
 - Dikerjakan:
   1. Perbaiki isian "Link Tujuan Tombol" di `components/admin/BannerManager.tsx` dan `app/admin/(dashboard)/banners/page.tsx` dari input teks manual yang membingungkan menjadi pemilih intuitif dua mode:
