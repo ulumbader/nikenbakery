@@ -129,6 +129,19 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-08 — Perbaikan UX: Pemilih Link Tujuan Tombol Banner Promo
+- Dikerjakan:
+  1. Perbaiki isian "Link Tujuan Tombol" di `components/admin/BannerManager.tsx` dan `app/admin/(dashboard)/banners/page.tsx` dari input teks manual yang membingungkan menjadi pemilih intuitif dua mode:
+     - **Mode Halaman Internal**: dropdown pilihan siap pakai berisi Halaman Menu Katalog (`/menu`), Tentang Kami (`/about`), Media Sosial (`/social`), Beranda (`/`), serta seluruh kategori produk yang ada di database (`/menu?kategori=slug`). Disertai teks petunjuk dan badge preview URL.
+     - **Mode Link Eksternal**: input URL fleksibel untuk mengetik atau menempel (*paste*) tautan lengkap (misal media sosial, WhatsApp, promo marketplace) dengan validasi URL.
+  2. Perbarui `docs/ADMIN_GUIDE.md` pada bagian Banner Promo untuk memandu pengelola toko non-teknis tentang penggunaan pemilih link baru ini.
+  3. Ambil dan verifikasi tangkapan layar tampilan form baru di `e2e/screenshots/admin-banner-form.png`.
+  4. Jalankan pengujian otomatis, lint, dan build: semuanya 100% lulus.
+- File penting yang diubah/dibuat: `components/admin/BannerManager.tsx`, `app/admin/(dashboard)/banners/page.tsx`, `docs/ADMIN_GUIDE.md`, `e2e/quality.spec.ts`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ADM-06 & QLT-04 ✅.
+- Berikutnya: Proyek siap serah terima atau lanjut Tahap 12 (opsional).
+
 ### 2026-11-07 — Tahap 11
 - Dikerjakan:
   1. Perbaiki dropdown menu mobile di `components/public/Navbar.tsx`: pindahkan drawer dialog ke luar elemen `<header>` (React Fragment `<>`) agar terhindar dari containing block yang diinduksi oleh `backdrop-filter` CSS, gunakan warna latar solid `bg-cream` (`#FFF4E0`) sesuai panduan neo-brutalism sehingga menu tidak lagi transparan dan tidak tumpang tindih dengan hero section. Verifikasi visual dengan screenshot `e2e/screenshots/mobile-menu-drawer.png`.

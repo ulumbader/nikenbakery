@@ -259,3 +259,4 @@ Sebelum meresmikan website untuk publik, pastikan seluruh poin di bawah telah te
 - [ ] **Uji Pesan WhatsApp**: Klik tombol "Pesan via WhatsApp" dari ponsel untuk memastikan aplikasi WhatsApp terbuka dengan format pesan yang benar.
 - [ ] **Pencadangan Teruji**: Skrip `backup.sh` telah diuji coba dan menghasilkan berkas arsip yang valid di folder `backups/`.
 - [ ] **Firewall Server**: Hanya port 22 (SSH), 80 (HTTP), dan 443 (HTTPS) yang terbuka untuk publik. Port internal 3000 tidak boleh dibuka langsung ke internet.
+

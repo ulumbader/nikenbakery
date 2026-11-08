@@ -20,3 +20,4 @@ else
   echo "🧁 [Niken Bakery] Menjalankan Next.js server..."
   exec npm run start
 fi
+

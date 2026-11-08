@@ -26,8 +26,15 @@ export interface BannerItem {
   sortOrder: number;
 }
 
+export interface BannerCategoryOption {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 interface BannerManagerProps {
   initialBanners: BannerItem[];
+  categories?: BannerCategoryOption[];
 }
 
 function formatDateForInput(d?: Date | null): string {
@@ -42,7 +49,10 @@ function formatDateForInput(d?: Date | null): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-export function BannerManager({ initialBanners }: BannerManagerProps) {
+export function BannerManager({
+  initialBanners,
+  categories = [],
+}: BannerManagerProps) {
   const [currentTime] = useState(() => Date.now());
   const [isPending, startTransition] = useTransition();
   const [editingBanner, setEditingBanner] = useState<BannerItem | null>(null);
@@ -54,6 +64,11 @@ export function BannerManager({ initialBanners }: BannerManagerProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
 
+  // State untuk pemilih Link Tujuan Tombol (Internal vs Eksternal)
+  const [linkType, setLinkType] = useState<"internal" | "external">("internal");
+  const [internalUrl, setInternalUrl] = useState<string>("/menu");
+  const [externalUrl, setExternalUrl] = useState<string>("");
+
   function showToast(msg: string) {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -63,6 +78,9 @@ export function BannerManager({ initialBanners }: BannerManagerProps) {
     setEditingBanner(null);
     setImagePreview(null);
     setRemoveCurrentImage(false);
+    setLinkType("internal");
+    setInternalUrl("/menu");
+    setExternalUrl("");
     setIsFormOpen(true);
   }
 
@@ -70,6 +88,23 @@ export function BannerManager({ initialBanners }: BannerManagerProps) {
     setEditingBanner(b);
     setImagePreview(b.imageFile);
     setRemoveCurrentImage(false);
+
+    const rawUrl = b.ctaUrl?.trim() ?? "/menu";
+    const isExternal =
+      rawUrl.startsWith("http://") ||
+      rawUrl.startsWith("https://") ||
+      rawUrl.startsWith("//");
+
+    if (isExternal) {
+      setLinkType("external");
+      setExternalUrl(rawUrl);
+      setInternalUrl("/menu");
+    } else {
+      setLinkType("internal");
+      setInternalUrl(rawUrl || "/menu");
+      setExternalUrl("");
+    }
+
     setIsFormOpen(true);
   }
 
@@ -78,6 +113,9 @@ export function BannerManager({ initialBanners }: BannerManagerProps) {
     setEditingBanner(null);
     setImagePreview(null);
     setRemoveCurrentImage(false);
+    setLinkType("internal");
+    setInternalUrl("/menu");
+    setExternalUrl("");
   }
 
   function handleToggleActive(id: number, current: boolean) {
@@ -254,20 +292,105 @@ export function BannerManager({ initialBanners }: BannerManagerProps) {
                 />
               </div>
 
-              {/* CTA URL */}
-              <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-ink">
-                  Link Tujuan Tombol
-                </label>
+              {/* CTA URL (Pemilih Link Internal vs Eksternal) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black uppercase text-ink">
+                    Link Tujuan Tombol
+                  </label>
+                  <span className="text-[11px] font-bold text-ink/60">
+                    Arahkan ke internal atau eksternal
+                  </span>
+                </div>
+
+                {/* Tab Pilihan Mode Link: Internal vs Eksternal */}
+                <div className="grid grid-cols-2 gap-1 rounded-[8px] border-2 border-ink bg-butter/30 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setLinkType("internal")}
+                    className={`py-1.5 px-2 rounded-[6px] text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      linkType === "internal"
+                        ? "bg-butter text-ink shadow-[var(--shadow-brutal-sm)] border-2 border-ink"
+                        : "text-ink/70 hover:text-ink hover:bg-white/50"
+                    }`}
+                  >
+                    <span>📋</span>
+                    <span>Halaman Internal</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLinkType("external")}
+                    className={`py-1.5 px-2 rounded-[6px] text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      linkType === "external"
+                        ? "bg-butter text-ink shadow-[var(--shadow-brutal-sm)] border-2 border-ink"
+                        : "text-ink/70 hover:text-ink hover:bg-white/50"
+                    }`}
+                  >
+                    <span>🌐</span>
+                    <span>Link Eksternal</span>
+                  </button>
+                </div>
+
+                {/* Mode Halaman Internal: Dropdown Pilihan Siap Pakai */}
+                {linkType === "internal" ? (
+                  <div className="space-y-1">
+                    <select
+                      value={internalUrl}
+                      onChange={(e) => setInternalUrl(e.target.value)}
+                      className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-pink"
+                    >
+                      <optgroup label="Halaman Utama Website">
+                        <option value="/menu">🍰 Halaman Menu Katalog (/menu)</option>
+                        <option value="/about">ℹ️ Halaman Tentang Kami & Kontak (/about)</option>
+                        <option value="/social">📸 Halaman Media Sosial & Galeri (/social)</option>
+                        <option value="/">🧁 Halaman Beranda Depan (/)</option>
+                      </optgroup>
+                      {categories.length > 0 && (
+                        <optgroup label="Kategori Menu Spesifik">
+                          {categories.map((c) => (
+                            <option key={c.id} value={`/menu?kategori=${c.slug}`}>
+                              🏷️ Kategori: {c.name} (/menu?kategori={c.slug})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {!["/menu", "/about", "/social", "/"].includes(internalUrl) &&
+                        !categories.some((c) => `/menu?kategori=${c.slug}` === internalUrl) &&
+                        internalUrl.startsWith("/") && (
+                          <optgroup label="Halaman Internal Kustom">
+                            <option value={internalUrl}>🔗 Halaman: {internalUrl}</option>
+                          </optgroup>
+                        )}
+                    </select>
+                    <div className="flex items-center justify-between text-[11px] text-ink/70 pt-0.5">
+                      <span>Pilih tujuan tombol tanpa perlu mengetik manual.</span>
+                      <span className="font-mono bg-cream px-1.5 py-0.5 rounded border border-ink/30 font-bold">
+                        {internalUrl}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  /* Mode Link Eksternal: Input Teks Langsung Tulis / Tempel */
+                  <div className="space-y-1">
+                    <input
+                      type="url"
+                      value={externalUrl}
+                      onChange={(e) => setExternalUrl(e.target.value)}
+                      placeholder="https://instagram.com/nikenbakery atau https://wa.me/..."
+                      className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-pink"
+                    />
+                    <span className="text-[11px] text-ink/70 block">
+                      Tulis atau tempel URL lengkap (harus diawali <code className="font-mono font-bold">https://</code> atau <code className="font-mono font-bold">http://</code>).
+                    </span>
+                  </div>
+                )}
+
+                {/* Input tersembunyi yang dikirimkan ke server */}
                 <input
+                  type="hidden"
                   name="ctaUrl"
-                  defaultValue={editingBanner?.ctaUrl ?? "/menu"}
-                  placeholder="Contoh: /menu atau https://wa.me/..."
-                  className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink"
+                  value={linkType === "internal" ? internalUrl : externalUrl.trim()}
                 />
-                <span className="text-[11px] text-ink/60">
-                  Bisa berupa link internal (diawali /) atau URL web eksternal (https://...).
-                </span>
               </div>
 
               {/* Jadwal Mulai */}

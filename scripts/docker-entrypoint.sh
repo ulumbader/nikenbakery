@@ -13,3 +13,4 @@ node scripts/migrate.js
 echo "✅ [Niken Bakery] Database siap. Menjalankan server aplikasi..."
 
 exec "$@"
+

@@ -99,7 +99,24 @@ test.describe("Kualitas Lintas Halaman (QLT-01 s/d QLT-04)", () => {
       });
     }
 
-    // Tangkapan layar khusus menu drawer mobile saat terbuka
+    // Tangkapan layar khusus form banner admin saat terbuka
+    if (projectName === "desktop") {
+      const authFile = path.resolve(process.cwd(), "e2e/.auth/admin.json");
+      if (fs.existsSync(authFile)) {
+        const adminContext = await page.context().browser()!.newContext({ storageState: authFile });
+        const adminPage = await adminContext.newPage();
+        await adminPage.goto("http://localhost:3100/admin/banners");
+        const addBtn = adminPage.getByRole("button", { name: /\+ tambah banner/i });
+        if (await addBtn.isVisible()) {
+          await addBtn.click();
+          await adminPage.waitForSelector("form");
+          await adminPage.screenshot({
+            path: path.join(screenshotsDir, "admin-banner-form.png"),
+          });
+        }
+        await adminContext.close();
+      }
+    }
     if (projectName === "mobile") {
       await page.goto("/");
       const hamburger = page.getByRole("button", { name: /buka menu navigasi/i });

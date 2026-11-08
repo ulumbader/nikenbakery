@@ -76,10 +76,15 @@ Banner promo adalah pita pengumuman berwarna yang muncul di bagian paling atas h
 
 1. Buka menu **"Banner Promo"**.
 2. Klik tombol **"+ Tambah Banner"**.
-3. Isi teks pengumuman promo.
-4. Pilih warna latar banner (misal: Kuning Ceria, Pink Manis, atau Hijau Segar).
-5. Atur jadwal tanggal mulai dan tanggal selesai promo (jika promo hanya berlaku periode tertentu).
-6. Centang status **"Aktif"** lalu klik **"Simpan"**.
+3. Isi teks judul dan subjudul pengumuman promo.
+4. Pilih warna tema banner (misal: Warna Pink, Butter, Mint, dll).
+5. **Teks & Tujuan Tombol**:
+   - Isi **Teks Tombol Aksi** (misal: *Lihat Menu*, *Pesan Sekarang*).
+   - Pada **Link Tujuan Tombol**, pilih:
+     - **Halaman Internal**: Pilih langsung halaman toko yang dituju dari daftar (misal: *Halaman Menu Katalog*, *Halaman Tentang Kami*, atau *Kategori Kue Tertentu*) tanpa perlu mengetik manual.
+     - **Link Eksternal**: Pilih opsi ini jika tombol ingin mengarah ke link luar (misal akun Instagram, link WhatsApp, atau artikel lain), lalu tempelkan alamat web lengkapnya.
+6. Atur jadwal tanggal mulai dan tanggal selesai tayang (opsional, jika promo hanya berlaku periode tertentu).
+7. Centang status **"Aktif"** lalu klik **"Buat Banner"**.
 
 ---
 
@@ -136,3 +141,4 @@ Demi keamanan data, website tidak menyediakan tautan reset password publik di in
    ```
    *(atau melalui perintah terminal VPS)*.
 3. Anda akan diberikan password baru untuk login kembali ke dashboard.
+

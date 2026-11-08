@@ -46,3 +46,4 @@ tar -czf "$ARCHIVE_PATH" -C "$TEMP_DIR" .
 SIZE=$(du -h "$ARCHIVE_PATH" | cut -f1)
 echo "✅ Backup selesai dengan sukses!"
 echo "📁 Lokasi: $ARCHIVE_PATH ($SIZE)"
+
