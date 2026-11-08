@@ -330,34 +330,32 @@ export function ProductDetailClient({
         </div>
       </div>
 
-      {/* ─── Mobile Sticky Bar (Hanya di mobile, GlassPanel) ─── */}
+      {/* ─── Mobile Sticky Action Bar (Hanya di mobile) ─── */}
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t-3 border-ink shadow-[0_-4px_0_#2B1B17]"
         style={{
           paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
         }}
       >
-        <div className="glass rounded-none border-x-0 border-b-0 border-t-3 border-ink px-4 py-3 shadow-[0_-4px_0_#2B1B17]">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <span className="text-xs font-semibold text-ink/70 block truncate">
-                {product.name}
-                {selectedVariant ? ` (${selectedVariant.label})` : ""}
-              </span>
-              <span className="tabular-nums font-extrabold text-lg text-ink">
-                {formatRupiah(currentPrice)}
-              </span>
-            </div>
-
-            <WhatsAppButton
-              href={waLink}
-              productId={product.id}
-              label={buttonLabel}
-              variant={buttonVariant}
-              size="default"
-              className="flex-shrink-0 text-sm font-bold shadow-none py-2 px-4"
-            />
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-semibold text-ink/70 block truncate">
+              {product.name}
+              {selectedVariant ? ` (${selectedVariant.label})` : ""}
+            </span>
+            <span className="tabular-nums font-extrabold text-lg text-ink leading-tight block">
+              {formatRupiah(currentPrice)}
+            </span>
           </div>
+
+          <WhatsAppButton
+            href={waLink}
+            productId={product.id}
+            label={buttonLabel}
+            variant={buttonVariant}
+            size="default"
+            className="flex-shrink-0 text-sm font-bold shadow-none py-2 px-4"
+          />
         </div>
       </div>
     </div>

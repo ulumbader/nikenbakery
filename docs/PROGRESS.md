@@ -129,6 +129,18 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-09 — Perbaikan Sticky Action Bar Detail Produk pada Layar Mobile
+- Dikerjakan:
+  1. Perbaiki sticky bottom action bar pada halaman detail produk (`components/public/ProductDetailClient.tsx`):
+     - Masalah sebelumnya: pembungkus terluar `fixed bottom-0` memiliki inline style `paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))"` tanpa warna latar (`bg-white`), sementara card di dalamnya berjarak dari tepi bawah viewport. Hal ini menghasilkan celah transparan di bawah bar yang membuat teks konten halaman di bawahnya tembus pandang dan bilah tampak terpotong/mengambang di udara.
+     - Perbaikan: terapkan latar belakang solid `bg-white`, border atas neo-brutal `border-t-3 border-ink`, dan shadow langsung pada kontainer `fixed bottom-0`. Ruang aman (*safe-area padding*) ditampung di dalam wadah berlatar solid tersebut sehingga warna putih solid menutup sempurna hingga tepi paling bawah layar ponsel (area gesture indicator/home bar).
+  2. Optimasi ruang scroll pada halaman detail produk mobile di `app/(public)/menu/[slug]/page.tsx` dengan menambahkan padding bawah (`pt-6 sm:pt-10 md:pt-16 pb-28 md:pb-16`) sehingga rekomendasi produk dan footer dapat di-scroll sepenuhnya di atas sticky action bar tanpa tertutup.
+  3. Verifikasi pengujian: `npm run lint` (0 error, 0 warning), `npm run build` (lulus bersih), `npm test` (40/40 passed), Playwright E2E `pub-flows.spec.ts` & `quality.spec.ts` (27/27 passed).
+- File penting yang diubah: `components/public/ProductDetailClient.tsx`, `app/(public)/menu/[slug]/page.tsx`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ✅.
+- Berikutnya: Proyek stabil dan selesai.
+
 ### 2026-11-09 — Optimasi Mobile View: Grid 2 Kolom Kompak & Efisiensi Tata Letak
 - Dikerjakan:
   1. Perbaiki tata letak kartu produk (`ProductCard.tsx`) agar beradaptasi menjadi 2 kolom (`grid-cols-2`) di layar mobile sesuai sketsa referensi pengguna:

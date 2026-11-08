@@ -100,7 +100,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-16">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 pt-6 sm:pt-10 md:pt-16 pb-28 md:pb-16 space-y-12 sm:space-y-16">
       {/* JSON-LD Product Structured Data */}
       <script
         type="application/ld+json"
