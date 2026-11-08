@@ -67,7 +67,7 @@ export function Navbar({
   return (
     <>
       <header className="sticky top-0 z-40 w-full glass border-b-3 border-ink">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-18 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 sm:h-18 flex items-center justify-between">
           {/* Logo / Brand */}
           <Link
             href="/"

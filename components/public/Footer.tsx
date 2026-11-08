@@ -14,9 +14,9 @@ export function Footer() {
   );
 
   return (
-    <footer className="bg-ink text-cream border-t-3 border-ink pt-16 pb-12 mt-20">
+    <footer className="bg-ink text-cream border-t-3 border-ink pt-10 sm:pt-16 pb-8 sm:pb-12 mt-12 sm:mt-20">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b-2 border-cream/20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10 pb-8 sm:pb-12 border-b-2 border-cream/20">
           {/* Kolom 1: Brand */}
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 font-extrabold text-2xl bg-butter text-ink px-3 py-1 border-2 border-ink rounded-[8px] shadow-[3px_3px_0_#FFF4E0] -rotate-1">

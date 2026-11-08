@@ -132,12 +132,12 @@ export function ProductDetailClient({
     product.images.length > 0 ? product.images[selectedImageIndex] : null;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6 sm:space-y-12">
       {/* ─── Breadcrumb / Navigasi Balik ─── */}
       <nav aria-label="Breadcrumb">
         <Link
           href="/menu"
-          className="inline-flex items-center gap-2 text-sm font-bold text-ink hover:underline bg-white px-3 py-1.5 rounded-[8px] border-2 border-ink shadow-[var(--shadow-brutal-sm)]"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-ink hover:underline bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-[8px] border-2 border-ink shadow-[var(--shadow-brutal-sm)]"
         >
           <span>←</span>
           <span>Kembali ke semua menu</span>
@@ -145,10 +145,10 @@ export function ProductDetailClient({
       </nav>
 
       {/* ─── Konten Utama: 2 Kolom ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-12">
         {/* Kolom Kiri: Galeri Foto */}
-        <div className="lg:col-span-6 space-y-4">
-          <div className="relative aspect-[4/3] w-full rounded-[14px] border-3 border-ink bg-cream overflow-hidden shadow-[var(--shadow-brutal)]">
+        <div className="lg:col-span-6 space-y-3 sm:space-y-4">
+          <div className="relative aspect-[4/3] w-full rounded-[10px] sm:rounded-[14px] border-2 sm:border-3 border-ink bg-cream overflow-hidden shadow-[var(--shadow-brutal-sm)] sm:shadow-[var(--shadow-brutal)]">
             {activeImage ? (
               <Image
                 src={activeImage.fileName}
@@ -164,25 +164,26 @@ export function ProductDetailClient({
                 className="w-full h-full rounded-none border-0"
               />
             )}
-            <div className="absolute top-4 left-4 z-10">
+            <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 z-10">
               <StatusBadge
                 status={product.status}
                 preorderNote={product.preorderNote ?? undefined}
+                className="text-xs sm:text-sm"
               />
             </div>
           </div>
 
           {/* Strip Thumbnail (jika lebih dari 1 gambar) */}
           {product.images.length > 1 && (
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2">
               {product.images.map((img, idx) => (
                 <button
                   key={img.id}
                   type="button"
                   onClick={() => setSelectedImageIndex(idx)}
-                  className={`relative w-20 h-20 rounded-[8px] border-2 overflow-hidden flex-shrink-0 cursor-pointer transition-all ${
+                  className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-[8px] border-2 overflow-hidden flex-shrink-0 cursor-pointer transition-all ${
                     selectedImageIndex === idx
-                      ? "border-ink ring-3 ring-ink scale-105"
+                      ? "border-ink ring-2 sm:ring-3 ring-ink scale-105"
                       : "border-ink/50 hover:border-ink opacity-70 hover:opacity-100"
                   }`}
                   aria-label={`Lihat foto ${idx + 1}`}
@@ -201,36 +202,36 @@ export function ProductDetailClient({
         </div>
 
         {/* Kolom Kanan: Informasi & Pemesanan */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-4 sm:space-y-6">
           {/* Header Produk */}
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {product.category && (
-              <Badge color={categoryColor} className="text-xs uppercase">
+              <Badge color={categoryColor} className="text-[10px] sm:text-xs uppercase">
                 {product.category.name}
               </Badge>
             )}
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold tracking-tight">
               {product.name}
             </h1>
           </div>
 
           {/* Harga Produk */}
-          <div className="p-4 bg-white border-3 border-ink rounded-[12px] shadow-[var(--shadow-brutal-sm)] flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-ink/70">
+          <div className="p-3 sm:p-4 bg-white border-2 sm:border-3 border-ink rounded-[10px] sm:rounded-[12px] shadow-[var(--shadow-brutal-sm)] flex items-baseline justify-between">
+            <span className="text-xs sm:text-sm font-semibold text-ink/70">
               {selectedVariant ? "Harga varian:" : "Harga:"}
             </span>
-            <span className="tabular-nums font-extrabold text-2xl md:text-3xl text-ink">
+            <span className="tabular-nums font-extrabold text-xl sm:text-2xl md:text-3xl text-ink">
               {formatRupiah(currentPrice)}
             </span>
           </div>
 
           {/* Pemilih Varian (bila ada) */}
           {product.variants.length > 0 && (
-            <div className="space-y-3">
-              <label className="block text-sm font-extrabold text-ink">
+            <div className="space-y-2 sm:space-y-3">
+              <label className="block text-xs sm:text-sm font-extrabold text-ink">
                 Pilih Ukuran / Varian:
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                 {product.variants.map((v) => {
                   const isSelected = v.id === selectedVariantId;
                   return (
@@ -238,16 +239,16 @@ export function ProductDetailClient({
                       key={v.id}
                       type="button"
                       onClick={() => setSelectedVariantId(v.id)}
-                      className={`p-3 rounded-[10px] border-2 text-left flex flex-col justify-between cursor-pointer transition-all ${
+                      className={`p-2 sm:p-3 rounded-[8px] sm:rounded-[10px] border-2 text-left flex flex-col justify-between cursor-pointer transition-all ${
                         isSelected
                           ? "bg-butter border-ink shadow-[var(--shadow-brutal-sm)] translate-x-[1px] translate-y-[1px]"
                           : "bg-white border-ink/40 hover:border-ink"
                       }`}
                     >
-                      <span className="font-bold text-sm text-ink">
+                      <span className="font-bold text-xs sm:text-sm text-ink line-clamp-1">
                         {v.label}
                       </span>
-                      <span className="tabular-nums text-xs font-semibold text-ink/80 mt-1">
+                      <span className="tabular-nums text-[10px] sm:text-xs font-semibold text-ink/80 mt-0.5 sm:mt-1">
                         {formatRupiah(v.price)}
                       </span>
                     </button>

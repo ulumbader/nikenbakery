@@ -129,6 +129,31 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-09 — Optimasi Mobile View: Grid 2 Kolom Kompak & Efisiensi Tata Letak
+- Dikerjakan:
+  1. Perbaiki tata letak kartu produk (`ProductCard.tsx`) agar beradaptasi menjadi 2 kolom (`grid-cols-2`) di layar mobile sesuai sketsa referensi pengguna:
+     - Ubah grid di `page.tsx` (Home), `menu/page.tsx` (Katalog), dan `menu/[slug]/page.tsx` (Rekomendasi) menjadi `grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6`.
+     - Buat kartu produk mobile lebih proporsional dan tidak boros layar: border 2px (`border-2 sm:border-3`), radius 10px (`rounded-[10px] sm:rounded-[14px]`), padding konten kompak (`p-2.5 sm:p-4`), judul `text-xs sm:text-lg` (2 baris rapi), sembunyikan paragraf deskripsi panjang di mobile agar tinggi kartu seragam, serta tombol aksi kompak (`💬 Pesan WA` di mobile, `💬 Pesan via WhatsApp` di desktop).
+  2. Optimasi seluruh bagian publik yang boros ruang di tampilan mobile:
+     - Di `app/(public)/page.tsx`:
+       - Kurangi jarak vertikal antar-seksi dari 64px menjadi lebih proporsional (`space-y-10 sm:space-y-16 md:space-y-24`).
+       - Hero section: heading judul responsif `clamp(2.1rem,6vw,5.5rem)`, padding showcase card diperkecil, dan gap tombol dirapatkan.
+       - Banner promo: padding responsif `p-4 sm:p-6 md:p-8` dengan ukuran teks judul yang pas.
+       - Cara pesan: ubah dari 4 baris vertikal bertumpuk menjadi grid 2x2 (`grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6`) sehingga seluruh langkah dapat dilihat seketika dalam satu layar.
+       - Preview postingan sosial: jadikan grid 2 kolom seperti feed Instagram.
+     - Di `app/(public)/social/page.tsx`: ubah kartu postingan menjadi 2 kolom kompak (`grid-cols-2`).
+     - Di `components/ui/SectionHeading.tsx`: buat margin bawah dan ukuran teks adaptif terhadap mobile (`mb-4 sm:mb-8`, `text-2xl sm:text-[clamp(2rem,5vw,3.5rem)]`).
+     - Di `components/public/Navbar.tsx` & `Footer.tsx`: kurangi tinggi dan padding vertikal pada mobile (`h-16 sm:h-18`, padding footer `pt-10 sm:pt-16 pb-8 sm:pb-12`).
+  3. Verifikasi pengujian lengkap:
+     - `npm test`: 37/37 unit & query integration tests lulus.
+     - `npm run lint`: Lulus 0 error, 0 warning.
+     - `npm run build`: Lulus kompilasi Turbopack.
+     - Playwright E2E: 27/27 tes lulus (Desktop Chromium & Mobile Pixel 7), termasuk QLT-01 (audit scroll horizontal nihil di mobile) dan QLT-02 (audit aksesibilitas axe-core).
+- File penting yang diubah: `components/public/ProductCard.tsx`, `components/public/ProductDetailClient.tsx`, `components/ui/SectionHeading.tsx`, `components/public/Navbar.tsx`, `components/public/Footer.tsx`, `app/(public)/page.tsx`, `app/(public)/menu/page.tsx`, `app/(public)/menu/[slug]/page.tsx`, `app/(public)/social/page.tsx`, `app/(public)/about/page.tsx`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, `npx playwright test e2e/pub-flows.spec.ts e2e/quality.spec.ts` ✅.
+- Berikutnya: Proyek siap serah terima atau lanjut ke tahap deployment.
+
 ### 2026-11-08 — Penyempurnaan Tampilan Admin: Pembersihan Keterangan Teknis & URL Path
 - Dikerjakan:
   1. Bersihkan seluruh keterangan teknis URL path (seperti `/menu`, `/about`, `(/menu?kategori=...)`) dari antarmuka pengguna akhir:

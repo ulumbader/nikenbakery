@@ -74,7 +74,7 @@ export default function SocialPage() {
 
       {/* ─── Grid Postingan Media Sosial ─── */}
       {posts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {posts.map((post, idx) => {
             const isInstagram = post.platform === "instagram";
             const platformBadgeColor = isInstagram ? "pink" : "mint";
@@ -84,10 +84,10 @@ export default function SocialPage() {
             return (
               <article
                 key={post.id}
-                className="bg-white border-3 border-ink rounded-[14px] shadow-[var(--shadow-brutal)] overflow-hidden flex flex-col justify-between hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--shadow-brutal-sm)] transition-all group"
+                className="bg-white border-2 sm:border-3 border-ink rounded-[10px] sm:rounded-[14px] shadow-[var(--shadow-brutal-sm)] sm:shadow-[var(--shadow-brutal)] overflow-hidden flex flex-col justify-between hover:translate-x-[2px] hover:translate-y-[2px] transition-all group"
               >
                 {/* Gambar Postingan */}
-                <div className="relative aspect-[4/3] w-full border-b-3 border-ink bg-cream overflow-hidden">
+                <div className="relative aspect-[4/3] w-full border-b-2 sm:border-b-3 border-ink bg-cream overflow-hidden">
                   {post.imageFile ? (
                     <Image
                       src={post.imageFile}
@@ -101,30 +101,30 @@ export default function SocialPage() {
                       className="w-full h-full rounded-none border-0 group-hover:scale-105 transition-transform duration-200"
                     />
                   )}
-                  <div className="absolute top-3 left-3 z-10">
-                    <Badge color={platformBadgeColor} className="text-xs font-bold uppercase">
-                      {isInstagram ? "📸 Instagram" : "🎵 TikTok"}
+                  <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-10">
+                    <Badge color={platformBadgeColor} className="text-[10px] sm:text-xs font-bold uppercase px-1.5 sm:px-2.5 py-0.5">
+                      {isInstagram ? "📸 IG" : "🎵 TikTok"}
                     </Badge>
                   </div>
                 </div>
 
                 {/* Konten & Caption */}
-                <div className="p-5 flex flex-col flex-1 justify-between gap-4">
-                  <p className="text-sm md:text-base text-ink font-medium leading-relaxed">
+                <div className="p-2.5 sm:p-5 flex flex-col flex-1 justify-between gap-2 sm:gap-4">
+                  <p className="text-xs sm:text-base text-ink font-medium leading-snug sm:leading-relaxed line-clamp-3 sm:line-clamp-none">
                     {post.caption}
                   </p>
 
-                  <div className="pt-3 border-t-2 border-ink/10 flex items-center justify-between">
+                  <div className="pt-2 sm:pt-3 border-t sm:border-t-2 border-ink/10 flex items-center justify-between">
                     <a
                       href={post.postUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-ink hover:underline"
+                      className="inline-flex items-center gap-1 text-[11px] sm:text-sm font-extrabold text-ink hover:underline"
                     >
-                      <span>Lihat di {isInstagram ? "Instagram" : "TikTok"}</span>
+                      <span>Lihat Post</span>
                       <span aria-hidden="true">↗</span>
                     </a>
-                    <span className="text-xs text-ink/80 font-bold" aria-hidden="true">
+                    <span className="hidden sm:inline text-xs text-ink/80 font-bold" aria-hidden="true">
                       ● Niken Bakery
                     </span>
                   </div>

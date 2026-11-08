@@ -37,7 +37,7 @@ export default function AboutPage() {
   );
 
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-16 md:space-y-24">
+    <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 sm:py-10 md:py-16 space-y-10 sm:space-y-16 md:space-y-24">
       {/* ─── 1. CERITA BRAND ─── */}
       <section className="space-y-8">
         <SectionHeading
@@ -119,7 +119,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
             {aboutValues.map((val, idx) => {
               const colors = ["bg-pink", "bg-butter", "bg-mint"];
               const icons = ["✨", "🧁", "🤝"];
@@ -128,7 +128,7 @@ export default function AboutPage() {
               return (
                 <div
                   key={idx}
-                  className={`${cardColor} border-3 border-ink rounded-[14px] p-6 shadow-[var(--shadow-brutal)] flex flex-col justify-between gap-4`}
+                  className={`${cardColor} border-3 border-ink rounded-[14px] p-4 sm:p-6 shadow-[var(--shadow-brutal)] flex flex-col justify-between gap-3 sm:gap-4`}
                 >
                   <span className="text-3xl" aria-hidden="true">
                     {icons[idx % icons.length]}

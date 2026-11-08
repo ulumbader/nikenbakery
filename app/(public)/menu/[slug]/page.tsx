@@ -122,7 +122,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             description="Pilihan kue lain yang sering dinikmati bersama oleh pelanggan kami."
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {relatedProducts.map((related) => (
               <ProductCard
                 key={related.id}
