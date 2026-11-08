@@ -282,16 +282,35 @@ test.describe("Alur Pengelolaan Admin (ADM-01 s/d ADM-09)", () => {
     await page.getByRole("button", { name: /^buat faq$/i }).click();
     await expect(page.getByText("Apakah Niken Bakery menerima custom tulisan").first()).toBeVisible();
 
-    // 3. Verifikasi di Publik
+    // 3. Tambah Post Social Baru dengan Upload Foto
+    await page.goto("/admin/social");
+    await page.getByRole("button", { name: /\+ tambah postingan/i }).click();
+    await page.fill('textarea[name="caption"]', "E2E Momen Manis Dapur Niken Bakery!");
+    await page.fill('input[name="postUrl"]', "https://instagram.com/p/e2etest123");
+    const socialFileChooserPromise = page.waitForEvent("filechooser");
+    await page.locator('input[type="file"]').click();
+    const socialFileChooser = await socialFileChooserPromise;
+    await socialFileChooser.setFiles(path.resolve(process.cwd(), "e2e/fixtures/cake.jpg"));
+    await page.getByRole("button", { name: /^tambah postingan$/i }).click();
+    await expect(page.getByText("E2E Momen Manis Dapur Niken Bakery!").first()).toBeVisible();
+
+    // 4. Verifikasi di Publik
     const pubPage = await context.newPage();
 
-    // Cek Testimoni di Home
+    // Cek Testimoni dan Post Social di Home
     await pubPage.goto("/");
     await expect(pubPage.getByText("E2E Reviewer Bintang 5").first()).toBeVisible();
+    await expect(pubPage.getByText("E2E Momen Manis Dapur Niken Bakery!").first()).toBeVisible();
 
     // Cek FAQ di About
     await pubPage.goto("/about");
     await expect(pubPage.getByText("Apakah Niken Bakery menerima custom tulisan di atas kue?").first()).toBeVisible();
+
+    // Cek Post Social di Halaman /social beserta gambarnya
+    await pubPage.goto("/social");
+    await expect(pubPage.getByText("E2E Momen Manis Dapur Niken Bakery!").first()).toBeVisible();
+    const socialImg = pubPage.locator('img[src*="media"]').first();
+    await expect(socialImg).toBeVisible();
 
     await context.close();
   });

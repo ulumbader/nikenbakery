@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSettings, getOpeningHours } from "@/lib/settings";
 import {
   listFeaturedProducts,
@@ -400,10 +401,21 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="bg-white border-2 sm:border-3 border-ink rounded-[10px] sm:rounded-[14px] p-2.5 sm:p-4 shadow-[var(--shadow-brutal-sm)] sm:shadow-[var(--shadow-brutal)] flex flex-col justify-between gap-2 sm:gap-3 hover:translate-x-[2px] hover:translate-y-[2px] transition-all group"
               >
-                <PlaceholderCake
-                  color="lavender"
-                  className="rounded-[6px] sm:rounded-[8px] border-2 aspect-[4/3] group-hover:scale-105 transition-transform"
-                />
+                <div className="relative aspect-[4/3] w-full rounded-[6px] sm:rounded-[8px] border-2 border-ink overflow-hidden bg-cream">
+                  {post.imageFile ? (
+                    <Image
+                      src={post.imageFile}
+                      alt={post.caption || "Postingan media sosial Niken Bakery"}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                  ) : (
+                    <PlaceholderCake
+                      color="lavender"
+                      className="w-full h-full rounded-none border-0 group-hover:scale-105 transition-transform duration-200"
+                    />
+                  )}
+                </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold text-ink/70">
                     <span className="uppercase truncate">

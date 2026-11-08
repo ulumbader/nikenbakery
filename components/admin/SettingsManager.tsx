@@ -75,6 +75,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [aboutImagePreview, setAboutImagePreview] = useState<string | null>(
     initialSettings.about_image || null
   );
+  const [selectedAboutFile, setSelectedAboutFile] = useState<File | null>(null);
   const [removeAboutImage, setRemoveAboutImage] = useState(false);
 
   function showToast(msg: string) {
@@ -106,6 +107,9 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       formData.set("opening_hours_json", JSON.stringify(openingHours));
       if (removeAboutImage) {
         formData.set("remove_about_image", "true");
+      }
+      if (selectedAboutFile) {
+        formData.set("about_image", selectedAboutFile);
       }
 
       const res = await updateSettingsAction(null, formData);
@@ -511,6 +515,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                       onClick={() => {
                         setRemoveAboutImage(true);
                         setAboutImagePreview(null);
+                        setSelectedAboutFile(null);
                       }}
                       className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer"
                       title="Hapus foto ini"
@@ -527,6 +532,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
+                          setSelectedAboutFile(file);
                           setAboutImagePreview(URL.createObjectURL(file));
                           setRemoveAboutImage(false);
                         }

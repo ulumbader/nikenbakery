@@ -34,6 +34,7 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
 
   const formRef = useRef<HTMLFormElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
 
   function showToast(msg: string) {
@@ -44,6 +45,7 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
   function handleOpenCreate() {
     setEditingPost(null);
     setImagePreview(null);
+    setSelectedFile(null);
     setRemoveCurrentImage(false);
     setIsFormOpen(true);
   }
@@ -51,6 +53,7 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
   function handleOpenEdit(p: SocialPostItem) {
     setEditingPost(p);
     setImagePreview(p.imageFile);
+    setSelectedFile(null);
     setRemoveCurrentImage(false);
     setIsFormOpen(true);
   }
@@ -59,6 +62,7 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
     setIsFormOpen(false);
     setEditingPost(null);
     setImagePreview(null);
+    setSelectedFile(null);
     setRemoveCurrentImage(false);
   }
 
@@ -91,6 +95,9 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
     async (_prev: unknown, formData: FormData) => {
       if (removeCurrentImage) {
         formData.set("removeImage", "true");
+      }
+      if (selectedFile) {
+        formData.set("image", selectedFile);
       }
       const action = editingPost ? updateSocialPostAction : createSocialPostAction;
       const res = await action(null, formData);
@@ -241,6 +248,7 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
                     onClick={() => {
                       setRemoveCurrentImage(true);
                       setImagePreview(null);
+                      setSelectedFile(null);
                     }}
                     className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer"
                     title="Hapus gambar"
@@ -257,6 +265,7 @@ export function SocialManager({ initialPosts }: SocialManagerProps) {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
+                        setSelectedFile(file);
                         setImagePreview(URL.createObjectURL(file));
                         setRemoveCurrentImage(false);
                       }

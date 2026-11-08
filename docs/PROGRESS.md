@@ -198,6 +198,20 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ADM-06 & QLT-04 ✅.
 - Berikutnya: Proyek siap serah terima atau lanjut Tahap 12 (opsional).
 
+### 2026-11-08 — Audit & Pengujian Siklus Upload Foto (Produk, Sosial, Pengaturan)
+- Dikerjakan:
+  1. Audit komprehensif seluruh entitas yang memiliki fitur upload foto: Produk (`ProductForm.tsx`, `actions/products.ts`), Postingan Sosial (`SocialManager.tsx`, `actions/social.ts`), dan Pengaturan Toko (`SettingsManager.tsx`, `actions/settings.ts`).
+  2. Perbaiki bug file input unmounted pada `SocialManager.tsx` dan `SettingsManager.tsx`: pemilihan file sebelumnya langsung merender preview dan meng-unmount `<input type="file" />` sehingga `FormData` kehilangan data berkas gambar. Diperbaiki dengan menyimpan `selectedFile` di React state dan menginjeksinya ke `FormData` saat form dikirimkan.
+  3. Perbaiki tampilan foto sosmed di beranda publik (`app/(public)/page.tsx`): sebelumnya hardcoded merender `PlaceholderCake`, kini menampilkan foto `post.imageFile` melalui Next.js `<Image />` dengan fallback `PlaceholderCake`.
+  4. Buat rangkaian uji integrasi siklus hidup berkas `tests/integration/upload-flow.test.ts` (3 skenario: upload, simpan fisik WebP ke disk, ganti, hapus berkas fisik dari disk secara individual maupun cascading delete pada Produk, Postingan Sosial, dan Foto About Pengaturan Toko).
+  5. Perluas skenario Playwright E2E `ADM-08` di `e2e/admin-flows.spec.ts` untuk menguji upload foto asli (`cake.jpg`) pada postingan sosial, verifikasi di admin, dan verifikasi tampil di Beranda (`/`) serta Galeri Sosial (`/social`).
+  6. Jalankan lint (`npm run lint`), build (`npm run build`), dan suite pengujian (`npm test` 40/40 passed, Playwright E2E 19/19 admin flows passed).
+- File penting yang diubah/dibuat: `app/(public)/page.tsx`, `components/admin/SocialManager.tsx`, `components/admin/SettingsManager.tsx`, `e2e/admin-flows.spec.ts`, `tests/integration/upload-flow.test.ts`, `docs/PROGRESS.md`.
+- Keputusan baru: tidak ada.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅ (0 error, 0 warning), `npm run build` ✅, `npm test` ✅ (40/40 tests passed), E2E test `ADM-08` ✅.
+- Berikutnya: Proyek stabil dan teruji penuh.
+
 ### 2026-11-07 — Tahap 11
 - Dikerjakan:
   1. Perbaiki dropdown menu mobile di `components/public/Navbar.tsx`: pindahkan drawer dialog ke luar elemen `<header>` (React Fragment `<>`) agar terhindar dari containing block yang diinduksi oleh `backdrop-filter` CSS, gunakan warna latar solid `bg-cream` (`#FFF4E0`) sesuai panduan neo-brutalism sehingga menu tidak lagi transparan dan tidak tumpang tindih dengan hero section. Verifikasi visual dengan screenshot `e2e/screenshots/mobile-menu-drawer.png`.
@@ -214,6 +228,8 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Masalah / utang teknis: tidak ada.
 - Cara verifikasi: `npm run lint` lulus (0 error, 0 warning), `npm run build` lulus, `powershell .\scripts\backup.ps1` berhasil membuat ZIP, `powershell .\scripts\restore.ps1` berhasil memulihkan data, screenshot visual mobile drawer bersih tanpa tumpang tindih.
 - Berikutnya: Proyek inti selesai dan siap serah terima. Tahap 12 (opsional: form custom order).
+
+### 2026-11-07 — Tahap 10b
 - Dikerjakan:
   1. Pasang dev dependency `@playwright/test`, `@axe-core/playwright`, `vitest`, `dotenv`. Install browser Chromium engine via `npx playwright install chromium`. Catat keputusan D-015 di `docs/DECISIONS.md`.
   2. Buat konfigurasi `.env.test`, `vitest.config.ts`, dan `playwright.config.ts` (project `setup`, `desktop` 1280×800, `mobile` Pixel 7, serial execution, headless webServer di port 3100 dengan database terisolasi `data/test.db` & uploads `data/test-uploads`).
