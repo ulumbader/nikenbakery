@@ -129,6 +129,23 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-08 — Penyempurnaan Tampilan Admin: Pembersihan Keterangan Teknis & URL Path
+- Dikerjakan:
+  1. Bersihkan seluruh keterangan teknis URL path (seperti `/menu`, `/about`, `(/menu?kategori=...)`) dari antarmuka pengguna akhir:
+     - Di `components/admin/BannerManager.tsx`:
+       - Ubah label opsi dropdown halaman dan kategori menjadi nama halaman toko yang ramah awam (contoh: *🍰 Halaman Menu Katalog*, *ℹ️ Halaman Tentang Kami & Kontak*, *🏷️ Kategori: Brownies & Bars*) tanpa menampilkan kurung path URL teknis.
+       - Hapus badge tampilan URL mentah (`{internalUrl}`) di bawah dropdown dan ganti dengan petunjuk fungsi sederhana.
+       - Pada kartu daftar banner promo: format tujuan tombol menjadi nama ramah awam menggunakan helper `getCtaDestinationLabel` (contoh: *Tombol: Lihat Menu → Kategori: Brownies & Bars* alih-alih *(/menu?kategori=brownies-bars)*).
+       - Perjelas nama tab menjadi *🏠 Halaman Toko* dan *🌐 Link Luar / Sosmed*.
+       - Bersihkan teks dialog konfirmasi hapus dari sisa teks teknis berkas gambar.
+     - Di `components/admin/FaqManager.tsx`: hapus penyebutan path `(/about)` pada deskripsi halaman FAQ.
+     - Di `docs/ADMIN_GUIDE.md`: sesuaikan panduan dengan nama baru yang non-teknis.
+  2. Verifikasi seluruh pengujian: `npm run lint` (0 error, 0 warning), `npm run build` (lulus), `npm test` (37 unit tests lulus), Playwright E2E 19/19 admin tests lulus.
+- File penting yang diubah/dibuat: `components/admin/BannerManager.tsx`, `components/admin/FaqManager.tsx`, `docs/ADMIN_GUIDE.md`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, `npx playwright test e2e/admin-flows.spec.ts` ✅.
+- Berikutnya: Proyek siap serah terima atau lanjut Tahap 12 (opsional).
+
 ### 2026-11-08 — Penghapusan Fitur Gambar pada Banner Promo
 - Dikerjakan:
   1. Hapus seluruh fitur dan keterkaitan gambar pada banner promo sesuai instruksi pengguna:

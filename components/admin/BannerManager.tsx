@@ -48,6 +48,34 @@ function formatDateForInput(d?: Date | null): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+function getCtaDestinationLabel(
+  url: string | null,
+  categories: BannerCategoryOption[]
+): string {
+  if (!url || url.trim() === "" || url === "#") return "Tanpa tautan";
+  if (url === "/menu") return "Halaman Menu Katalog";
+  if (url === "/about") return "Halaman Tentang Kami & Kontak";
+  if (url === "/social") return "Halaman Media Sosial & Galeri";
+  if (url === "/") return "Halaman Beranda Depan";
+
+  if (url.startsWith("/menu?kategori=")) {
+    const slug = url.replace("/menu?kategori=", "");
+    const found = categories.find((c) => c.slug === slug);
+    return found ? `Kategori: ${found.name}` : "Kategori Menu";
+  }
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, "");
+      return `Link Luar (${host})`;
+    } catch {
+      return "Link Luar";
+    }
+  }
+
+  return "Halaman Khusus";
+}
+
 export function BannerManager({
   initialBanners,
   categories = [],
@@ -280,18 +308,18 @@ export function BannerManager({
                 />
               </div>
 
-              {/* CTA URL (Pemilih Link Internal vs Eksternal) */}
+              {/* CTA URL (Pemilih Halaman Toko vs Link Luar) */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-black uppercase text-ink">
-                    Link Tujuan Tombol
+                    Tujuan Tombol Aksi
                   </label>
                   <span className="text-[11px] font-bold text-ink/60">
-                    Arahkan ke internal atau eksternal
+                    Arahkan ke halaman toko atau tautan luar
                   </span>
                 </div>
 
-                {/* Tab Pilihan Mode Link: Internal vs Eksternal */}
+                {/* Tab Pilihan Mode Link */}
                 <div className="grid grid-cols-2 gap-1 rounded-[8px] border-2 border-ink bg-butter/30 p-1">
                   <button
                     type="button"
@@ -302,8 +330,8 @@ export function BannerManager({
                         : "text-ink/70 hover:text-ink hover:bg-white/50"
                     }`}
                   >
-                    <span>📋</span>
-                    <span>Halaman Internal</span>
+                    <span>🏠</span>
+                    <span>Halaman Toko</span>
                   </button>
                   <button
                     type="button"
@@ -315,11 +343,11 @@ export function BannerManager({
                     }`}
                   >
                     <span>🌐</span>
-                    <span>Link Eksternal</span>
+                    <span>Link Luar / Sosmed</span>
                   </button>
                 </div>
 
-                {/* Mode Halaman Internal: Dropdown Pilihan Siap Pakai */}
+                {/* Mode Halaman Toko: Dropdown Pilihan Siap Pakai */}
                 {linkType === "internal" ? (
                   <div className="space-y-1">
                     <select
@@ -328,16 +356,16 @@ export function BannerManager({
                       className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-pink"
                     >
                       <optgroup label="Halaman Utama Website">
-                        <option value="/menu">🍰 Halaman Menu Katalog (/menu)</option>
-                        <option value="/about">ℹ️ Halaman Tentang Kami & Kontak (/about)</option>
-                        <option value="/social">📸 Halaman Media Sosial & Galeri (/social)</option>
-                        <option value="/">🧁 Halaman Beranda Depan (/)</option>
+                        <option value="/menu">🍰 Halaman Menu Katalog</option>
+                        <option value="/about">ℹ️ Halaman Tentang Kami & Kontak</option>
+                        <option value="/social">📸 Halaman Media Sosial & Galeri</option>
+                        <option value="/">🧁 Halaman Beranda Depan</option>
                       </optgroup>
                       {categories.length > 0 && (
-                        <optgroup label="Kategori Menu Spesifik">
+                        <optgroup label="Kategori Menu Pilihan">
                           {categories.map((c) => (
                             <option key={c.id} value={`/menu?kategori=${c.slug}`}>
-                              🏷️ Kategori: {c.name} (/menu?kategori={c.slug})
+                              🏷️ Kategori: {c.name}
                             </option>
                           ))}
                         </optgroup>
@@ -345,17 +373,14 @@ export function BannerManager({
                       {!["/menu", "/about", "/social", "/"].includes(internalUrl) &&
                         !categories.some((c) => `/menu?kategori=${c.slug}` === internalUrl) &&
                         internalUrl.startsWith("/") && (
-                          <optgroup label="Halaman Internal Kustom">
-                            <option value={internalUrl}>🔗 Halaman: {internalUrl}</option>
+                          <optgroup label="Halaman Pilihan">
+                            <option value={internalUrl}>🔗 Halaman Pilihan Khusus</option>
                           </optgroup>
                         )}
                     </select>
-                    <div className="flex items-center justify-between text-[11px] text-ink/70 pt-0.5">
-                      <span>Pilih tujuan tombol tanpa perlu mengetik manual.</span>
-                      <span className="font-mono bg-cream px-1.5 py-0.5 rounded border border-ink/30 font-bold">
-                        {internalUrl}
-                      </span>
-                    </div>
+                    <p className="text-[11px] text-ink/70 pt-0.5">
+                      Pilih tujuan tombol tanpa perlu mengetik alamat URL manual.
+                    </p>
                   </div>
                 ) : (
                   /* Mode Link Eksternal: Input Teks Langsung Tulis / Tempel */
@@ -364,11 +389,11 @@ export function BannerManager({
                       type="url"
                       value={externalUrl}
                       onChange={(e) => setExternalUrl(e.target.value)}
-                      placeholder="https://instagram.com/nikenbakery atau https://wa.me/..."
+                      placeholder="Contoh: https://instagram.com/nikenbakery atau https://wa.me/..."
                       className="w-full rounded-[8px] border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink focus:outline-none focus:ring-2 focus:ring-pink"
                     />
                     <span className="text-[11px] text-ink/70 block">
-                      Tulis atau tempel URL lengkap (harus diawali <code className="font-mono font-bold">https://</code> atau <code className="font-mono font-bold">http://</code>).
+                      Tulis atau tempel alamat link luar lengkap (diawali <strong className="text-ink">https://</strong>).
                     </span>
                   </div>
                 )}
@@ -514,10 +539,14 @@ export function BannerManager({
                       <p className="text-xs text-ink/80 line-clamp-1">{b.subtitle}</p>
                     )}
 
-                    <div className="text-[11px] text-ink/60 flex flex-wrap gap-x-3">
+                    <div className="text-[11px] text-ink/60 flex flex-wrap items-center gap-x-3 gap-y-1">
                       {b.ctaLabel && (
                         <span>
-                          Tombol: <strong className="text-ink">{b.ctaLabel}</strong> ({b.ctaUrl || "#"})
+                          Tombol: <strong className="text-ink">{b.ctaLabel}</strong>
+                          <span className="text-ink/40 mx-1">→</span>
+                          <span className="font-bold text-ink/80">
+                            {getCtaDestinationLabel(b.ctaUrl, categories)}
+                          </span>
                         </span>
                       )}
                       {b.startsAt && (
@@ -602,7 +631,7 @@ export function BannerManager({
               Konfirmasi Hapus Banner
             </h3>
             <p className="text-xs text-ink/80">
-              Apakah Anda yakin ingin menghapus banner ini? Jika memiliki berkas gambar, gambar fisik di server juga akan dihapus permanen.
+              Apakah Anda yakin ingin menghapus banner promo ini?
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <Button

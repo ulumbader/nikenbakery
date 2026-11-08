@@ -104,7 +104,7 @@ export function FaqManager({ initialFaqs }: FaqManagerProps) {
             Tanya Jawab (FAQ)
           </h1>
           <p className="mt-1 font-body text-sm text-ink/70">
-            Kelola daftar pertanyaan yang sering diajukan pelanggan di halaman Tentang Kami (/about).
+            Kelola daftar pertanyaan yang sering diajukan pelanggan di halaman Tentang Kami.
           </p>
         </div>
         {!isFormOpen && (

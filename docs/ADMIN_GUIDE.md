@@ -80,9 +80,9 @@ Banner promo adalah pita pengumuman berwarna yang muncul di bagian paling atas h
 4. Pilih warna tema banner (misal: Warna Pink, Butter, Mint, dll).
 5. **Teks & Tujuan Tombol**:
    - Isi **Teks Tombol Aksi** (misal: *Lihat Menu*, *Pesan Sekarang*).
-   - Pada **Link Tujuan Tombol**, pilih:
-     - **Halaman Internal**: Pilih langsung halaman toko yang dituju dari daftar (misal: *Halaman Menu Katalog*, *Halaman Tentang Kami*, atau *Kategori Kue Tertentu*) tanpa perlu mengetik manual.
-     - **Link Eksternal**: Pilih opsi ini jika tombol ingin mengarah ke link luar (misal akun Instagram, link WhatsApp, atau artikel lain), lalu tempelkan alamat web lengkapnya.
+   - Pada **Tujuan Tombol Aksi**, pilih:
+     - **Halaman Toko**: Pilih langsung halaman toko yang dituju dari daftar (misal: *Menu Katalog*, *Tentang Kami*, atau *Kategori Kue*) tanpa perlu menghafal atau mengetik alamat URL.
+     - **Link Luar / Sosmed**: Pilih opsi ini jika tombol ingin mengarah ke link luar (misal akun Instagram, link WhatsApp, atau website lain), lalu tempelkan tautannya.
 6. Atur jadwal tanggal mulai dan tanggal selesai tayang (opsional, jika promo hanya berlaku periode tertentu).
 7. Centang status **"Aktif"** lalu klik **"Buat Banner"**.
 
