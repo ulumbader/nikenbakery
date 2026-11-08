@@ -428,33 +428,69 @@ export function BannerManager({
 
             {/* Upload Gambar Banner */}
             <div className="space-y-2 pt-2 border-t border-ink/20">
-              <label className="text-xs font-black uppercase text-ink">
-                Gambar Banner (Opsional)
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase text-ink">
+                  Gambar / Foto Banner (Opsional)
+                </label>
+                <span className="text-[11px] font-bold text-ink/60">
+                  Maks. 5 MB (WebP, JPG, PNG)
+                </span>
+              </div>
 
               {imagePreview && !removeCurrentImage ? (
-                <div className="relative w-48 h-28 rounded-[8px] border-2 border-ink overflow-hidden bg-white">
-                  <Image
-                    src={imagePreview}
-                    alt="Preview banner"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRemoveCurrentImage(true);
-                      setImagePreview(null);
-                    }}
-                    className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 text-xs font-bold shadow cursor-pointer"
-                    title="Hapus gambar"
-                  >
-                    ✕
-                  </button>
+                <div className="flex flex-col sm:flex-row items-start gap-4 p-3 bg-white border-2 border-ink rounded-[8px]">
+                  <div className="relative w-40 h-24 rounded-[6px] border-2 border-ink overflow-hidden bg-cream shrink-0">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview banner"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-extrabold text-ink bg-mint px-2 py-0.5 rounded border border-ink">
+                        ✓ Foto Terpasang
+                      </span>
+                    </div>
+                    <p className="text-xs text-ink/70">
+                      Foto ini akan tampil mendampingi teks banner di halaman beranda.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <label className="inline-flex items-center gap-1.5 text-xs font-black text-ink bg-butter hover:bg-butter/80 px-2.5 py-1.5 rounded-[6px] border-2 border-ink shadow-[var(--shadow-brutal-sm)] cursor-pointer">
+                        <span>🔄</span>
+                        <span>Ganti Foto</span>
+                        <input
+                          type="file"
+                          name="image"
+                          accept="image/jpeg,image/png,image/webp,image/avif"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setImagePreview(URL.createObjectURL(file));
+                              setRemoveCurrentImage(false);
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoveCurrentImage(true);
+                          setImagePreview(null);
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs font-black text-danger bg-danger/10 hover:bg-danger hover:text-white px-2.5 py-1.5 rounded-[6px] border border-danger transition-colors cursor-pointer"
+                      >
+                        <span>🗑️</span>
+                        <span>Hapus Foto</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div>
+                <div className="space-y-2">
                   <input
                     type="file"
                     name="image"
@@ -468,9 +504,14 @@ export function BannerManager({
                     }}
                     className="block w-full text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-[6px] file:border-2 file:border-ink file:text-xs file:font-black file:bg-butter file:cursor-pointer hover:file:bg-butter/80"
                   />
-                  <span className="text-[11px] text-ink/60">
-                    Format: JPEG, PNG, WebP (maks. 5 MB). Gambar akan dioptimasi otomatis.
-                  </span>
+                  <div className="flex items-center justify-between text-[11px] text-ink/60">
+                    <span>Pilih foto kue atau flyer diskon untuk ditampilkan di banner beranda.</span>
+                    {removeCurrentImage && (
+                      <span className="text-danger font-bold">
+                        ⚠️ Foto lama ditandai akan dihapus saat disimpan.
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -543,8 +584,19 @@ export function BannerManager({
                         unoptimized
                       />
                     ) : (
-                      <div className={`w-full h-full bg-${b.color} flex items-center justify-center text-ink`}>
-                        PROMO
+                      <div
+                        className={`w-full h-full flex flex-col items-center justify-center text-ink ${
+                          b.color === "butter"
+                            ? "bg-butter"
+                            : b.color === "mint"
+                            ? "bg-mint"
+                            : b.color === "lavender"
+                            ? "bg-lavender"
+                            : "bg-pink"
+                        }`}
+                      >
+                        <span className="text-base">📢</span>
+                        <span className="text-[9px] font-black uppercase">Promo</span>
                       </div>
                     )}
                   </div>
@@ -569,6 +621,16 @@ export function BannerManager({
                       >
                         {scheduleStatus}
                       </span>
+                      {/* Penanda Foto: Bergambar vs Teks Saja */}
+                      {b.imageFile ? (
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-ink bg-butter text-ink inline-flex items-center gap-1 shadow-[1px_1px_0px_#000]">
+                          <span>🖼️</span> Ada Foto
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-ink/40 bg-cream text-ink/70 inline-flex items-center gap-1">
+                          <span>📝</span> Teks Saja
+                        </span>
+                      )}
                     </div>
 
                     {b.subtitle && (
