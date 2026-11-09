@@ -94,7 +94,7 @@ export function checkoutOrderMessage({
     ? `${productName} — ${variantLabel}`
     : productName;
   const lines = [
-    "Halo Niken Bakery! 👋",
+    "Halo Niken Bakery!",
     "Saya ingin memesan:",
     `1. ${cleanLine(itemDescription)}`,
     `   ${quantity} pcs × ${formatRupiah(unitPrice)} = ${formatRupiah(subtotal)}`,

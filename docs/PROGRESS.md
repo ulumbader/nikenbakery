@@ -121,6 +121,7 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Tambahkan kontrol jumlah pcs `[- 1 +]` di detail produk. Tombol pesan membawa produk, varian, dan jumlah ke `/checkout`.
 - Halaman checkout menampilkan ringkasan bill dan meminta nama, nomor WhatsApp, tanggal ambil/kirim, metode pemenuhan, alamat jika dikirim, serta catatan opsional.
 - Tombol **Beli sekarang** membuka WhatsApp dengan format bill rapi. Website tidak menyimpan data pembeli/order; ongkir dikonfirmasi admin dan tidak termasuk subtotal.
+- Hapus emoji lambaian dari bill checkout karena beberapa klien WhatsApp menampilkannya sebagai karakter pengganti `�`; encoder URL lokal tetap menghasilkan UTF-8 yang benar.
 - Catat keputusan pengguna di D-020 dan selaraskan brief, arsitektur, aturan agent, serta design system.
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
@@ -131,7 +132,7 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
   1. Tambahkan kontrol jumlah pcs 1–99 pada detail produk dan hitung subtotal langsung; produk habis tetap memakai tombol tanya ketersediaan.
   2. Tambahkan `/checkout` yang mengambil ulang produk, varian, dan harga dari SQLite, lalu menyajikan ringkasan serta form data pemesan.
   3. Buat bill teks berisi item, harga satuan, jumlah, subtotal, metode ambil/kirim, tanggal, kontak, alamat opsional, catatan, dan keterangan ongkir; tombol **Beli sekarang** meneruskannya ke WhatsApp.
-  4. Tidak menyimpan data form atau pesanan. Perbarui D-020, brief, arsitektur, desain, dan aturan agent agar scope checkout baru jelas.
+  4. Tidak menyimpan data form atau pesanan. Perbarui D-020, brief, arsitektur, desain, dan aturan agent agar scope checkout baru jelas; hilangkan emoji lambaian dari bill setelah laporan karakter `�` di WhatsApp.
 - File penting yang diubah/dibuat: `components/public/ProductDetailClient.tsx`, `components/public/CheckoutForm.tsx`, `app/(public)/checkout/page.tsx`, `lib/whatsapp.ts`, `docs/DECISIONS.md`, `docs/01-PROJECT_BRIEF.md`, `docs/02-ARCHITECTURE.md`, `docs/03-DESIGN_SYSTEM.md`, `AGENTS.md`, `docs/PROGRESS.md`.
 - Masalah / utang teknis: tidak ada.
 - Cara verifikasi: `npm run lint` ✅, `npm run build` ✅; halaman `/checkout?product=fudgy-brownies&quantity=2` tampil pada 375px dan 1280px, serta detail `/menu/fudgy-brownies` diperiksa pada 1280px.

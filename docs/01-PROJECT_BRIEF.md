@@ -44,7 +44,7 @@ Login · ringkasan dan analitik dasar · CRUD produk (varian, multi-foto, toggle
 Di detail, tombol **Pesan via WhatsApp** membuka `/checkout` dengan produk, varian, dan jumlah. Tombol **Beli sekarang** pada checkout menyusun lalu membuka `https://wa.me/<nomor>?text=<bill>` dengan format:
 
 ```
-Halo Niken Bakery! 👋
+Halo Niken Bakery!
 Saya ingin memesan:
 1. {nama produk} — {varian}
    {jumlah} pcs × {harga satuan} = {subtotal}
