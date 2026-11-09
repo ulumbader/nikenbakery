@@ -38,6 +38,11 @@ export const metadata: Metadata = {
   authors: [{ name: "Niken Bakery" }],
   creator: "Niken Bakery",
   publisher: "Niken Bakery",
+  appleWebApp: {
+    capable: true,
+    title: "Niken Bakery",
+    statusBarStyle: "default",
+  },
   formatDetection: {
     email: false,
     address: false,

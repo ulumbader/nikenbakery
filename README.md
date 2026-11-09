@@ -65,6 +65,13 @@ Buka browser di:
 - **Halaman Publik**: [http://localhost:3000](http://localhost:3000)
 - **Dashboard Admin**: [http://localhost:3000/admin](http://localhost:3000/admin) (login dengan akun yang dibuat di langkah 4)
 
+### Instal sebagai aplikasi dari browser (PWA)
+
+- Saat deployment, gunakan domain **HTTPS** agar browser mengizinkan instalasi. `localhost` juga bisa dipakai untuk uji lokal; alamat Wi-Fi HTTP seperti `http://192.168.x.x` bukan konteks aman untuk instalasi.
+- **Chrome/Edge (Android atau desktop)**: buka situs HTTPS, lalu pilih **Install app / Instal aplikasi** dari menu browser atau ikon instal di bilah alamat.
+- **iPhone/iPad**: buka situs melalui Safari, ketuk **Bagikan**, lalu **Tambahkan ke Layar Utama**.
+- Aplikasi bisa dibuka dalam tampilan mandiri. Konten katalog tetap memerlukan koneksi internet; mode offline belum disiapkan.
+
 ---
 
 ## 🧪 Menjalankan Pengujian (Testing)

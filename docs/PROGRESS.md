@@ -118,6 +118,10 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Ringkasan sesi terakhir
 
+- Lengkapi PWA browser-installable: manifest ikon 192/512, ikon Apple Touch, metadata standalone Apple. Panduan Android/desktop dan iOS ada di README; HTTPS diperlukan untuk domain produksi.
+- Aplikasi tetap online-only; service worker/offline cache tidak ditambahkan.
+- Catat keputusan pengguna di D-022.
+
 - Akses LAN development diaktifkan dengan bind `0.0.0.0` dan `allowedDevOrigins` hanya untuk host `192.168.x.x`; tidak memakai CORS wildcard.
 - Alamat Wi-Fi saat ini `http://192.168.1.9:3000` merespons dari komputer ini. Perangkat lain belum dapat dipastikan karena firewall Windows bertipe Public dan sesi ini tidak memiliki hak Administrator untuk menambahkan aturan inbound.
 - Catat keputusan ini di D-021.
@@ -130,6 +134,17 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-09 — Dukungan Instalasi Browser (PWA)
+- Dikerjakan:
+  1. Lengkapi manifest PWA dengan ikon PNG 192×192 dan 512×512 dari ikon kue yang sudah ada.
+  2. Tambahkan ikon Apple Touch 180×180 dan metadata web app mandiri untuk perangkat Apple.
+  3. Dokumentasikan pemasangan dari Chrome/Edge dan Safari serta syarat HTTPS; jelaskan bahwa akses offline belum tersedia.
+- Keputusan: D-022.
+- File penting yang diubah/dibuat: `app/manifest.ts`, `app/layout.tsx`, `app/apple-icon.png`, `public/icons/pwa-192.png`, `public/icons/pwa-512.png`, `README.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: mode offline tidak termasuk scope; HTTPS diperlukan untuk pemasangan dari domain publik.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅; manifest mengembalikan ikon standar dengan `application/manifest+json`, file ikon PNG merespons HTTP 200, dan HTML memuat manifest serta Apple Touch icon.
+- Berikutnya: buka domain HTTPS di browser untuk memasang aplikasi; iOS memakai Safari → Bagikan → Tambahkan ke Layar Utama.
 
 ### 2026-11-09 — Akses Development dari Wi-Fi Lokal
 - Dikerjakan:
