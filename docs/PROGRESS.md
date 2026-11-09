@@ -129,17 +129,17 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
-### 2026-11-09 — Perbaikan Sticky Action Bar Detail Produk pada Layar Mobile
+### 2026-11-09 — Tampilan Frosted Glass pada Sticky Action Bar Mobile Detail Produk
 - Dikerjakan:
-  1. Perbaiki sticky bottom action bar pada halaman detail produk (`components/public/ProductDetailClient.tsx`):
-     - Masalah sebelumnya: pembungkus terluar `fixed bottom-0` memiliki inline style `paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))"` tanpa warna latar (`bg-white`), sementara card di dalamnya berjarak dari tepi bawah viewport. Hal ini menghasilkan celah transparan di bawah bar yang membuat teks konten halaman di bawahnya tembus pandang dan bilah tampak terpotong/mengambang di udara.
-     - Perbaikan: terapkan latar belakang solid `bg-white`, border atas neo-brutal `border-t-3 border-ink`, dan shadow langsung pada kontainer `fixed bottom-0`. Ruang aman (*safe-area padding*) ditampung di dalam wadah berlatar solid tersebut sehingga warna putih solid menutup sempurna hingga tepi paling bawah layar ponsel (area gesture indicator/home bar).
-  2. Optimasi ruang scroll pada halaman detail produk mobile di `app/(public)/menu/[slug]/page.tsx` dengan menambahkan padding bawah (`pt-6 sm:pt-10 md:pt-16 pb-28 md:pb-16`) sehingga rekomendasi produk dan footer dapat di-scroll sepenuhnya di atas sticky action bar tanpa tertutup.
-  3. Verifikasi pengujian: `npm run lint` (0 error, 0 warning), `npm run build` (lulus bersih), `npm test` (40/40 passed), Playwright E2E `pub-flows.spec.ts` & `quality.spec.ts` (27/27 passed).
-- File penting yang diubah: `components/public/ProductDetailClient.tsx`, `app/(public)/menu/[slug]/page.tsx`, `docs/PROGRESS.md`.
+  1. Terapkan tampilan frosted glass (`.glass`) pada sticky bottom action bar halaman detail produk (`components/public/ProductDetailClient.tsx`) agar serasi dengan topbar (`Navbar.tsx`):
+     - Gunakan kelas `.glass` (`background: rgb(255 255 255 / 0.6)`, `backdrop-filter: blur(14px) saturate(140%)`) langsung pada kontainer `fixed bottom-0 left-0 right-0 z-30`.
+     - Pertahankan border atas neo-brutal `border-t-3 border-ink`, netralkan border samping/bawah (`!border-x-0 !border-b-0 !rounded-none`), serta terapkan drop shadow ke arah atas `!shadow-[0_-4px_0_#2B1B17]`.
+     - Lapisan frosted glass menutup penuh hingga ujung terbawah layar ponsel (area gesture indicator), sedangkan konten tombol dan harga berada di dalam padding safe area tanpa celah terpotong.
+  2. Verifikasi pengujian lengkap: `npm run lint` (0 error, 0 warning), `npm run build` (lulus bersih), `npm test` (40/40 tests lulus), Playwright E2E `pub-flows.spec.ts` & `quality.spec.ts` (28/28 tests lulus).
+- File penting yang diubah: `components/public/ProductDetailClient.tsx`, `docs/PROGRESS.md`.
 - Masalah / utang teknis: tidak ada.
 - Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ✅.
-- Berikutnya: Proyek stabil dan selesai.
+- Berikutnya: Selesai.
 
 ### 2026-11-09 — Optimasi Mobile View: Grid 2 Kolom Kompak & Efisiensi Tata Letak
 - Dikerjakan:

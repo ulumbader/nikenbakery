@@ -330,9 +330,9 @@ export function ProductDetailClient({
         </div>
       </div>
 
-      {/* ─── Mobile Sticky Action Bar (Hanya di mobile) ─── */}
+      {/* ─── Mobile Sticky Action Bar (Hanya di mobile, Frosted Glass) ─── */}
       <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t-3 border-ink shadow-[0_-4px_0_#2B1B17]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass !border-x-0 !border-b-0 border-t-3 border-ink !rounded-none !shadow-[0_-4px_0_#2B1B17]"
         style={{
           paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
         }}
