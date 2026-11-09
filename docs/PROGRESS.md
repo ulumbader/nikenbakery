@@ -129,6 +129,18 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-09 — Perbaikan Batas Ukuran Upload Server Actions & Peringatan Parent Image
+- Dikerjakan:
+  1. Perbaiki kendala `Error: Body exceeded 1 MB limit (413 Payload Too Large)` pada Server Actions Next.js:
+     - Di `next.config.ts`: tambahkan konfigurasi `experimental.serverActions.bodySizeLimit: "10mb"` sehingga pengunggahan multi-foto produk kamera beresolusi tinggi (sampai 10 MB per form submission) dapat diterima oleh server tanpa error 500/413 sebelum diproses kompresi WebP oleh Sharp.
+  2. Perbaiki peringatan konsol browser `Image with src ... has "fill" and parent element with invalid "position". Provided "static" should be one of absolute,fixed,relative`:
+     - Di `components/public/ProductCard.tsx`: tambahkan kelas `relative` pada elemen `<Link className="relative block w-full h-full ...">` yang membungkus Next.js `<Image fill />`.
+  3. Verifikasi pengujian: `npm run lint` (0 error), `npm run build` (lulus), `npm test` (40/40 tests lulus), Playwright E2E `admin-flows.spec.ts` (19/19 tests lulus).
+- File penting yang diubah: `next.config.ts`, `components/public/ProductCard.tsx`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E ✅.
+- Berikutnya: Selesai.
+
 ### 2026-11-09 — Tampilan Frosted Glass pada Sticky Action Bar Mobile Detail Produk
 - Dikerjakan:
   1. Terapkan tampilan frosted glass (`.glass`) pada sticky bottom action bar halaman detail produk (`components/public/ProductDetailClient.tsx`) agar serasi dengan topbar (`Navbar.tsx`):

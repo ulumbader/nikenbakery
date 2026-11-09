@@ -49,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="relative aspect-[4/3] border-b-2 sm:border-b-3 border-ink bg-cream overflow-hidden group">
         <Link
           href={`/menu/${product.slug}`}
-          className="block w-full h-full focus-visible:outline-none"
+          className="relative block w-full h-full focus-visible:outline-none"
           aria-label={`Lihat detail ${product.name}`}
         >
           {product.coverImage ? (

@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     agentFeedback: true,
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
   turbopack: {
     rules: {
