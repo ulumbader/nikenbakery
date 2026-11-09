@@ -179,7 +179,7 @@ export function HeroSection({
 
             <div className="flex items-end justify-between gap-4 px-1 pb-1 pt-3 sm:px-2 sm:pt-4">
               <div className="min-w-0">
-                <p className="text-xs font-bold text-ink/60">
+                <p className="text-xs font-bold text-ink/75">
                   {featuredProduct?.category?.name || "Menu andalan"}
                 </p>
                 <h2 className="mt-0.5 truncate font-heading text-lg font-extrabold leading-tight text-ink sm:text-2xl">
@@ -197,7 +197,7 @@ export function HeroSection({
               </div>
               {featuredProduct ? (
                 <div className="shrink-0 text-right">
-                  <p className="text-[11px] font-semibold text-ink/60 sm:text-xs">
+                  <p className="text-[11px] font-semibold text-ink/75 sm:text-xs">
                     Mulai dari
                   </p>
                   <p className="tabular-nums font-heading text-base font-extrabold text-ink sm:text-lg">

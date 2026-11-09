@@ -127,6 +127,23 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Log sesi (terbaru di atas)
 
+### 2026-11-09 — Pembaruan Menyeluruh Foto Produk Katalog (2 Foto per Menu, Product Photography Style)
+- Dikerjakan:
+  1. Hasilkan foto produk baru menggunakan AI Image Generator (`gemini-3.1-flash-image`) untuk Strawberry Shortcake dan Red Velvet Cake dalam gaya studio bakery product photography yang bersih dan menggugah selera.
+  2. Susun dan jalankan skrip kurasi `scripts/seed-product-images.ts` untuk melengkapi seluruh 14 menu katalog Niken Bakery, masing-masing dengan 2 foto produk (1 cover andalan + 1 foto detail/slice sudut alternatif):
+     - Seluruh foto diproses melalui pipeline kompresi Sharp ke format WebP ganda: ukuran large 1200w (`-1200w.webp`) dan thumbnail 480w (`-480w.webp`) dengan kualitas 80 dan EXIF dibersihkan.
+     - Total 28 file foto tersimpan rapi di direktori fisik `data/uploads/` dan tercatat pada tabel `product_images` di database SQLite `data/nikenbakery.db`.
+  3. Perbaiki rasio kontras warna teks kategori dan harga pada `components/public/HeroSection.tsx` (`text-ink/60` → `text-ink/75`) untuk memenuhi standar aksesibilitas WCAG AA (kontras > 4.5:1).
+  4. Jalankan rangkaian verifikasi pengujian:
+     - `npm run lint`: 0 error, 0 warning.
+     - `npm run build`: Berhasil kompilasi produksi Turbopack.
+     - `npm test`: 40/40 vitest unit & query integration tests lulus.
+     - Playwright E2E: 27/27 tests lulus (PUB-01 s/d PUB-09, QLT-01 s/d QLT-04) di Desktop dan Mobile.
+- File penting yang diubah/dibuat: `scripts/seed-product-images.ts`, `components/public/HeroSection.tsx`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅, `npm test` ✅, Playwright E2E 27/27 ✅; periksa katalog `/menu`, beranda `/`, dan detail produk `/menu/[slug]`.
+- Berikutnya: Selesai. Seluruh foto produk telah terpasang dan aktif di katalog.
+
 ### 2026-11-09 — Poles Hero Home
 - Dikerjakan:
   1. Susun ulang `HeroSection` menjadi layout dua kolom pada desktop dan satu kolom pada mobile, dengan hierarchy tipografi yang lebih rapat, dua CTA jelas, serta info alamat dan jam buka tetap terlihat.
