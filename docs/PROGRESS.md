@@ -7,8 +7,8 @@
 
 - **Tahap aktif:** 11 — Deploy & serah terima
 - **Status:** selesai ✅
-- **Kondisi repo:** Packaging produksi, Docker containerization, script pencadangan & pemulihan konsisten (Linux & Windows), dokumentasi deploy VPS (`docs/DEPLOY.md`), panduan pemilik non-teknis (`docs/ADMIN_GUIDE.md`), serta `README.md` utama telah selesai dan teruji penuh. Bug visual dropdown menu mobile telah diperbaiki (hoist drawer ke luar header agar tidak terkurung containing-block backdrop-filter, background solid `bg-cream`). Lint (0 errors, 0 warnings), build produksi (`output: "standalone"`), dan suite pengujian (37 Vitest + 57 Playwright) 100% lulus.
-- **Langkah berikutnya:** proyek inti Niken Bakery telah selesai dan siap diserahterimakan ke pengguna/pemilik toko. Tahap 12 (opsional: form custom order) dapat dikerjakan bila pengguna membutuhkan fitur kustomisasi kue khusus.
+- **Kondisi repo:** Tahap 11 deploy tetap selesai. Atas permintaan pengguna, alur pemesanan kini mencakup jumlah pcs, checkout ringkas untuk satu produk, biodata pemesan, dan bill ke WhatsApp. Tidak ada penyimpanan order, keranjang multi-produk, atau pembayaran online. Lihat keputusan D-020.
+- **Langkah berikutnya:** serah-terima. Tahap 12 (opsional: form custom order) tetap terpisah.
 
 ## Checklist tahap
 
@@ -118,13 +118,24 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Ringkasan sesi terakhir
 
-- Tambahkan micro-interaction untuk kontrol, serta splash navigasi dengan empat variasi ilustrasi kue SVG yang dipilih acak.
-- Saat halaman dibuka atau rute berganti, splash mengaburkan layar sejenak lalu memudar dan bergerak mundur; konten tampil melalui fade-in. Navbar publik tetap berada di layout persisten.
-- Perpindahan rute publik dan admin memakai template Next.js; FAQ/dialog dan kontrol juga mendapat umpan balik gerak. `prefers-reduced-motion` melewati splash dan animasi.
-- Catatan keputusan animasi ada di D-019. Foto katalog produk sudah diperbarui melalui commit dan sesi sebelumnya.
-- `npm run lint` dan `npm run build` lulus; transisi, tampilan mobile/desktop, dan perilaku reduced-motion diperiksa di browser.
+- Tambahkan kontrol jumlah pcs `[- 1 +]` di detail produk. Tombol pesan membawa produk, varian, dan jumlah ke `/checkout`.
+- Halaman checkout menampilkan ringkasan bill dan meminta nama, nomor WhatsApp, tanggal ambil/kirim, metode pemenuhan, alamat jika dikirim, serta catatan opsional.
+- Tombol **Beli sekarang** membuka WhatsApp dengan format bill rapi. Website tidak menyimpan data pembeli/order; ongkir dikonfirmasi admin dan tidak termasuk subtotal.
+- Catat keputusan pengguna di D-020 dan selaraskan brief, arsitektur, aturan agent, serta design system.
+- `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-09 — Checkout Satu Produk ke WhatsApp
+- Dikerjakan:
+  1. Tambahkan kontrol jumlah pcs 1–99 pada detail produk dan hitung subtotal langsung; produk habis tetap memakai tombol tanya ketersediaan.
+  2. Tambahkan `/checkout` yang mengambil ulang produk, varian, dan harga dari SQLite, lalu menyajikan ringkasan serta form data pemesan.
+  3. Buat bill teks berisi item, harga satuan, jumlah, subtotal, metode ambil/kirim, tanggal, kontak, alamat opsional, catatan, dan keterangan ongkir; tombol **Beli sekarang** meneruskannya ke WhatsApp.
+  4. Tidak menyimpan data form atau pesanan. Perbarui D-020, brief, arsitektur, desain, dan aturan agent agar scope checkout baru jelas.
+- File penting yang diubah/dibuat: `components/public/ProductDetailClient.tsx`, `components/public/CheckoutForm.tsx`, `app/(public)/checkout/page.tsx`, `lib/whatsapp.ts`, `docs/DECISIONS.md`, `docs/01-PROJECT_BRIEF.md`, `docs/02-ARCHITECTURE.md`, `docs/03-DESIGN_SYSTEM.md`, `AGENTS.md`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅; halaman `/checkout?product=fudgy-brownies&quantity=2` tampil pada 375px dan 1280px, serta detail `/menu/fudgy-brownies` diperiksa pada 1280px.
+- Berikutnya: selesai; server development tetap aktif di `http://localhost:3000`.
 
 ### 2026-11-09 — Splash SVG Kue dan Transisi Aksi
 - Dikerjakan:

@@ -24,6 +24,7 @@ src/
       page.tsx              # Home
       menu/page.tsx
       menu/[slug]/page.tsx
+      checkout/page.tsx      # review satu produk + data pemesan, tanpa menyimpan order
       social/page.tsx
       about/page.tsx
     admin/

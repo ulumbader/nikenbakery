@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/format";
-import { buildWhatsAppLink, orderMessage, inquiryMessage } from "@/lib/whatsapp";
+import { buildWhatsAppLink, inquiryMessage } from "@/lib/whatsapp";
 import { StatusBadge, PlaceholderCake, Badge, Button } from "@/components/ui";
 import { WhatsAppButton } from "@/components/public/WhatsAppButton";
 import { IconLink, IconCheck, IconWheat, IconAlert } from "@/components/ui/Icons";
@@ -60,6 +60,9 @@ export function ProductDetailClient({
   // State for selected image
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  // Jumlah pcs untuk satu produk yang dipilih.
+  const [quantity, setQuantity] = useState(1);
+
   // State for share toast feedback
   const [shareToast, setShareToast] = useState(false);
 
@@ -78,20 +81,21 @@ export function ProductDetailClient({
     ? selectedVariant.price
     : product.basePrice;
 
-  // Determine WhatsApp link
+  // Produk habis tetap membuka WhatsApp untuk pertanyaan ketersediaan.
   const isSoldOut = product.status === "soldout";
   const waLink = isSoldOut
     ? buildWhatsAppLink(
         whatsappNumber,
         inquiryMessage({ productName: product.name })
       )
-    : buildWhatsAppLink(
-        whatsappNumber,
-        orderMessage({
-          productName: product.name,
-          variantLabel: selectedVariant?.label,
-        })
-      );
+    : undefined;
+
+  const checkoutParams = new URLSearchParams({
+    product: product.slug,
+    quantity: String(quantity),
+  });
+  if (selectedVariant) checkoutParams.set("variant", String(selectedVariant.id));
+  const checkoutHref = `/checkout?${checkoutParams.toString()}`;
 
   const buttonLabel = isSoldOut ? "Tanya via WhatsApp" : "Pesan via WhatsApp";
   const buttonVariant = isSoldOut ? "ghost" : "wa";
@@ -259,16 +263,68 @@ export function ProductDetailClient({
             </div>
           )}
 
+          {!isSoldOut && (
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-[10px] border-2 border-ink bg-white p-3 sm:p-4 shadow-[var(--shadow-brutal-sm)]">
+              <div>
+                <label className="block text-sm font-extrabold" id="quantity-label">
+                  Jumlah (pcs)
+                </label>
+                <span className="text-xs text-ink/70">Maksimal 99 pcs per pesanan</span>
+              </div>
+              <div className="flex items-center gap-2" aria-labelledby="quantity-label">
+                <button
+                  type="button"
+                  aria-label="Kurangi jumlah"
+                  onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                  disabled={quantity <= 1}
+                  className="min-h-11 min-w-11 rounded-full border-2 border-ink bg-cream text-xl font-black shadow-[var(--shadow-brutal-sm)] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-none disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  −
+                </button>
+                <output className="min-w-10 text-center text-lg font-extrabold tabular-nums" aria-live="polite">
+                  {quantity}
+                </output>
+                <button
+                  type="button"
+                  aria-label="Tambah jumlah"
+                  onClick={() => setQuantity((current) => Math.min(99, current + 1))}
+                  disabled={quantity >= 99}
+                  className="min-h-11 min-w-11 rounded-full border-2 border-ink bg-butter text-xl font-black shadow-[var(--shadow-brutal-sm)] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-none disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!isSoldOut && (
+            <div className="flex items-baseline justify-between gap-3 px-1" aria-live="polite">
+              <span className="text-sm font-semibold text-ink/75">Subtotal produk</span>
+              <span className="text-xl font-extrabold tabular-nums">{formatRupiah(currentPrice * quantity)}</span>
+            </div>
+          )}
+
           {/* Tombol Pesan (Desktop) & Bagikan */}
           <div className="hidden md:flex flex-col gap-3 pt-2">
-            <WhatsAppButton
-              href={waLink}
-              productId={product.id}
-              label={buttonLabel}
-              variant={buttonVariant}
-              size="lg"
-              className="w-full text-base font-extrabold shadow-[var(--shadow-brutal)]"
-            />
+            {isSoldOut && waLink ? (
+              <WhatsAppButton
+                href={waLink}
+                productId={product.id}
+                label={buttonLabel}
+                variant={buttonVariant}
+                size="lg"
+                className="w-full text-base font-extrabold shadow-[var(--shadow-brutal)]"
+              />
+            ) : (
+              <Button
+                href={checkoutHref}
+                variant="wa"
+                size="lg"
+                className="w-full text-base font-extrabold shadow-[var(--shadow-brutal)]"
+              >
+                {buttonLabel}
+              </Button>
+            )}
 
             <Button
               type="button"
@@ -344,18 +400,29 @@ export function ProductDetailClient({
               {selectedVariant ? ` (${selectedVariant.label})` : ""}
             </span>
             <span className="tabular-nums font-extrabold text-lg text-ink leading-tight block">
-              {formatRupiah(currentPrice)}
+              {formatRupiah(currentPrice * (isSoldOut ? 1 : quantity))}
             </span>
           </div>
 
-          <WhatsAppButton
-            href={waLink}
-            productId={product.id}
-            label={buttonLabel}
-            variant={buttonVariant}
-            size="default"
-            className="flex-shrink-0 text-sm font-bold shadow-none py-2 px-4"
-          />
+          {isSoldOut && waLink ? (
+            <WhatsAppButton
+              href={waLink}
+              productId={product.id}
+              label={buttonLabel}
+              variant={buttonVariant}
+              size="default"
+              className="flex-shrink-0 text-sm font-bold shadow-none py-2 px-4"
+            />
+          ) : (
+            <Button
+              href={checkoutHref}
+              variant="wa"
+              size="default"
+              className="flex-shrink-0 text-sm font-bold shadow-none py-2 px-4"
+            >
+              {buttonLabel}
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -16,7 +16,7 @@ Titik masuk utama untuk semua AI agent (Claude Code, Codex, Cursor, Copilot, Gem
 ## 1. Proyek dalam 6 baris
 
 - **Niken Bakery**: website katalog kue untuk UMKM. Bukan e-commerce penuh.
-- **Order lewat WhatsApp** (link `wa.me` dengan pesan otomatis). Tanpa keranjang dan payment gateway di fase ini.
+- **Order lewat WhatsApp** melalui checkout ringkas untuk satu produk, dengan data pemesan dan bill otomatis. Tanpa keranjang multi-produk, penyimpanan order, atau payment gateway (D-020).
 - **Target pasar**: Gen-Z. Mobile-first, visual kuat, bahasa santai.
 - **Publik**: Home, Menu (+ detail produk), Social, About Us. **Admin**: dashboard di `/admin` (login).
 - **Desain**: neo-brutalism sebagai tulang punggung, frosted glass sebagai lapisan sekunder (lihat `docs/03-DESIGN_SYSTEM.md`).
@@ -70,7 +70,7 @@ Jika kamu tidak bisa melihat tampilan (tanpa browser atau screenshot), **jangan 
 
 ## 5. Larangan keras
 
-- Jangan menambah keranjang, checkout, atau payment (di luar scope).
+- Jangan menambah keranjang multi-produk, penyimpanan order, atau pembayaran online. Checkout satu produk yang berakhir di WhatsApp sudah disetujui pada D-020.
 - Jangan memakai glass di grid kartu produk.
 - Jangan mengubah nama tabel/kolom tanpa migrasi dan catatan di DECISIONS.md.
 - Jangan menghapus atau menimpa isi `data/` milik pengguna.

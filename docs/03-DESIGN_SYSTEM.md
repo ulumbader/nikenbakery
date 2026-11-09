@@ -98,6 +98,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 800; line-height: 1.
 | `Input` / `Select` / `Textarea` | Border 3px, radius 8px, label terlihat, error teks di bawah dengan warna `danger` dan ikon |
 | `PlaceholderCake` | Blok warna token + pola sederhana (CSS/SVG) sebagai pengganti foto. Menerima `color` |
 | `ProductCard` | Solid. Foto rasio 4:3 (border), nama, harga, StatusBadge, tombol "Pesan via WhatsApp" ringkas |
+| Checkout pesanan | Ringkasan bill dan form pemesan solid dengan border tebal + hard shadow; subtotal dan keterangan ongkir harus terbaca jelas, kontrol jumlah minimal 44×44px |
 | `WhatsAppButton` / `FloatingWhatsApp` | Hijau `wa`; floating memakai wadah glass kecil, aman dari safe-area iOS |
 | `Dialog` | Panel glass di atas overlay gelap transparan, tutup dengan Esc dan klik overlay, fokus terkunci |
 | `EmptyState` | Ilustrasi sederhana + kalimat arahan + tombol aksi |

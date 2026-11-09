@@ -5,7 +5,7 @@ Tambahkan keputusan baru di bawah (ID berurutan). Jangan menghapus keputusan lam
 
 | ID | Keputusan | Status | Alasan / catatan |
 |---|---|---|---|
-| D-001 | Katalog + order via WhatsApp, tanpa keranjang/payment di fase 1 | Disepakati | Cocok untuk UMKM; pembayaran online jadi fase 2 |
+| D-001 | Katalog + order langsung via WhatsApp, tanpa keranjang/payment di fase 1 | Disepakati, digantikan oleh D-020 untuk alur pemesanan | Cocok untuk UMKM; pembayaran online jadi fase 2 |
 | D-002 | Desain neo-brutalism (tulang punggung) + frosted glass (lapisan sekunder, tetap berborder tebal + hard shadow) | Disepakati | Aturan peran di `03-DESIGN_SYSTEM.md` |
 | D-003 | Database SQLite dahulu | Disepakati | Sederhana untuk skala UMKM |
 | D-004 | Drizzle ORM + `better-sqlite3`. Akses DB terisolasi di `src/db/` | Usulan | TS-first, ringan, jalur mudah ke libSQL/Turso atau Postgres. Fallback jika `better-sqlite3` gagal terpasang: `@libsql/client` dengan URL `file:` |
@@ -24,3 +24,4 @@ Tambahkan keputusan baru di bawah (ID berurutan). Jangan menghapus keputusan lam
 | D-017 | Ganti seluruh emoji antarmuka dengan custom neo-brutal SVG icon library (`components/ui/Icons.tsx`) | Disepakati | Permintaan pengguna: menyelaraskan estetika visual satu tema neo-brutal, konsisten di semua OS/browser, dan meningkatkan a11y tanpa ketergantungan emoji sistem |
 | D-018 | Hapus Floating WhatsApp button dan ganti tombol pesan WA di kartu produk dengan tombol Beli yang membuka halaman detail kue | Disepakati | Permintaan pengguna: setiap produk memiliki opsi/varian yang berbeda di dalamnya sehingga pengunjung diarahkan ke halaman detail produk untuk memilih varian sebelum checkout ke WhatsApp, serta menghilangkan floating button yang menutupi tampilan |
 | D-019 | Tambahkan micro-interaction pada kontrol dan transisi rute dengan splash SVG kue acak serta efek blur-depth reveal | Disepakati | Permintaan pengguna; animasi berlaku pada aksi hover/tekan, pembukaan dialog/FAQ, dan perpindahan halaman. Splash harus hilang serta transisi langsung tampil saat `prefers-reduced-motion` aktif |
+| D-020 | Tambahkan checkout ringkas untuk satu produk: pilih jumlah pcs, isi data pemesan, tinjau subtotal, lalu kirim bill melalui WhatsApp | Disepakati | Permintaan pengguna. Tidak ada keranjang multi-produk, penyimpanan order, pembayaran online, atau perhitungan ongkir otomatis. Harga dan varian diambil ulang dari database; ongkir pengiriman dikonfirmasi lewat WhatsApp |

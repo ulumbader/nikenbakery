@@ -11,9 +11,9 @@ Website katalog koleksi kue untuk UMKM **Niken Bakery**. Pengunjung melihat menu
 
 ## Scope
 
-**Masuk:** katalog dengan kategori, varian, status stok; order via WhatsApp; halaman Social (galeri kurasi); About Us (cerita, lokasi, jam, FAQ); promo banner; testimoni; dashboard admin; analitik dasar (view produk, klik WA); SEO dasar.
+**Masuk:** katalog dengan kategori, varian, status stok; checkout ringkas satu produk dengan jumlah pcs, data pemesan, subtotal, dan bill WhatsApp; halaman Social (galeri kurasi); About Us (cerita, lokasi, jam, FAQ); promo banner; testimoni; dashboard admin; analitik dasar (view produk, klik WA); SEO dasar.
 
-**Tidak masuk (backlog fase 2):** keranjang, checkout, payment gateway, akun pelanggan, stok kuantitatif, multi-role admin, multi-bahasa, dark mode.
+**Tidak masuk (backlog fase 2):** keranjang multi-produk, penyimpanan order di website, payment gateway, akun pelanggan, stok kuantitatif, multi-role admin, multi-bahasa, dark mode.
 
 ## Fitur per halaman
 
@@ -22,7 +22,13 @@ Hero (heading besar, tagline, tombol "Pesan via WhatsApp" dan "Lihat menu") · s
 
 ### Menu (`/menu`, `/menu/[slug]`)
 - **Daftar**: grid kartu (foto, nama, harga "Mulai dari", badge status), filter kategori (pill), pencarian, empty state.
-- **Detail**: galeri foto, harga mengikuti varian terpilih, pilihan varian, status dan lead time pre-order, deskripsi, bahan dan alergen, tombol **Pesan via WhatsApp** (membawa produk + varian), tombol bagikan, produk terkait.
+- **Detail**: galeri foto, harga mengikuti varian terpilih, pilihan varian, jumlah pcs, status dan lead time pre-order, deskripsi, bahan dan alergen, tombol **Pesan via WhatsApp** menuju checkout, tombol bagikan, produk terkait.
+
+### Checkout (`/checkout`)
+- Checkout hanya memuat satu produk dari detail yang dipilih; harga dan varian diverifikasi ulang dari katalog.
+- Tampilkan produk, varian, jumlah, subtotal, dan total sementara. Ongkir pengiriman belum termasuk dan dikonfirmasi admin lewat WhatsApp.
+- Minta nama lengkap, nomor WhatsApp, tanggal ambil/kirim, metode pemenuhan, alamat bila dikirim, dan catatan opsional.
+- Tombol **Beli sekarang** membuka WhatsApp dengan bill berformat rapi. Data pemesan tidak disimpan oleh website.
 
 ### Social (`/social`)
 Galeri kurasi post (gambar + caption + link ke Instagram/TikTok), tombol ikuti akun, dikelola admin. Tanpa embed script pihak ketiga.
@@ -35,16 +41,26 @@ Login · ringkasan dan analitik dasar · CRUD produk (varian, multi-foto, toggle
 
 ## Alur pesan WhatsApp
 
-Tombol WA di produk membuka `https://wa.me/<nomor>?text=<pesan>` dengan template:
+Di detail, tombol **Pesan via WhatsApp** membuka `/checkout` dengan produk, varian, dan jumlah. Tombol **Beli sekarang** pada checkout menyusun lalu membuka `https://wa.me/<nomor>?text=<bill>` dengan format:
 
 ```
 Halo Niken Bakery! 👋
-Aku mau pesan:
-• {nama produk} ({varian})
-Jumlah: 1
-Tanggal ambil/kirim: (isi di sini)
-Nama: (isi di sini)
+Saya ingin memesan:
+1. {nama produk} — {varian}
+   {jumlah} pcs × {harga satuan} = {subtotal}
+
+Nama pemesan: {nama}
+No. WhatsApp: {nomor}
+Metode: {ambil di toko / pengiriman}
+Tanggal ambil/kirim: {tanggal}
+Alamat pengiriman: {alamat bila dikirim}
+
+Subtotal produk: {subtotal}
+Ongkir: {dikonfirmasi via WhatsApp bila dikirim}
+TOTAL SEMENTARA: {subtotal}
 ```
+
+Checkout tidak membuat keranjang, menyimpan order, atau memproses pembayaran. Produk habis tetap membuka WhatsApp untuk pertanyaan ketersediaan.
 
 Tombol umum (navbar, footer, floating): `Halo Niken Bakery! Aku mau tanya-tanya soal kue 🙌`.
 Nomor dinormalisasi ke format internasional tanpa `+` (mis. `0812...` menjadi `62812...`).
