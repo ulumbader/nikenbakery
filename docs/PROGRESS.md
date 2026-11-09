@@ -118,14 +118,24 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Ringkasan sesi terakhir
 
-- Hero Home disusun ulang menjadi layout dua kolom responsif: copy dan CTA di kiri, kartu produk unggulan dengan harga di kanan. Pada layar kecil konten utama dan tombol tetap tampil sebelum kartu produk.
-- Hero memakai gambar unggulan yang sudah ada dengan fallback `PlaceholderCake`, aksen geometris flat, border tebal, dan hard shadow. Komponen Navbar/topbar tidak diubah.
-- Direktori laporan dan trace Playwright ditambahkan ke ignore ESLint agar bundle hasil generate tidak dipindai sebagai source.
-- `next dev` mengganti konten lokal yang sebelumnya berada di dalam blok instruksi terkelola; panduan Niken Bakery dipindah kembali ke luar blok tersebut agar tetap terjaga.
-- `npm run lint` dan `npm run build` lulus. Tampilan diperiksa di 375px, 390px, dan 1280px.
-- Catatan konten: gambar produk unggulan yang saat ini ada di database bukan foto kue; ganti dari admin saat foto produk yang sesuai tersedia. File upload dan database tidak diubah.
+- Tambahkan micro-interaction untuk kontrol, serta splash navigasi dengan empat variasi ilustrasi kue SVG yang dipilih acak.
+- Saat halaman dibuka atau rute berganti, splash mengaburkan layar sejenak lalu memudar dan bergerak mundur; konten tampil melalui fade-in. Navbar publik tetap berada di layout persisten.
+- Perpindahan rute publik dan admin memakai template Next.js; FAQ/dialog dan kontrol juga mendapat umpan balik gerak. `prefers-reduced-motion` melewati splash dan animasi.
+- Catatan keputusan animasi ada di D-019. Foto katalog produk sudah diperbarui melalui commit dan sesi sebelumnya.
+- `npm run lint` dan `npm run build` lulus; transisi, tampilan mobile/desktop, dan perilaku reduced-motion diperiksa di browser.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-09 — Splash SVG Kue dan Transisi Aksi
+- Dikerjakan:
+  1. Tambahkan transisi route berbasis `template.tsx` pada halaman publik, login admin, dan dashboard admin; topbar publik tetap di layout persisten.
+  2. Buat splash inline SVG dengan empat variasi kue acak, animasi mengambang singkat, lapisan blur yang mereda, dan fade-in konten dengan efek kedalaman saat halaman dibuka atau berpindah rute.
+  3. Tambahkan micro-interaction untuk hover/tekan kontrol, fokus form, pembukaan dialog, dan FAQ. Matikan splash dan gerak saat `prefers-reduced-motion` aktif.
+  4. Samakan fallback `loading.tsx` publik dengan visual splash SVG dan catat keputusan pengguna di D-019 serta `03-DESIGN_SYSTEM.md`.
+- File penting yang diubah/dibuat: `app/globals.css`, `app/(public)/template.tsx`, `app/(public)/loading.tsx`, `app/admin/(dashboard)/template.tsx`, `app/admin/login/template.tsx`, `components/public/PageTransition.tsx`, `components/public/CakeSplashVisual.tsx`, `docs/03-DESIGN_SYSTEM.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: tidak ada.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅; pratinjau splash/reveal desktop dan mobile, perpindahan ke `/menu`, serta `prefers-reduced-motion`.
+- Berikutnya: selesai; server development tetap aktif di `http://localhost:3000`.
 
 ### 2026-11-09 — Pembaruan Menyeluruh Foto Produk Katalog (2 Foto per Menu, Product Photography Style)
 - Dikerjakan:

@@ -127,8 +127,10 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 800; line-height: 1.
 
 ## Gerak
 
-- Gerak hanya untuk menjawab aksi pengguna (hover/tekan, buka/tutup) dan satu momen di hero. Tidak ada animasi masuk di setiap section.
-- Marquee adalah satu-satunya gerak otomatis lain; wajib mati saat reduced motion.
+- Gerak tetap singkat dan punya respons langsung pada aksi pengguna: hover/tekan, fokus form, pembukaan dialog, dan disclosure FAQ.
+- Perpindahan halaman memakai satu splash SVG kue acak, lalu konten muncul dari blur dengan efek kedalaman yang mereda. Jangan menambahkan animasi masuk terpisah pada setiap section.
+- Jika `prefers-reduced-motion: reduce` aktif, tampilkan halaman tanpa splash dan tanpa gerak dekoratif.
+- Marquee menjadi satu-satunya gerak otomatis yang terus berjalan; splash hanya muncul singkat saat halaman dibuka atau navigasi. Keduanya mati saat reduced motion.
 
 ## Aksesibilitas
 
