@@ -67,6 +67,7 @@ export default function HomePage() {
       <HeroSection
         generalWaLink={generalWaLink}
         address={settings.address}
+        featuredProduct={featuredProducts[0]}
         todayHour={todayHour}
       />
 

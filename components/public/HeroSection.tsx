@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { formatRupiah } from "@/lib/format";
+import { Button, PlaceholderCake } from "@/components/ui";
 import {
   IconWhatsApp,
   IconCakeSlice,
@@ -8,9 +10,25 @@ import {
   IconSparkle,
 } from "@/components/ui/Icons";
 
+type HeroProduct = {
+  name: string;
+  slug: string;
+  displayPrice: number;
+  coverImage?: {
+    fileName: string;
+    thumbName: string;
+    alt: string;
+  } | null;
+  category?: {
+    name: string;
+    color: string;
+  } | null;
+};
+
 interface HeroSectionProps {
   generalWaLink: string;
   address: string;
+  featuredProduct?: HeroProduct;
   todayHour?: {
     day: string;
     open: string;
@@ -22,6 +40,7 @@ interface HeroSectionProps {
 export function HeroSection({
   generalWaLink,
   address,
+  featuredProduct,
   todayHour,
 }: HeroSectionProps) {
   const shortAddress = address.split(",")[0] || address;
@@ -30,267 +49,169 @@ export function HeroSection({
       ? "Tutup"
       : `${todayHour.open} - ${todayHour.close}`
     : "08:00 - 20:00";
+  const categoryColor = featuredProduct?.category?.color;
+  const placeholderColor =
+    categoryColor === "pink" ||
+    categoryColor === "butter" ||
+    categoryColor === "mint" ||
+    categoryColor === "lavender"
+      ? categoryColor
+      : "butter";
 
   return (
-    <section className="relative w-full overflow-hidden bg-cream pt-6 sm:pt-10 md:pt-14 pb-14 sm:pb-20 md:pb-28">
-      {/* ─── LATAR BELAKANG DEKORATIF (ORGANIC WAVES & SPARKLES) ─── */}
+    <section className="relative isolate overflow-hidden bg-cream py-8 sm:py-12 lg:py-16">
       <div
-        className="absolute inset-0 pointer-events-none overflow-hidden select-none"
+        className="pointer-events-none absolute inset-0 select-none"
         aria-hidden="true"
       >
-        {/* 1. Ombak Kiri Atas (Kuning & Pink Berlapis Organik) */}
-        <svg
-          className="absolute -top-1 -left-1 w-[180px] sm:w-[260px] md:w-[340px] lg:w-[400px] h-auto z-0"
-          viewBox="0 0 400 280"
-          fill="none"
-        >
-          {/* Lapisan kuning mentega di belakang */}
-          <path
-            d="M0 0 H280 C240 100, 160 170, 50 190 C15 195, 0 200, 0 200 Z"
-            fill="#FFE899"
-            fillOpacity="0.85"
-          />
-          {/* Lapisan pink lembut melengkung di depan */}
-          <path
-            d="M0 0 H180 C170 90, 110 160, 25 245 C5 260, 0 270, 0 270 Z"
-            fill="#FFAEC8"
-            fillOpacity="0.9"
-          />
-        </svg>
-
-        {/* 2. Ombak Kanan Atas (Kuning Mentega Organik) */}
-        <svg
-          className="absolute -top-1 -right-1 w-[220px] sm:w-[320px] md:w-[420px] lg:w-[500px] h-auto z-0"
-          viewBox="0 0 500 240"
-          fill="none"
-        >
-          <path
-            d="M500 0 H160 C230 85, 320 135, 440 160 C470 165, 500 170, 500 170 Z"
-            fill="#FFE37D"
-            fillOpacity="0.85"
-          />
-        </svg>
-
-        {/* 3. Ombak Kiri Bawah (Kuning Mentega Lembut) */}
-        <svg
-          className="absolute -bottom-1 -left-1 w-[160px] sm:w-[220px] md:w-[280px] h-auto z-0"
-          viewBox="0 0 280 220"
-          fill="none"
-        >
-          <path
-            d="M0 220 V80 C40 115, 95 145, 160 175 C210 198, 240 220, 240 220 Z"
-            fill="#FFE37D"
-            fillOpacity="0.85"
-          />
-        </svg>
-
-        {/* 4. Ombak Kanan Bawah (Signature Double-Layer Pink Waves) */}
-        <svg
-          className="absolute -bottom-1 -right-1 w-[320px] sm:w-[480px] md:w-[620px] lg:w-[750px] xl:w-[840px] h-auto z-0"
-          viewBox="0 0 840 400"
-          fill="none"
-        >
-          {/* Lapisan bawah: soft pastel pink/peach */}
-          <path
-            d="M840 40 C750 110, 670 170, 550 215 C410 268, 290 285, 140 350 C70 375, 20 395, 0 400 H840 Z"
-            fill="#FFBAC9"
-            fillOpacity="0.8"
-          />
-          {/* Lapisan atas: vibrant strawberry rose-pink */}
-          <path
-            d="M840 140 C740 195, 640 248, 510 280 C390 310, 280 330, 160 380 C110 395, 60 400, 30 400 H840 Z"
-            fill="#FA4D75"
-            fillOpacity="0.95"
-          />
-        </svg>
-
-        {/* 5. Aksen Sparkle & Dekorasi Mengambang */}
-        {/* Sparkle Pink Kiri Tengah */}
-        <div className="absolute left-[3%] sm:left-[5%] top-[50%] sm:top-[54%] z-0">
-          <svg className="w-5 sm:w-6 h-5 sm:h-6" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 0 C12 6.6 6.6 12 0 12 C6.6 12 12 17.4 12 24 C12 17.4 17.4 12 24 12 C17.4 12 12 6.6 12 0 Z"
-              fill="#FA4D75"
-            />
-          </svg>
-        </div>
-
-        {/* Titik & Sparkle Kuning Kiri Bawah */}
-        <div className="absolute left-[6%] sm:left-[8%] bottom-[16%] sm:bottom-[20%] z-0 flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#FFBF00] inline-block" />
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 0 C12 6.6 6.6 12 0 12 C6.6 12 12 17.4 12 24 C12 17.4 17.4 12 24 12 C17.4 12 12 6.6 12 0 Z"
-              fill="#FFBF00"
-            />
-          </svg>
-        </div>
-
-        {/* Sparkle Kuning & Aksen Pink Kanan Atas */}
-        <div className="absolute right-[8%] sm:right-[12%] top-[16%] sm:top-[20%] z-0 flex items-start gap-2">
-          <svg className="w-6 sm:w-7 h-6 sm:h-7" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 0 C12 6.6 6.6 12 0 12 C6.6 12 12 17.4 12 24 C12 17.4 17.4 12 24 12 C17.4 12 12 6.6 12 0 Z"
-              fill="#FFBF00"
-            />
-          </svg>
-          <svg className="w-4 sm:w-5 h-4 sm:h-5 -mt-1" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 18 L11 6"
-              stroke="#FA4D75"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <path
-              d="M15 20 L21 8"
-              stroke="#FA4D75"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-
-        {/* Garis Aksen Melengkung Kanan Bawah (di atas ombak pink) */}
-        <div className="absolute right-[12%] sm:right-[15%] bottom-[26%] sm:bottom-[30%] z-0 hidden sm:block">
-          <svg className="w-12 h-9" viewBox="0 0 48 36" fill="none">
-            <path
-              d="M10 26 C20 20, 32 14, 42 6"
-              stroke="#FA4D75"
-              strokeWidth="4.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M2 34 C12 29, 20 24, 28 18"
-              stroke="#FA4D75"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
+        <div className="absolute -right-40 -top-8 h-36 w-72 rotate-[-18deg] rounded-full bg-butter/60 lg:hidden" />
+        <div className="absolute -right-28 -top-56 hidden h-[31rem] w-[48rem] rotate-[-12deg] rounded-full bg-butter/75 lg:block" />
+        <IconSparkle className="absolute right-[8%] top-[39%] hidden h-7 w-7 text-pink sm:block" />
       </div>
 
-      {/* ─── KONTEN UTAMA HERO ─── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
-        <div className="max-w-2xl lg:max-w-3xl space-y-4 sm:space-y-6 text-left">
-          {/* Badge: Dipanggang Segar Setiap Pagi! */}
-          <div className="inline-block relative">
-            {/* 3 Garis Sinar Kuning di Kanan Atas Badge */}
-            <svg
-              className="absolute -top-3.5 sm:-top-4 -right-2 sm:-right-3 w-6 sm:w-7 h-5 sm:h-6 pointer-events-none"
-              viewBox="0 0 28 22"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path d="M4 18 L1 12" stroke="#FFBF00" strokeWidth="3" strokeLinecap="round" />
-              <path d="M14 15 L14 3" stroke="#FFBF00" strokeWidth="3" strokeLinecap="round" />
-              <path d="M24 18 L27 12" stroke="#FFBF00" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-[10px] sm:rounded-[12px] bg-[#FFAEC8] border-2 sm:border-3 border-ink shadow-[2px_2px_0px_#2B1B17] sm:shadow-[3px_3px_0px_#2B1B17]">
-              <IconSparkle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white flex-shrink-0" />
-              <span className="font-heading font-black text-xs sm:text-sm text-ink tracking-wide">
-                Dipanggang Segar Setiap Pagi!
-              </span>
-            </div>
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 md:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">
+        <div className="max-w-2xl text-left">
+          <div className="mb-5 inline-flex -rotate-2 items-center gap-2 rounded-[9px] border-2 border-ink bg-pink px-3 py-2 shadow-[3px_3px_0_#2B1B17] sm:mb-6 sm:px-4">
+            <IconSparkle className="h-4 w-4 shrink-0 text-white" />
+            <span className="font-heading text-xs font-extrabold text-ink sm:text-sm">
+              Dipanggang segar setiap pagi
+            </span>
           </div>
 
-          {/* Judul Besar (Heading 1) */}
-          <h1 className="font-heading font-black text-ink text-[38px] sm:text-[54px] md:text-[68px] lg:text-[78px] xl:text-[84px] leading-[1.06] tracking-tight">
-            Kue Lezat,
+          <h1 className="font-heading text-[clamp(2.75rem,6.2vw,5.25rem)] font-black leading-[0.98] tracking-[-0.045em] text-ink">
+            Kue lezat,
             <br />
-            Momen Lebih
+            momen lebih
             <br />
-            <span className="relative inline-block pb-2 sm:pb-3">
-              Manis.
-              {/* Garis Bawah Lengkung Pink Tebal & Ceria */}
+            <span className="relative inline-block whitespace-nowrap pb-2 sm:pb-3">
+              manis.
               <svg
-                className="absolute left-0 bottom-0 sm:bottom-0.5 w-full h-3.5 sm:h-5 pointer-events-none overflow-visible z-10"
-                viewBox="0 0 200 20"
+                className="absolute -bottom-0.5 left-0 h-3 w-full overflow-visible sm:h-4"
+                viewBox="0 0 200 16"
                 fill="none"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
                 <path
-                  d="M2 12 C55 18, 130 18, 196 6"
+                  d="M3 9 C55 15, 133 15, 197 4"
                   stroke="#FA4D75"
-                  strokeWidth="7"
+                  strokeWidth="6"
                   strokeLinecap="round"
                 />
               </svg>
-              {/* Dua Garis Aksen Pink Melengkung di Samping Kanan */}
-              <span
-                className="absolute -right-8 sm:-right-11 top-1 sm:top-2 pointer-events-none"
-                aria-hidden="true"
-              >
-                <svg
-                  className="w-7 sm:w-9 h-7 sm:h-9"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                >
-                  <path
-                    d="M6 18 C14 13, 20 8, 26 2"
-                    stroke="#FA4D75"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M12 28 C18 23, 24 18, 30 12"
-                    stroke="#FA4D75"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
             </span>
           </h1>
 
-          {/* Deskripsi */}
-          <p className="text-sm sm:text-base md:text-lg text-ink/80 font-medium max-w-xl leading-relaxed">
-            Kue lezat untuk setiap momen spesialmu. Pilihan cake, brownies, dan
-            pastry istimewa yang siap memeriahkan harimu. Pesan langsung tanpa
-            ribet!
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/75 sm:mt-6 sm:text-lg">
+            Cake, brownies, dan pastry yang dibuat segar untuk momen spesialmu.
+            Pilih favoritmu, lalu pesan langsung lewat WhatsApp.
           </p>
 
-          {/* Tombol Aksi */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-1 sm:pt-2">
+          <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <Button
               href={generalWaLink}
               target="_blank"
               rel="noopener noreferrer"
               variant="wa"
               size="lg"
-              className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-[var(--shadow-brutal)]"
+              className="w-full text-sm font-extrabold shadow-[var(--shadow-brutal)] sm:w-auto sm:text-base"
             >
-              <IconWhatsApp className="w-5 h-5 text-ink" />
+              <IconWhatsApp className="h-5 w-5 text-ink" />
               <span>Pesan via WhatsApp</span>
             </Button>
-            <Link href="/menu" className="w-full sm:w-auto">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base font-extrabold shadow-[var(--shadow-brutal)]"
-              >
-                <IconCakeSlice className="w-5 h-5 text-ink" />
-                <span>Lihat Koleksi Menu</span>
-              </Button>
-            </Link>
+            <Button
+              href="/menu"
+              variant="primary"
+              size="lg"
+              className="w-full text-sm font-extrabold shadow-[var(--shadow-brutal)] sm:w-auto sm:text-base"
+            >
+              <IconCakeSlice className="h-5 w-5 text-ink" />
+              <span>Lihat koleksi menu</span>
+            </Button>
           </div>
 
-          {/* Info Cepat Toko */}
-          <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold text-ink/80">
-            <div className="flex items-center gap-1.5">
-              <IconMapPin className="w-4 h-4 text-ink" />
+          <div className="mt-6 flex flex-col gap-2 border-t-2 border-ink/15 pt-4 text-sm font-semibold text-ink/75 sm:mt-7 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
+            <div className="flex items-center gap-2">
+              <IconMapPin className="h-4 w-4 shrink-0 text-ink" />
               <span>Toko di {shortAddress}</span>
             </div>
-            <span
-              className="hidden sm:inline text-ink/40 font-bold"
-              aria-hidden="true"
-            >
-              |
-            </span>
-            <div className="flex items-center gap-1.5">
-              <IconClock className="w-4 h-4 text-ink" />
+            <div className="flex items-center gap-2">
+              <IconClock className="h-4 w-4 shrink-0 text-ink" />
               <span>Hari ini: {hoursText}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative mx-auto w-full max-w-[500px] lg:ml-auto">
+          <div
+            className="absolute -bottom-4 -left-4 right-5 top-5 rotate-[-4deg] rounded-[16px] border-3 border-ink bg-pink sm:-bottom-5 sm:-left-5 sm:right-7 sm:top-7"
+            aria-hidden="true"
+          />
+          <div className="relative rounded-[14px] border-3 border-ink bg-white p-2.5 shadow-[8px_8px_0_#2B1B17] sm:p-3">
+            <Link
+              href={featuredProduct ? `/menu/${featuredProduct.slug}` : "/menu"}
+              className="group relative block aspect-[4/3] overflow-hidden rounded-[8px] border-3 border-ink bg-butter focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink focus-visible:ring-offset-2"
+              aria-label={
+                featuredProduct
+                  ? `Lihat detail ${featuredProduct.name}`
+                  : "Lihat koleksi menu Niken Bakery"
+              }
+            >
+              {featuredProduct?.coverImage ? (
+                <Image
+                  src={
+                    featuredProduct.coverImage.thumbName ||
+                    featuredProduct.coverImage.fileName
+                  }
+                  alt={featuredProduct.coverImage.alt || featuredProduct.name}
+                  fill
+                  sizes="(max-width: 1023px) 100vw, 42vw"
+                  loading="eager"
+                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+              ) : (
+                <PlaceholderCake
+                  color={placeholderColor}
+                  className="h-full w-full rounded-none border-0 aspect-auto"
+                />
+              )}
+            </Link>
+
+            <div className="flex items-end justify-between gap-4 px-1 pb-1 pt-3 sm:px-2 sm:pt-4">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-ink/60">
+                  {featuredProduct?.category?.name || "Menu andalan"}
+                </p>
+                <h2 className="mt-0.5 truncate font-heading text-lg font-extrabold leading-tight text-ink sm:text-2xl">
+                  {featuredProduct ? (
+                    <Link
+                      href={`/menu/${featuredProduct.slug}`}
+                      className="rounded-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink"
+                    >
+                      {featuredProduct.name}
+                    </Link>
+                  ) : (
+                    "Fresh dari dapur"
+                  )}
+                </h2>
+              </div>
+              {featuredProduct ? (
+                <div className="shrink-0 text-right">
+                  <p className="text-[11px] font-semibold text-ink/60 sm:text-xs">
+                    Mulai dari
+                  </p>
+                  <p className="tabular-nums font-heading text-base font-extrabold text-ink sm:text-lg">
+                    {formatRupiah(featuredProduct.displayPrice)}
+                  </p>
+                </div>
+              ) : (
+                <Link
+                  href="/menu"
+                  className="shrink-0 rounded-full border-2 border-ink bg-butter px-3 py-2 text-xs font-extrabold text-ink shadow-[2px_2px_0_#2B1B17] transition-transform hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none sm:text-sm"
+                >
+                  Jelajahi menu
+                </Link>
+              )}
             </div>
           </div>
         </div>

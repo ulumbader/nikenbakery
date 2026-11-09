@@ -1,7 +1,7 @@
 # PROGRESS — Dokumen Hidup
 
 > **Agent WAJIB memperbarui file ini di akhir setiap sesi/tahap.** Ini adalah memori proyek antar sesi.
-> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-07.
+> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-09.
 
 ## Posisi saat ini
 
@@ -118,16 +118,26 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Ringkasan sesi terakhir
 
-- Tahap 11 selesai. Dilakukan packaging produksi penuh dengan Next.js `output: "standalone"` dan multi-stage `Dockerfile` (Node 20 Bookworm Slim untuk kompatibilitas native `better-sqlite3` dan `sharp`), `.dockerignore`, dan `docker-compose.yml` dengan volume persisten `./data:/app/data` dan healthcheck.
-- Dibuat skrip startup dan migrasi aman: `scripts/migrate.js`, `scripts/docker-entrypoint.sh`, dan `scripts/start.sh`.
-- Dibuat utilitas backup konsisten SQLite (WAL mode safe via `better-sqlite3` online backup) dan arsip media uploads untuk Linux (`scripts/backup.sh`, `scripts/restore.sh`) dan Windows (`scripts/backup.ps1`, `scripts/restore.ps1`). Uji pemulihan data (restore) telah diverifikasi berhasil.
-- Disusun panduan arsitektur deployment teknis `docs/DEPLOY.md` (VPS Ubuntu/Debian, Docker Compose, reverse proxy HTTPS dengan Caddy/Nginx, cron backup, jalur migrasi Turso/libSQL untuk serverless, dan Production Checklist).
-- Disusun buku panduan pengelola non-teknis `docs/ADMIN_GUIDE.md` dalam Bahasa Indonesia ramah awam mencakup seluruh alur pengelolaan kue, foto, banner, promo, info kontak, jam buka toko, dan reset password admin.
-- Ditulis ulang `README.md` utama secara komprehensif.
-- Diperbaiki kendala dropdown menu mobile yang tumpang tindih (hoist drawer ke luar header agar bebas dari containing block backdrop-filter, dan gunakan background solid `bg-cream`).
-- Lint (0 errors, 0 warnings) dan build produksi 100% lulus. Seluruh test suite (37 Vitest + 57 Playwright) lulus.
+- Hero Home disusun ulang menjadi layout dua kolom responsif: copy dan CTA di kiri, kartu produk unggulan dengan harga di kanan. Pada layar kecil konten utama dan tombol tetap tampil sebelum kartu produk.
+- Hero memakai gambar unggulan yang sudah ada dengan fallback `PlaceholderCake`, aksen geometris flat, border tebal, dan hard shadow. Komponen Navbar/topbar tidak diubah.
+- Direktori laporan dan trace Playwright ditambahkan ke ignore ESLint agar bundle hasil generate tidak dipindai sebagai source.
+- `next dev` mengganti konten lokal yang sebelumnya berada di dalam blok instruksi terkelola; panduan Niken Bakery dipindah kembali ke luar blok tersebut agar tetap terjaga.
+- `npm run lint` dan `npm run build` lulus. Tampilan diperiksa di 375px, 390px, dan 1280px.
+- Catatan konten: gambar produk unggulan yang saat ini ada di database bukan foto kue; ganti dari admin saat foto produk yang sesuai tersedia. File upload dan database tidak diubah.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-09 — Poles Hero Home
+- Dikerjakan:
+  1. Susun ulang `HeroSection` menjadi layout dua kolom pada desktop dan satu kolom pada mobile, dengan hierarchy tipografi yang lebih rapat, dua CTA jelas, serta info alamat dan jam buka tetap terlihat.
+  2. Hubungkan visual kartu hero ke produk unggulan pertama yang sudah diambil oleh Home, tampilkan foto WebP, nama, kategori, dan harga. Sediakan `PlaceholderCake` bila belum ada foto; tambahkan `loading="eager"` untuk gambar LCP.
+  3. Ganti gelombang dekoratif besar dengan aksen datar yang lebih tenang, border neo-brutal dan hard shadow. Navbar/topbar tetap.
+  4. Tambahkan `playwright-report/**` dan `test-results/**` ke daftar global ignore ESLint karena konfigurasi global saat ini tidak mewarisi ignore `.gitignore`.
+  5. Pulihkan panduan lokal Niken Bakery di luar marker yang dikelola Next.js setelah `next dev` mengganti teks di dalam marker tersebut.
+- File penting yang diubah: `components/public/HeroSection.tsx`, `app/(public)/page.tsx`, `eslint.config.mjs`, `AGENTS.md`, `docs/PROGRESS.md`.
+- Masalah / utang teknis: foto produk unggulan yang saat ini tersimpan bukan foto kue; perlu diganti lewat admin untuk hasil final yang sesuai brand.
+- Cara verifikasi: `npm run lint` ✅, `npm run build` ✅; pratinjau Home pada 375px, 390px, dan 1280px.
+- Berikutnya: bila ingin hero menampilkan foto produk sebenarnya, unggah/ganti foto produk unggulan lewat `/admin/products`. Tahap 12 tetap opsional.
 
 ### 2026-11-09 — Perbaikan Batas Ukuran Upload Server Actions & Peringatan Parent Image
 - Dikerjakan:
