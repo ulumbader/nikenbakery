@@ -114,9 +114,13 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Blocker & pertanyaan terbuka
 
-- (kosong)
+- Jalankan `New-NetFirewallRule` di PowerShell sebagai Administrator agar perangkat pada subnet Wi-Fi yang sama dapat masuk ke TCP 3000 (lihat sesi 2026-11-09).
 
 ## Ringkasan sesi terakhir
+
+- Akses LAN development diaktifkan dengan bind `0.0.0.0` dan `allowedDevOrigins` hanya untuk host `192.168.x.x`; tidak memakai CORS wildcard.
+- Alamat Wi-Fi saat ini `http://192.168.1.9:3000` merespons dari komputer ini. Perangkat lain belum dapat dipastikan karena firewall Windows bertipe Public dan sesi ini tidak memiliki hak Administrator untuk menambahkan aturan inbound.
+- Catat keputusan ini di D-021.
 
 - Tambahkan kontrol jumlah pcs `[- 1 +]` di detail produk. Tombol pesan membawa produk, varian, dan jumlah ke `/checkout`.
 - Halaman checkout menampilkan ringkasan bill dan meminta nama, nomor WhatsApp, tanggal ambil/kirim, metode pemenuhan, alamat jika dikirim, serta catatan opsional.
@@ -126,6 +130,18 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-09 — Akses Development dari Wi-Fi Lokal
+- Dikerjakan:
+  1. Atur skrip `npm run dev` agar Next.js mendengarkan semua interface IPv4.
+  2. Izinkan origin development pada subnet Wi-Fi `192.168.x.x` lewat `allowedDevOrigins`; tanpa CORS wildcard.
+  3. Verifikasi URL menggunakan alamat IPv4 Wi-Fi. Windows menolak pembuatan aturan firewall (`Access is denied`) karena proses Codex tidak elevated; aturan inbound perlu dibuat manual sebagai Administrator dan dibatasi ke `LocalSubnet` + TCP 3000.
+- Keputusan: D-021.
+- Langkah tersisa untuk perangkat lain: buka PowerShell sebagai Administrator lalu jalankan:
+  ```powershell
+  New-NetFirewallRule -DisplayName "Niken Bakery Next.js LAN 3000" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3000 -RemoteAddress LocalSubnet -Profile Public
+  ```
+  Setelah itu akses `http://192.168.1.9:3000` dari perangkat di Wi-Fi yang sama.
 
 ### 2026-11-09 — Checkout Satu Produk ke WhatsApp
 - Dikerjakan:
