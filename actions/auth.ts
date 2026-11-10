@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { adminUsers } from "@/db/schema";
+import { first } from "@/db/first";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession, destroySession } from "@/lib/auth/session";
 
@@ -84,11 +85,11 @@ export async function loginAction(
   }
 
   // Cari user di database
-  const user = db
+  const user = await first(db
     .select()
     .from(adminUsers)
     .where(eq(adminUsers.username, username))
-    .get();
+    .limit(1));
 
   const isPasswordValid = user
     ? await verifyPassword(password, user.passwordHash)

@@ -19,9 +19,9 @@ export const metadata = {
   title: "Ringkasan & Analitik | Admin Niken Bakery",
 };
 
-export default function AdminOverviewPage() {
+export default async function AdminOverviewPage() {
   const { stats, topViewedProducts, topWaClickProducts, chart14Days, checklist } =
-    getAnalyticsSummary();
+    await getAnalyticsSummary();
 
   const completedChecklistCount = checklist.filter((item) => item.isComplete).length;
   const isAllChecklistComplete = completedChecklistCount === checklist.length;

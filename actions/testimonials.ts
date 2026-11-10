@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { eq, asc, desc } from "drizzle-orm";
 import { db } from "@/db";
+import { first } from "@/db/first";
 import { testimonials } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
@@ -40,16 +41,15 @@ export async function createTestimonialAction(_prevState: unknown, formData: For
     return { error: issues || "Data testimoni tidak valid" };
   }
 
-  const last = db
+  const last = await first(db
     .select({ sortOrder: testimonials.sortOrder })
     .from(testimonials)
     .orderBy(desc(testimonials.sortOrder))
-    .limit(1)
-    .get();
+    .limit(1));
 
   const nextOrder = (last?.sortOrder ?? 0) + 1;
 
-  db.insert(testimonials)
+  await db.insert(testimonials)
     .values({
       name,
       handle: handle ? (handle.startsWith("@") ? handle : `@${handle}`) : null,
@@ -57,8 +57,7 @@ export async function createTestimonialAction(_prevState: unknown, formData: For
       rating,
       isPublished,
       sortOrder: nextOrder,
-    })
-    .run();
+    });
 
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
@@ -75,7 +74,9 @@ export async function updateTestimonialAction(_prevState: unknown, formData: For
   const id = Number(formData.get("id"));
   if (!id || isNaN(id)) return { error: "ID testimoni tidak valid" };
 
-  const existing = db.select().from(testimonials).where(eq(testimonials.id, id)).get();
+  const existing = await first(
+    db.select().from(testimonials).where(eq(testimonials.id, id)).limit(1)
+  );
   if (!existing) return { error: "Testimoni tidak ditemukan" };
 
   const name = formData.get("name")?.toString() || "";
@@ -97,7 +98,7 @@ export async function updateTestimonialAction(_prevState: unknown, formData: For
     return { error: issues || "Data testimoni tidak valid" };
   }
 
-  db.update(testimonials)
+  await db.update(testimonials)
     .set({
       name,
       handle: handle ? (handle.startsWith("@") ? handle : `@${handle}`) : null,
@@ -105,8 +106,7 @@ export async function updateTestimonialAction(_prevState: unknown, formData: For
       rating,
       isPublished,
     })
-    .where(eq(testimonials.id, id))
-    .run();
+    .where(eq(testimonials.id, id));
 
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
@@ -120,10 +120,9 @@ export async function updateTestimonialAction(_prevState: unknown, formData: For
 export async function toggleTestimonialPublishAction(id: number, isPublished: boolean) {
   await requireAdmin();
 
-  db.update(testimonials)
+  await db.update(testimonials)
     .set({ isPublished })
-    .where(eq(testimonials.id, id))
-    .run();
+    .where(eq(testimonials.id, id));
 
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
@@ -137,7 +136,10 @@ export async function toggleTestimonialPublishAction(id: number, isPublished: bo
 export async function reorderTestimonialAction(id: number, direction: "up" | "down") {
   await requireAdmin();
 
-  const all = db.select().from(testimonials).orderBy(asc(testimonials.sortOrder)).all();
+  const all = await db
+    .select()
+    .from(testimonials)
+    .orderBy(asc(testimonials.sortOrder));
   const currentIndex = all.findIndex((t) => t.id === id);
   if (currentIndex === -1) return { error: "Testimoni tidak ditemukan" };
 
@@ -147,8 +149,10 @@ export async function reorderTestimonialAction(id: number, direction: "up" | "do
   const current = all[currentIndex];
   const target = all[targetIndex];
 
-  db.update(testimonials).set({ sortOrder: target.sortOrder }).where(eq(testimonials.id, current.id)).run();
-  db.update(testimonials).set({ sortOrder: current.sortOrder }).where(eq(testimonials.id, target.id)).run();
+  await Promise.all([
+    db.update(testimonials).set({ sortOrder: target.sortOrder }).where(eq(testimonials.id, current.id)),
+    db.update(testimonials).set({ sortOrder: current.sortOrder }).where(eq(testimonials.id, target.id)),
+  ]);
 
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
@@ -162,7 +166,7 @@ export async function reorderTestimonialAction(id: number, direction: "up" | "do
 export async function deleteTestimonialAction(id: number) {
   await requireAdmin();
 
-  db.delete(testimonials).where(eq(testimonials.id, id)).run();
+  await db.delete(testimonials).where(eq(testimonials.id, id));
 
   revalidatePath("/admin/testimonials");
   revalidatePath("/");

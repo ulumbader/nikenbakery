@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db } from "./index";
+import { db, postgresClient } from "./index";
+import { first } from "./first";
 import {
   categories,
   products,
@@ -11,23 +12,8 @@ import {
   siteSettings,
 } from "./schema";
 
-const isReset = process.argv.includes("--reset");
-
 async function seed() {
-  console.log(isReset ? "🔄 Resetting and re-seeding..." : "🌱 Seeding...");
-
-  if (isReset) {
-    // Delete content tables (order matters for FK)
-    db.delete(productVariants).run();
-    db.delete(products).run();
-    db.delete(categories).run();
-    db.delete(banners).run();
-    db.delete(testimonials).run();
-    db.delete(socialPosts).run();
-    db.delete(faqs).run();
-    db.delete(siteSettings).run();
-    console.log("  ✓ Cleared all content tables");
-  }
+  console.log("🌱 Seeding missing sample content (existing data is preserved)...");
 
   // ─── Categories ───
   const categoryData = [
@@ -38,15 +24,15 @@ async function seed() {
   ];
 
   for (const cat of categoryData) {
-    const existing = db.select().from(categories).where(eq(categories.slug, cat.slug)).get();
+    const existing = await first(db.select().from(categories).where(eq(categories.slug, cat.slug)).limit(1));
     if (!existing) {
-      db.insert(categories).values(cat).run();
+      await db.insert(categories).values(cat);
     }
   }
   console.log("  ✓ Categories");
 
   // Fetch inserted categories for FK references
-  const allCats = db.select().from(categories).all();
+  const allCats = await db.select().from(categories);
   const catMap = Object.fromEntries(allCats.map((c) => [c.slug, c.id]));
 
   // ─── Products ───
@@ -262,23 +248,24 @@ async function seed() {
   ];
 
   for (const p of productData) {
-    const existing = db.select().from(products).where(eq(products.slug, p.slug)).get();
+    const existing = await first(db.select().from(products).where(eq(products.slug, p.slug)).limit(1));
     if (!existing) {
       const { variants, categorySlug, preorderNote, ...rest } = p;
-      const inserted = db
+      const [inserted] = await db
         .insert(products)
         .values({
           ...rest,
           preorderNote: preorderNote ?? null,
           categoryId: catMap[categorySlug] ?? null,
         })
-        .returning()
-        .get();
+        .returning();
+
+      if (!inserted) continue;
 
       for (const v of variants) {
-        db.insert(productVariants)
-          .values({ ...v, productId: inserted.id })
-          .run();
+        await db
+          .insert(productVariants)
+          .values({ ...v, productId: inserted.id });
       }
     }
   }
@@ -305,9 +292,9 @@ async function seed() {
   ];
 
   for (const b of bannerData) {
-    const existing = db.select().from(banners).where(eq(banners.title, b.title)).get();
+    const existing = await first(db.select().from(banners).where(eq(banners.title, b.title)).limit(1));
     if (!existing) {
-      db.insert(banners).values(b).run();
+      await db.insert(banners).values(b);
     }
   }
   console.log("  ✓ Banners");
@@ -352,13 +339,13 @@ async function seed() {
   ];
 
   for (const t of testimonialData) {
-    const existing = db
+    const existing = await first(db
       .select()
       .from(testimonials)
       .where(eq(testimonials.name, t.name))
-      .get();
+      .limit(1));
     if (!existing) {
-      db.insert(testimonials).values(t).run();
+      await db.insert(testimonials).values(t);
     }
   }
   console.log("  ✓ Testimonials");
@@ -404,13 +391,13 @@ async function seed() {
   ];
 
   for (const s of socialData) {
-    const existing = db
+    const existing = await first(db
       .select()
       .from(socialPosts)
       .where(eq(socialPosts.postUrl, s.postUrl))
-      .get();
+      .limit(1));
     if (!existing) {
-      db.insert(socialPosts).values(s).run();
+      await db.insert(socialPosts).values(s);
     }
   }
   console.log("  ✓ Social posts");
@@ -456,13 +443,13 @@ async function seed() {
   ];
 
   for (const f of faqData) {
-    const existing = db
+    const existing = await first(db
       .select()
       .from(faqs)
       .where(eq(faqs.question, f.question))
-      .get();
+      .limit(1));
     if (!existing) {
-      db.insert(faqs).values(f).run();
+      await db.insert(faqs).values(f);
     }
   }
   console.log("  ✓ FAQs");
@@ -534,13 +521,13 @@ async function seed() {
   ];
 
   for (const s of settingsData) {
-    const existing = db
+    const existing = await first(db
       .select()
       .from(siteSettings)
       .where(eq(siteSettings.key, s.key))
-      .get();
+      .limit(1));
     if (!existing) {
-      db.insert(siteSettings).values(s).run();
+      await db.insert(siteSettings).values(s);
     }
   }
   console.log("  ✓ Site settings");
@@ -550,6 +537,8 @@ async function seed() {
 
 seed().catch((err) => {
   console.error("❌ Seed failed:", err);
-  process.exit(1);
+  process.exitCode = 1;
+}).finally(async () => {
+  await postgresClient.end();
 });
 

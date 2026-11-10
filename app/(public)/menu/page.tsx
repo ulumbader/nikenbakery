@@ -26,12 +26,11 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
   const currentCategorySlug = resolvedParams.kategori;
   const currentQuery = resolvedParams.q;
 
-  const settings = getSettings();
-  const categories = listCategories();
-  const products = listProducts({
-    categorySlug: currentCategorySlug,
-    q: currentQuery,
-  });
+  const [settings, categories, products] = await Promise.all([
+    getSettings(),
+    listCategories(),
+    listProducts({ categorySlug: currentCategorySlug, q: currentQuery }),
+  ]);
 
   const activeCategory = categories.find((c) => c.slug === currentCategorySlug);
   const hasActiveFilters = Boolean(currentCategorySlug || currentQuery);

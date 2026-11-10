@@ -9,22 +9,14 @@ export const metadata = {
   title: "Kelola Banner Promo | Admin Niken Bakery",
 };
 
-export default function AdminBannersPage() {
-  const allBanners = db
-    .select()
-    .from(banners)
-    .orderBy(asc(banners.sortOrder))
-    .all();
-
-  const allCategories = db
-    .select({
-      id: categories.id,
-      name: categories.name,
-      slug: categories.slug,
-    })
-    .from(categories)
-    .orderBy(asc(categories.sortOrder))
-    .all();
+export default async function AdminBannersPage() {
+  const [allBanners, allCategories] = await Promise.all([
+    db.select().from(banners).orderBy(asc(banners.sortOrder)),
+    db
+      .select({ id: categories.id, name: categories.name, slug: categories.slug })
+      .from(categories)
+      .orderBy(asc(categories.sortOrder)),
+  ]);
 
   return (
     <div className="space-y-6">

@@ -1,262 +1,91 @@
-# Panduan Deployment — Niken Bakery
+# Deploy Niken Bakery ke Vercel + Supabase
 
-Dokumen ini menjelaskan langkah-langkah untuk menjalankan aplikasi **Niken Bakery** di lingkungan produksi menggunakan VPS (Virtual Private Server) berbasis Linux (Ubuntu/Debian) dengan Docker, konfigurasi reverse proxy HTTPS, pencadangan otomatis (cron), serta jalur migrasi database bila ingin berpindah ke layanan serverless seperti Turso.
+Web berjalan sebagai Next.js di Vercel. PostgreSQL menyimpan data katalog, pengaturan, akun admin, dan analitik; Supabase Storage menyimpan gambar. SQLite lokal dan folder fungsi Vercel tidak dipakai sebagai penyimpanan produksi.
 
----
+## 1. Siapkan Supabase
 
-## 1. Arsitektur & Kebutuhan Sistem
+1. Buat project Supabase dan simpan password database dengan aman.
+2. Buka **Project Settings → Database → Connection string → Transaction pooler**. Salin URI pooler pada port `6543`; encode karakter khusus pada password sebelum menaruhnya di URI. Tambahkan `?workaround=supabase-pooler.vercel` jika URL belum memiliki query string, atau `&workaround=supabase-pooler.vercel` jika sudah ada.
+3. Buka **Storage → New bucket**, buat bucket `nikenbakery-media`, lalu aktifkan **Public bucket** agar gambar katalog dapat dibaca pengunjung. Aplikasi hanya mengunggah dan menghapus objek dari server menggunakan service role.
+4. Dari **Project Settings → API**, salin Project URL dan service role key. Jangan menaruh service role key di variabel `NEXT_PUBLIC_*`, kode browser, atau repository.
 
-- **Aplikasi**: Next.js (App Router, Node.js 20 LTS) dengan konfigurasi `output: "standalone"`.
-- **Database**: SQLite lokal via `better-sqlite3` dalam mode WAL. Data dan berkas unggahan disimpan dalam folder persisten `./data` (di-mount ke `/app/data` di dalam kontainer Docker).
-- **Spesifikasi Minimum VPS**:
-  - CPU: 1 vCPU
-  - RAM: 1 GB (disarankan 2 GB jika melakukan build langsung di server)
-  - Penyimpanan: 10 GB SSD (disesuaikan dengan volume unggahan foto)
-  - OS: Ubuntu 22.04 LTS / 24.04 LTS atau Debian 12 (Bookworm)
-  - Perangkat Lunak: Docker Engine (>= 24.x) dan Docker Compose (>= 2.x)
+## 2. Konfigurasi lokal dan migrasi schema
 
-> [!IMPORTANT]
-> Jangan menjalankan aplikasi ini di platform *ephemeral serverless* (seperti Vercel atau Netlify) dengan SQLite lokal, karena berkas `./data` akan hilang setiap kali kontainer serverless di-restart. Untuk Vercel, lihat [Bagian 7: Jalur Migrasi ke Turso](#7-jalur-migrasi-ke-turso-serverless).
+Salin `.env.example` ke `.env.local`, lalu isi nilai berikut:
 
----
-
-## 2. Langkah-Langkah Deploy ke VPS
-
-### Langkah 1: Persiapan Server & Clone Repo
-
-1. Masuk ke VPS Anda melalui SSH:
-   ```bash
-   ssh user@ip-server-anda
-   ```
-2. Pastikan Docker dan Docker Compose telah terpasang:
-   ```bash
-   docker --version
-   docker compose version
-   ```
-3. Unduh atau clone repositori proyek:
-   ```bash
-   git clone <URL_REPO_ANDA> /var/www/nikenbakery
-   cd /var/www/nikenbakery
-   ```
-
-### Langkah 2: Konfigurasi Environment Produksi
-
-Buat berkas `.env` di root direktori proyek:
-```bash
-cp .env.example .env # atau nano .env
-```
-
-Isi variabel lingkungan produksi dengan nilai yang aman:
 ```env
-# Node & Port
-NODE_ENV=production
-PORT=3000
-HOSTNAME=0.0.0.0
-
-# Database & Uploads
-DB_PATH=/app/data/nikenbakery.db
-UPLOAD_DIR=/app/data/uploads
-
-# Kunci Rahasia Sesi Admin (WAJIB: string acak minimal 32 karakter)
-# Buat dengan: openssl rand -base64 32
-SESSION_SECRET=ganti_dengan_kunci_acak_yang_sangat_panjang_dan_rahasia_32chars!
-
-# URL Publik Situs (untuk SEO & OpenGraph)
-NEXT_PUBLIC_SITE_URL=https://nikenbakery.com
+DATABASE_URL=postgresql://postgres.PROJECT_REF:DB_PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?workaround=supabase-pooler.vercel
+SUPABASE_URL=https://PROJECT_REF.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_STORAGE_BUCKET=nikenbakery-media
+SESSION_SECRET=nilai-acak-minimal-32-karakter
+NEXT_PUBLIC_SITE_URL=https://domain-anda.vercel.app
 ```
 
-### Langkah 3: Bangun & Jalankan Aplikasi dengan Docker Compose
+Jalankan migrasi schema satu kali untuk project Supabase yang akan dipakai:
 
-Jalankan perintah berikut untuk membangun citra Docker dan menyalakan kontainer di latar belakang:
 ```bash
-docker compose up -d --build
+npm run db:migrate
 ```
 
-Docker entrypoint (`scripts/docker-entrypoint.sh`) akan otomatis:
-1. Memastikan folder `/app/data` dan `/app/data/uploads` siap.
-2. Menjalankan migrasi skema database (`node scripts/migrate.js`).
-3. Menjalankan server Next.js standalone.
+Skrip migrasi berhenti jika koneksi tidak tersedia dan tidak dijalankan otomatis pada setiap Vercel build. Untuk database baru yang benar-benar kosong, data contoh opsional dapat ditambahkan dengan `npm run db:seed`; seed bersifat aditif dan mempertahankan konten yang sudah ada. Buat admin awal setelah variabel `ADMIN_USERNAME` dan `ADMIN_PASSWORD` diisi, lalu jalankan `npm run admin:create`.
 
-Periksa status kontainer:
-```bash
-docker compose ps
-docker compose logs -f
-```
+## 3. Pindahkan database dan gambar SQLite yang sudah ada
 
-### Langkah 4: Membuat Akun Admin Awal
+Jika website saat ini sudah berisi data, migrasikan sebelum mengarahkan domain produksi:
 
-Jalankan perintah berikut di dalam kontainer yang sedang berjalan:
-```bash
-docker compose exec web node -e "
-const bcrypt = require('bcryptjs');
-const Database = require('better-sqlite3');
-const db = new Database('/app/data/nikenbakery.db');
-const username = 'admin';
-const password = 'GantiPasswordKuatIni!';
-const hash = bcrypt.hashSync(password, 10);
-const now = new Date().toISOString();
-db.prepare('INSERT OR REPLACE INTO admin_users (id, username, password_hash, created_at, updated_at) VALUES (1, ?, ?, ?, ?)').run(username, hash, now, now);
-console.log('Admin berhasil dibuat!');
-db.close();
-"
-```
-*(Atau jalankan skrip `npm run admin:create` jika Node.js dan dependensi terpasang di host server).*
+1. Pertahankan file sumber `data/nikenbakery.db` dan `data/uploads/` sebagai backup. Jangan jalankan `npm run db:seed` untuk memindahkan data.
+2. Pastikan `.env.local` sudah memiliki `DATABASE_URL`, variabel Storage Supabase, serta:
 
----
-
-## 3. Konfigurasi Reverse Proxy & HTTPS
-
-Aplikasi berjalan pada port internal `3000`. Gunakan reverse proxy untuk menangani sertifikat SSL/HTTPS otomatis dan meneruskan trafik publik (port 80 & 443) ke port 3000.
-
-### Pilihan A: Menggunakan Caddy (Sangat Direkomendasikan — Termudah)
-
-Caddy secara otomatis mengelola dan memperbarui sertifikat SSL Let's Encrypt tanpa konfigurasi rumit.
-
-1. Pasang Caddy di server (`sudo apt install caddy`).
-2. Edit `/etc/caddy/Caddyfile`:
-   ```caddy
-   nikenbakery.com, www.nikenbakery.com {
-       reverse_proxy 127.0.0.1:3000
-
-       # Kompresi gzip/zstd
-       encode gzip zstd
-
-       # Batas upload file 10MB
-       request_body {
-           max_size 10MB
-       }
-
-       # Header keamanan standar
-       header {
-           Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-           X-Content-Type-Options "nosniff"
-           X-Frame-Options "DENY"
-           Referrer-Policy "strict-origin-when-cross-origin"
-       }
-   }
+   ```env
+   SQLITE_SOURCE_PATH=./data/nikenbakery.db
+   SQLITE_UPLOAD_DIR=./data/uploads
    ```
-3. Muat ulang Caddy:
+
+3. Pastikan schema sudah dimigrasikan dan bucket sudah dibuat, lalu jalankan:
+
    ```bash
-   sudo systemctl reload caddy
+   npm run db:import-sqlite
    ```
 
-### Pilihan B: Menggunakan Nginx + Certbot
+Importer menolak berjalan jika ada tabel Supabase yang sudah terisi. Import mempertahankan ID dan relasi, mengonversi timestamp/boolean SQLite, menyalin gambar ke bucket, dan mengganti URL gambar pada data tujuan. File SQLite sumber tidak diubah. Setelah selesai, cek jumlah baris dan gambar melalui aplikasi/dashboard sebelum mengaktifkan deployment produksi.
 
-1. Buat berkas `/etc/nginx/sites-available/nikenbakery`:
-   ```nginx
-   server {
-       server_name nikenbakery.com www.nikenbakery.com;
+Jika importer terputus sebelum database diisi, perbaiki penyebabnya lalu ulangi. Jika database sudah terisi sebagian oleh tindakan manual, kosongkan atau buat project Supabase baru setelah melakukan backup; importer sengaja tidak menimpa data.
 
-       client_max_body_size 10M;
+## 4. Deploy aplikasi ke Vercel
 
-       location / {
-           proxy_pass http://127.0.0.1:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header X-Forwarded-Proto $scheme;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-2. Aktifkan situs dan pasang sertifikat Let's Encrypt:
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/nikenbakery /etc/nginx/sites-enabled/
-   sudo nginx -t && sudo systemctl reload nginx
-   sudo certbot --nginx -d nikenbakery.com -d www.nikenbakery.com
-   ```
+1. Push repository ke GitHub/GitLab/Bitbucket, lalu buat project baru di Vercel dan pilih repository.
+2. Gunakan framework preset **Next.js**. Build command standar `npm run build`; jangan menambahkan build step untuk menjalankan migrasi database.
+3. Tambahkan environment variables di **Project Settings → Environment Variables** untuk Production, Preview, dan Development sesuai kebutuhan:
 
----
+   | Nama | Isi |
+   |---|---|
+   | `DATABASE_URL` | Transaction pooler Supabase, port 6543 |
+   | `SUPABASE_URL` | Project URL Supabase |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Service role key server-only |
+   | `SUPABASE_STORAGE_BUCKET` | `nikenbakery-media` |
+   | `SESSION_SECRET` | Rahasia acak minimal 32 karakter |
+   | `NEXT_PUBLIC_SITE_URL` | Domain publik yang aktif |
 
-## 4. Pencadangan Otomatis (Cron Job)
+   Untuk keamanan, gunakan project Supabase terpisah bagi Preview bila tersedia; jika Preview menggunakan database produksi, preview dapat membaca/menulis konten produksi.
+4. Deploy. Pastikan halaman publik, `/admin/login`, upload gambar dari admin, dan link gambar yang tampil berfungsi. Pilih ulang foto untuk menguji upload baru karena upload baru harus masuk Supabase Storage.
+5. Atur domain di Vercel. HTTPS disediakan untuk domain Vercel dan domain kustom setelah DNS terverifikasi.
 
-Database SQLite dalam mode WAL membutuhkan pencadangan konsisten agar data tidak korup saat server sedang membaca/menulis data. Repositori telah dilengkapi dengan skrip:
-- `scripts/backup.sh` (Linux / VPS)
-- `scripts/backup.ps1` (Windows)
-- `scripts/sqlite-backup.js` (Helper online backup SQLite)
+## Koneksi Postgres di Vercel
 
-### Mengatur Jadwal Cron di VPS
+Gunakan connection pooler transaction Supabase, bukan koneksi langsung database untuk fungsi serverless. Adapter menggunakan `postgres-js` dengan `prepare: false`, SSL, dan maksimal satu koneksi per instance Vercel. Untuk workload besar, evaluasi batas koneksi dan paket Supabase sesuai trafik.
 
-1. Buka editor crontab:
-   ```bash
-   crontab -e
-   ```
-2. Tambahkan baris jadwal berikut untuk menjalankan backup setiap hari pada jam 02.00 pagi dan menghapus arsip yang lebih lama dari 30 hari:
-   ```cron
-   # Backup harian Niken Bakery jam 02:00 WIB
-   0 2 * * * cd /var/www/nikenbakery && ./scripts/backup.sh >> /var/log/nikenbakery-backup.log 2>&1
+## Variabel rahasia dan keamanan
 
-   # Hapus backup lama (> 30 hari) jam 03:00 WIB
-   0 3 * * * find /var/www/nikenbakery/backups -type f -name "nikenbakery_backup_*.tar.gz" -mtime +30 -delete
-   ```
+- `SESSION_SECRET` harus acak, minimal 32 karakter. Ganti jika pernah masuk ke Git atau terkirim ke publik.
+- `SUPABASE_SERVICE_ROLE_KEY` memiliki hak server luas. Simpan hanya sebagai environment variable server-side di Vercel.
+- Migrasi mengaktifkan Row Level Security tanpa kebijakan publik pada tabel aplikasi. Rute server menggunakan koneksi pooler dengan kredensial database; jangan membuat kebijakan anon yang membuka tabel admin atau data toko.
+- Bucket gambar bersifat public untuk pembacaan gambar produk; service role tetap diperlukan untuk mengunggah dan menghapus.
+- `ADMIN_USERNAME` dan `ADMIN_PASSWORD` dipakai hanya saat menjalankan skrip lokal `npm run admin:create`, tidak perlu dipasang di Vercel setelah akun admin dibuat.
+- Jangan masukkan `.env.local`, export database, atau file di `data/` ke Git.
 
----
+## Operasional dan backup
 
-## 5. Panduan Pemulihan Data (Restore)
+Vercel tidak menyimpan berkas runtime secara persisten. Foto produksi berada di Supabase Storage dan data terstruktur berada di Postgres. Atur backup/export database melalui fitur Supabase sesuai paket project, dan simpan salinan objek Storage terpisah bila foto penting. Sebelum migrasi schema atau import besar, buat backup terlebih dahulu.
 
-Jika terjadi kendala sistem atau ingin memindahkan server:
-
-1. Matikan sementara kontainer web agar tidak ada transaksi baru:
-   ```bash
-   docker compose down
-   ```
-2. Jalankan skrip restore:
-   ```bash
-   ./scripts/restore.sh ./backups/nikenbakery_backup_YYYYMMDD_HHMMSS.tar.gz
-   ```
-   *(Skrip akan otomatis membuat salinan pengaman darurat sebelum mengekstrak database dan berkas foto).*
-3. Nyalakan kembali kontainer:
-   ```bash
-   docker compose up -d
-   ```
-
----
-
-## 6. Jalur Migrasi ke Turso (Serverless / Vercel)
-
-Jika di masa mendatang tim ingin meng-host web di Vercel atau edge serverless:
-
-1. **Buat Database di Turso**:
-   ```bash
-   turso db create nikenbakery
-   turso db show nikenbakery --url
-   turso db tokens create nikenbakery
-   ```
-2. **Ubah Adapter Database (`db/index.ts`)**:
-   Drizzle ORM mendukung libSQL / Turso. Ganti `better-sqlite3` dengan `@libsql/client`:
-   ```ts
-   import { drizzle } from "drizzle-orm/libsql";
-   import { createClient } from "@libsql/client";
-
-   const client = createClient({
-     url: process.env.TURSO_DATABASE_URL!,
-     authToken: process.env.TURSO_AUTH_TOKEN,
-   });
-
-   export const db = drizzle(client);
-   ```
-3. **Pindahkan Berkas Unggahan**:
-   Karena Vercel tidak memiliki sistem berkas lokal persisten, alihkan folder `data/uploads` ke penyimpanan objek seperti Cloudflare R2, AWS S3, atau Supabase Storage.
-4. **Push Skema ke Turso**:
-   ```bash
-   npx drizzle-kit push
-   ```
-
----
-
-## 7. Daftar Periksa Produksi (Production Checklist)
-
-Sebelum meresmikan website untuk publik, pastikan seluruh poin di bawah telah terpenuhi:
-
-- [ ] **Kunci Sesi Kuat**: `SESSION_SECRET` di `.env` telah diisi string acak minimal 32 karakter (bukan nilai default).
-- [ ] **Password Admin Unik**: Password akun admin telah diubah dari nilai default dan memiliki kombinasi yang aman.
-- [ ] **HTTPS Aktif**: Akses via `http://` otomatis di-redirect ke `https://` dan sertifikat SSL valid.
-- [ ] **Data Bisnis Asli**: Teks bertanda **CONTOH** (nomor WA, alamat toko, jam buka, link Instagram/TikTok) di menu Pengaturan Admin telah diganti dengan data riil toko.
-- [ ] **Katalog Produk Riil**: Produk contoh telah disesuaikan dengan daftar kue dan harga asli Niken Bakery.
-- [ ] **Uji Pesan WhatsApp**: Klik tombol "Pesan via WhatsApp" dari ponsel untuk memastikan aplikasi WhatsApp terbuka dengan format pesan yang benar.
-- [ ] **Pencadangan Teruji**: Skrip `backup.sh` telah diuji coba dan menghasilkan berkas arsip yang valid di folder `backups/`.
-- [ ] **Firewall Server**: Hanya port 22 (SSH), 80 (HTTP), dan 443 (HTTPS) yang terbuka untuk publik. Port internal 3000 tidak boleh dibuka langsung ke internet.
-
+Script `events:prune` memangkas analitik lebih lama dari 180 hari jika perlu dijalankan manual dari lingkungan aman dengan `DATABASE_URL`; jadwalkan hanya jika kebijakan retensi memang menghendakinya.

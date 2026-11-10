@@ -1,11 +1,9 @@
-import { db } from "../db";
+import { db, postgresClient } from "../db";
 import { products, productImages } from "../db/schema";
-import sharp from "sharp";
+import { eq } from "drizzle-orm";
 import fs from "node:fs/promises";
 import path from "node:path";
-import crypto from "node:crypto";
-
-const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || path.join(process.cwd(), "data", "uploads"));
+import { processAndSaveImage } from "../lib/upload";
 
 interface ProductImagePlan {
   productSlug: string;
@@ -260,49 +258,28 @@ const imagePlans: ProductImagePlan[] = [
   },
 ];
 
-async function processImageBuffer(buffer: Buffer): Promise<{ largeFileName: string; thumbFileName: string }> {
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-
-  const fileId = crypto.randomUUID();
-  const largeFileName = `${fileId}-1200w.webp`;
-  const thumbFileName = `${fileId}-480w.webp`;
-
-  const largePath = path.join(UPLOAD_DIR, largeFileName);
-  const thumbPath = path.join(UPLOAD_DIR, thumbFileName);
-
-  await sharp(buffer)
-    .rotate()
-    .resize({ width: 1200, withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(largePath);
-
-  await sharp(buffer)
-    .rotate()
-    .resize({ width: 480, withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(thumbPath);
-
-  return { largeFileName, thumbFileName };
-}
-
 async function main() {
-  console.log("🚀 Menyiapkan pembaruan foto produk (2 foto per menu, product style)...");
-  console.log(`📁 Upload Dir: ${UPLOAD_DIR}`);
+  console.log("🚀 Menambahkan foto contoh produk yang belum memiliki foto...");
 
   // 1. Ambil semua produk dari DB
-  const allProducts = db.select().from(products).all();
+  const allProducts = await db.select().from(products);
   const productMap = new Map(allProducts.map((p) => [p.slug, p]));
-
-  // 2. Bersihkan tabel productImages saat ini
-  const oldImages = db.select().from(productImages).all();
-  console.log(`🗑️ Menghapus ${oldImages.length} data foto lama dari database...`);
-  db.delete(productImages).run();
 
   // 3. Proses setiap item menu
   for (const plan of imagePlans) {
     const product = productMap.get(plan.productSlug);
     if (!product) {
       console.warn(`⚠️ Produk slug "${plan.productSlug}" tidak ditemukan di database.`);
+      continue;
+    }
+
+    const existingImages = await db
+      .select({ id: productImages.id })
+      .from(productImages)
+      .where(eq(productImages.productId, product.id))
+      .limit(1);
+    if (existingImages.length > 0) {
+      console.log(`  Lewati ${product.name}: foto yang ada dipertahankan.`);
       continue;
     }
 
@@ -325,29 +302,32 @@ async function main() {
         buffer = Buffer.from(ab);
       }
 
-      const { largeFileName, thumbFileName } = await processImageBuffer(buffer);
+      const imageBytes = new Uint8Array(buffer.byteLength);
+      imageBytes.set(buffer);
+      const processed = await processAndSaveImage(new Blob([imageBytes.buffer]));
 
-      db.insert(productImages)
+      await db.insert(productImages)
         .values({
           productId: product.id,
-          fileName: `/media/${largeFileName}`,
-          thumbName: `/media/${thumbFileName}`,
+          fileName: processed.largeUrl,
+          thumbName: processed.thumbUrl,
           alt: imgConfig.alt,
           isCover: imgConfig.isCover,
           sortOrder,
-        })
-        .run();
+        });
 
-      console.log(`  ✓ Tersimpan: /media/${thumbFileName} (Cover: ${imgConfig.isCover})`);
+      console.log(`  ✓ Foto tersimpan ke Storage (${imgConfig.isCover ? "cover" : "galeri"})`);
       sortOrder++;
     }
   }
 
-  const finalCount = db.select().from(productImages).all().length;
+  const finalCount = (await db.select().from(productImages)).length;
   console.log(`\n🎉 Selesai! Total ${finalCount} foto produk berhasil disimpan dan aktif di katalog.`);
 }
 
 main().catch((err) => {
   console.error("❌ Error saat memperbarui foto produk:", err);
   process.exit(1);
+}).finally(async () => {
+  await postgresClient.end();
 });

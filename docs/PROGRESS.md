@@ -5,10 +5,10 @@
 
 ## Posisi saat ini
 
-- **Tahap aktif:** 11 — Deploy & serah terima
-- **Status:** selesai ✅
-- **Kondisi repo:** Tahap 11 deploy tetap selesai. Checkout WhatsApp satu produk tetap berlaku (D-020); tautan marketplace per produk ditambahkan sebagai opsi pembelian langsung yang bisa diatur admin (D-023). Tidak ada keranjang multi-produk, penyimpanan order, atau pembayaran online.
-- **Langkah berikutnya:** serah-terima. Tahap 12 (opsional: form custom order) tetap terpisah.
+- **Tahap aktif:** 11 — Deploy & serah terima (selesai); adaptasi hosting berdasarkan permintaan pengguna
+- **Status:** kode Vercel + Supabase selesai ✅; migrasi data produksi menunggu konfigurasi/kredensial Supabase pemilik
+- **Kondisi repo:** Aplikasi memakai Supabase PostgreSQL untuk runtime dan Supabase Storage untuk gambar produksi (D-024). Migrator SQL dan importer SQLite → Supabase tersedia; file data lokal tidak disentuh. Checkout satu produk melalui WhatsApp tetap berlaku (D-020), dan marketplace per produk tetap tersedia (D-023).
+- **Langkah berikutnya:** isi environment Supabase, jalankan migrasi schema, import data lokal bila diperlukan, lalu set environment Vercel dan deploy. Tahap 12 (opsional: form custom order) tetap terpisah.
 
 ## Checklist tahap
 
@@ -63,14 +63,14 @@ Perbarui tabel ini begitu pengguna memberi data asli.
    ```bash
    npm run admin:create
    ```
-3. Akun admin otomatis dibuat/diperbarui di database SQLite.
+3. Akun admin otomatis dibuat/diperbarui di database Supabase PostgreSQL (butuh `DATABASE_URL`).
 
 ## Pemeliharaan Data Analitik (Prune Events)
-Untuk menjaga database SQLite tetap ramping dan performa query tetap cepat, data event analitik yang lebih lama dari 180 hari dapat dipangkas secara berkala:
+Untuk menjaga database tetap ramping dan performa query tetap cepat, data event analitik yang lebih lama dari 180 hari dapat dipangkas secara berkala:
 ```bash
 npm run events:prune
 ```
-Script ini (`scripts/prune-events.ts`) menghapus seluruh baris di tabel `events` di mana `createdAt < now - 180 hari`. Dapat dijadwalkan lewat cron di server produksi (mis. mingguan atau bulanan).
+Script ini (`scripts/prune-events.ts`) menghapus seluruh baris di tabel `events` di mana `createdAt < now - 180 hari`. Jalankan dari lingkungan dengan `DATABASE_URL`; dapat dijadwalkan mingguan atau bulanan.
 
 ## Panduan Menjalankan Pengujian (Testing Suite)
 
@@ -140,6 +140,17 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-10 — Adaptasi Vercel + Supabase
+- Dikerjakan:
+  1. Ganti adapter runtime SQLite sinkron dengan PostgreSQL async melalui `postgres-js`; seluruh query, Server Action, halaman admin/publik, endpoint event, analytics, seed, dan skrip admin sudah memakai query async.
+  2. Tambahkan migrasi PostgreSQL Drizzle dengan 11 tabel, index/foreign key, dan Row Level Security aktif tanpa kebijakan publik.
+  3. Alihkan upload WebP ke Supabase Storage, izinkan host gambar Supabase pada `next/image`, dan tetap dukung penyimpanan lokal hanya untuk development.
+  4. Tambahkan importer satu kali dari SQLite yang mempertahankan ID/relasi, menyalin foto ke Storage, menolak target yang sudah berisi data, dan tidak mengubah database lokal.
+  5. Perbarui konfigurasi environment, README, arsitektur, keputusan D-024, dan panduan deploy Vercel/Supabase. Migrasi tidak dijalankan otomatis saat build Vercel.
+- Verifikasi: `npm run db:generate` ✅, `npm run lint` ✅, `npm run build` ✅. Koneksi Supabase/import data belum dapat diuji karena kredensial project belum diberikan.
+- File penting: `db/`, `db/migrations-postgres/`, `lib/upload.ts`, `lib/supabase-admin.ts`, `scripts/import-sqlite-to-supabase.ts`, `.env.example`, `docs/DEPLOY.md`.
+- Berikutnya: pemilik mengisi `.env.local`, menjalankan migrasi schema dan (jika perlu) import SQLite, lalu memasukkan variabel runtime di Vercel.
 
 ### 2026-11-10 — Tautan Pembelian Marketplace Per Produk
 - Dikerjakan:

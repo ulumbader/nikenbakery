@@ -30,18 +30,20 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
-  const settings = getSettings();
+  const settings = await getSettings();
   return {
     title: `Tentang Kami | ${settings.business_name}`,
     description: `Cerita, nilai, lokasi, dan jam buka ${settings.business_name}. Semua kue dipanggang fresh setiap hari!`,
   };
 }
 
-export default function AboutPage() {
-  const settings = getSettings();
-  const openingHours = getOpeningHours();
-  const aboutValues = getAboutValues();
-  const faqs = listFaqs();
+export default async function AboutPage() {
+  const [settings, openingHours, aboutValues, faqs] = await Promise.all([
+    getSettings(),
+    getOpeningHours(),
+    getAboutValues(),
+    listFaqs(),
+  ]);
   const hoursStatus = isOpenNow(openingHours, settings.timezone);
 
   const waLink = buildWhatsAppLink(

@@ -18,16 +18,18 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
-  const settings = getSettings();
+  const settings = await getSettings();
   return {
     title: `Dapur & Media Sosial | ${settings.business_name}`,
     description: `Ikuti keseharian, proses memanggang, dan keseruan kreasi kue manis di media sosial ${settings.business_name}.`,
   };
 }
 
-export default function SocialPage() {
-  const settings = getSettings();
-  const posts = listSocialPosts();
+export default async function SocialPage() {
+  const [settings, posts] = await Promise.all([
+    getSettings(),
+    listSocialPosts(),
+  ]);
 
   const placeholderColors: Array<"pink" | "butter" | "mint" | "lavender"> = [
     "pink",

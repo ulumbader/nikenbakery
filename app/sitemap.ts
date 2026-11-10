@@ -5,18 +5,17 @@ import { products } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   // Ambil semua produk yang dipublikasikan dari database
-  const publishedProducts = db
+  const publishedProducts = await db
     .select({
       slug: products.slug,
       updatedAt: products.updatedAt,
     })
     .from(products)
-    .where(eq(products.isPublished, true))
-    .all();
+    .where(eq(products.isPublished, true));
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -47,12 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const productRoutes: MetadataRoute.Sitemap = publishedProducts.map((p) => {
     let lastMod = new Date();
-    if (p.updatedAt) {
-      lastMod =
-        typeof p.updatedAt === "number"
-          ? new Date(p.updatedAt * 1000)
-          : new Date(p.updatedAt);
-    }
+    if (p.updatedAt) lastMod = p.updatedAt;
 
     return {
       url: `${siteUrl}/menu/${p.slug}`,

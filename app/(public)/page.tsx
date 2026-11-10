@@ -33,20 +33,29 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
-  const settings = getSettings();
+  const settings = await getSettings();
   return {
     title: `Home | ${settings.business_name}`,
     description: settings.tagline,
   };
 }
 
-export default function HomePage() {
-  const settings = getSettings();
-  const featuredProducts = listFeaturedProducts(6);
-  const activeBanners = listActiveBanners();
-  const testimonials = listTestimonials();
-  const socialPosts = listSocialPosts(6);
-  const openingHours = getOpeningHours();
+export default async function HomePage() {
+  const [
+    settings,
+    featuredProducts,
+    activeBanners,
+    testimonials,
+    socialPosts,
+    openingHours,
+  ] = await Promise.all([
+    getSettings(),
+    listFeaturedProducts(6),
+    listActiveBanners(),
+    listTestimonials(),
+    listSocialPosts(6),
+    getOpeningHours(),
+  ]);
 
   // Find today's opening hours
   const todayName = new Intl.DateTimeFormat("id-ID", {

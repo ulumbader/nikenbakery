@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { siteSettings } from "@/db/schema";
+import { first } from "@/db/first";
 
 /** Default values for all known settings keys */
 const DEFAULTS: Record<string, string> = {
@@ -53,8 +54,8 @@ export type SiteSettingsMap = typeof DEFAULTS;
 /**
  * Get all settings as a typed object with safe defaults.
  */
-export function getSettings(): SiteSettingsMap {
-  const rows = db.select().from(siteSettings).all();
+export async function getSettings(): Promise<SiteSettingsMap> {
+  const rows = await db.select().from(siteSettings);
   const map: Record<string, string> = { ...DEFAULTS };
   for (const row of rows) {
     map[row.key] = row.value;
@@ -65,20 +66,18 @@ export function getSettings(): SiteSettingsMap {
 /**
  * Get a single setting value.
  */
-export function getSetting(key: string): string {
-  const row = db
-    .select()
-    .from(siteSettings)
-    .where(eq(siteSettings.key, key))
-    .get();
+export async function getSetting(key: string): Promise<string> {
+  const row = await first(
+    db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1)
+  );
   return row?.value ?? DEFAULTS[key] ?? "";
 }
 
 /**
  * Parse opening_hours JSON safely.
  */
-export function getOpeningHours(): OpeningHour[] {
-  const raw = getSettings().opening_hours;
+export async function getOpeningHours(): Promise<OpeningHour[]> {
+  const raw = (await getSettings()).opening_hours;
   try {
     return JSON.parse(raw) as OpeningHour[];
   } catch {
@@ -89,8 +88,8 @@ export function getOpeningHours(): OpeningHour[] {
 /**
  * Parse about_values JSON safely.
  */
-export function getAboutValues(): string[] {
-  const raw = getSettings().about_values;
+export async function getAboutValues(): Promise<string[]> {
+  const raw = (await getSettings()).about_values;
   try {
     return JSON.parse(raw) as string[];
   } catch {

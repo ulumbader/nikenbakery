@@ -1,26 +1,26 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { existsSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import "dotenv/config";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 
-const DB_PATH = process.env.DB_PATH ?? "./data/nikenbakery.db";
+const databaseUrl = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
 
-// Ensure data directory exists
-const dir = dirname(DB_PATH);
-if (!existsSync(dir)) {
-  mkdirSync(dir, { recursive: true });
+if (!databaseUrl) {
+  throw new Error("Isi DATABASE_URL dengan connection string Supabase terlebih dahulu.");
 }
 
-const sqlite = new Database(DB_PATH);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
+const client = postgres(databaseUrl, {
+  max: 1,
+  prepare: false,
+  ssl: "require",
+});
 
-const db = drizzle(sqlite);
-
-console.log("🔄 Running migrations...");
-migrate(db, { migrationsFolder: "./db/migrations" });
-console.log("✅ Migrations complete!");
-
-sqlite.close();
-
+try {
+  console.log("🔄 Running PostgreSQL migrations...");
+  await migrate(drizzle(client), {
+    migrationsFolder: "./db/migrations-postgres",
+  });
+  console.log("✅ PostgreSQL migrations complete!");
+} finally {
+  await client.end();
+}

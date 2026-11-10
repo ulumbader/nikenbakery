@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { eq, and, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { products, productVariants, productImages } from "@/db/schema";
+import { first } from "@/db/first";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { generateSlug, ensureUniqueSlug } from "@/lib/slug";
 import { processAndSaveImage, deleteUploadedFile } from "@/lib/upload";
@@ -18,13 +19,12 @@ export async function toggleProductStatusAction(
 ) {
   await requireAdmin();
 
-  db.update(products)
+  await db.update(products)
     .set({
       status,
-      updatedAt: sql`(unixepoch())`,
+      updatedAt: new Date(),
     })
-    .where(eq(products.id, productId))
-    .run();
+    .where(eq(products.id, productId));
 
   revalidatePath("/admin/products");
   revalidatePath("/menu");
@@ -42,13 +42,12 @@ export async function toggleProductPublishAction(
 ) {
   await requireAdmin();
 
-  db.update(products)
+  await db.update(products)
     .set({
       isPublished,
-      updatedAt: sql`(unixepoch())`,
+      updatedAt: new Date(),
     })
-    .where(eq(products.id, productId))
-    .run();
+    .where(eq(products.id, productId));
 
   revalidatePath("/admin/products");
   revalidatePath("/menu");
@@ -66,13 +65,12 @@ export async function toggleProductFeaturedAction(
 ) {
   await requireAdmin();
 
-  db.update(products)
+  await db.update(products)
     .set({
       isFeatured,
-      updatedAt: sql`(unixepoch())`,
+      updatedAt: new Date(),
     })
-    .where(eq(products.id, productId))
-    .run();
+    .where(eq(products.id, productId));
 
   revalidatePath("/admin/products");
   revalidatePath("/");
@@ -87,11 +85,10 @@ export async function deleteProductAction(productId: number) {
   await requireAdmin();
 
   // 1. Ambil semua file gambar produk ini untuk dihapus dari disk
-  const images = db
+  const images = await db
     .select()
     .from(productImages)
-    .where(eq(productImages.productId, productId))
-    .all();
+    .where(eq(productImages.productId, productId));
 
   for (const img of images) {
     await deleteUploadedFile(img.fileName);
@@ -99,7 +96,7 @@ export async function deleteProductAction(productId: number) {
   }
 
   // 2. Hapus produk dari database (cascade menghapus productVariants & productImages)
-  db.delete(products).where(eq(products.id, productId)).run();
+  await db.delete(products).where(eq(products.id, productId));
 
   revalidatePath("/admin/products");
   revalidatePath("/admin");
@@ -208,19 +205,18 @@ export async function saveProductAction(formData: FormData) {
 
   // 1. Tangani slug (otomatis dari nama bila kosong, cek duplikat)
   const baseSlug = generateSlug(data.slug || data.name);
-  const otherSlugs = db
+  const otherSlugs = (await db
     .select({ slug: products.slug })
     .from(products)
     .where(id ? sql`${products.id} != ${id}` : undefined)
-    .all()
-    .map((p) => p.slug);
+  ).map((p) => p.slug);
   const finalSlug = ensureUniqueSlug(baseSlug, otherSlugs);
 
   let targetProductId = id;
 
   if (targetProductId) {
     // UPDATE
-    db.update(products)
+    await db.update(products)
       .set({
         name: data.name,
         slug: finalSlug,
@@ -239,13 +235,12 @@ export async function saveProductAction(formData: FormData) {
         tokopediaEnabled: data.tokopediaEnabled,
         tiktokShopUrl: data.tiktokShopUrl,
         tiktokShopEnabled: data.tiktokShopEnabled,
-        updatedAt: sql`(unixepoch())`,
+        updatedAt: new Date(),
       })
-      .where(eq(products.id, targetProductId))
-      .run();
+      .where(eq(products.id, targetProductId));
   } else {
     // CREATE
-    const inserted = db
+    const [inserted] = await db
       .insert(products)
       .values({
         name: data.name,
@@ -266,8 +261,7 @@ export async function saveProductAction(formData: FormData) {
         tiktokShopUrl: data.tiktokShopUrl,
         tiktokShopEnabled: data.tiktokShopEnabled,
       })
-      .returning({ id: products.id })
-      .get();
+      .returning({ id: products.id });
 
     targetProductId = inserted.id;
   }
@@ -283,21 +277,20 @@ export async function saveProductAction(formData: FormData) {
       }>;
 
       // Hapus varian lama produk ini
-      db.delete(productVariants)
-        .where(eq(productVariants.productId, targetProductId))
-        .run();
+      await db
+        .delete(productVariants)
+        .where(eq(productVariants.productId, targetProductId));
 
       // Masukkan varian baru
       for (const [idx, v] of parsedVariants.entries()) {
         if (v.label.trim()) {
-          db.insert(productVariants)
+          await db.insert(productVariants)
             .values({
               productId: targetProductId,
               label: v.label.trim(),
               price: Number(v.price) || 0,
               sortOrder: idx + 1,
-            })
-            .run();
+            });
         }
       }
     } catch {
@@ -311,7 +304,7 @@ export async function saveProductAction(formData: FormData) {
     try {
       const deletedIds = JSON.parse(deletedImageIdsRaw) as number[];
       for (const imgId of deletedIds) {
-        const img = db
+        const img = await first(db
           .select()
           .from(productImages)
           .where(
@@ -320,12 +313,12 @@ export async function saveProductAction(formData: FormData) {
               eq(productImages.productId, targetProductId)
             )
           )
-          .get();
+          .limit(1));
 
         if (img) {
           await deleteUploadedFile(img.fileName);
           await deleteUploadedFile(img.thumbName);
-          db.delete(productImages).where(eq(productImages.id, imgId)).run();
+          await db.delete(productImages).where(eq(productImages.id, imgId));
         }
       }
     } catch {
@@ -345,7 +338,7 @@ export async function saveProductAction(formData: FormData) {
       }>;
 
       for (const meta of existingMeta) {
-        db.update(productImages)
+        await db.update(productImages)
           .set({
             alt: meta.alt || "",
             isCover: Boolean(meta.isCover),
@@ -356,8 +349,7 @@ export async function saveProductAction(formData: FormData) {
               eq(productImages.id, meta.id),
               eq(productImages.productId, targetProductId)
             )
-          )
-          .run();
+          );
       }
     } catch {
       // Abaikan jika parsing gagal
@@ -372,23 +364,23 @@ export async function saveProductAction(formData: FormData) {
 
   if (validFiles.length > 0) {
     // Ambil gambar yang sudah ada untuk menentukan urutan berikutnya
-    const currentImages = db
+    const currentImageCount = await db
       .select({ count: sql<number>`count(*)` })
       .from(productImages)
       .where(eq(productImages.productId, targetProductId))
-      .get()?.count ?? 0;
+      .then((rows) => Number(rows[0]?.count ?? 0));
 
     let hasCoverAlready = Boolean(
-      db
+      await first(db
         .select()
         .from(productImages)
         .where(
           and(
             eq(productImages.productId, targetProductId),
-            eq(productImages.isCover, true)
+              eq(productImages.isCover, true)
+            )
           )
-        )
-        .get()
+          .limit(1))
     );
 
     for (const [idx, file] of validFiles.entries()) {
@@ -397,16 +389,15 @@ export async function saveProductAction(formData: FormData) {
         const shouldBeCover = !hasCoverAlready && idx === 0;
         if (shouldBeCover) hasCoverAlready = true;
 
-        db.insert(productImages)
+        await db.insert(productImages)
           .values({
             productId: targetProductId,
             fileName: processed.largeUrl,
             thumbName: processed.thumbUrl,
             alt: data.name,
             isCover: shouldBeCover,
-            sortOrder: currentImages + idx + 1,
-          })
-          .run();
+            sortOrder: currentImageCount + idx + 1,
+          });
       } catch (err) {
         return {
           error: `Gagal memproses gambar '${file.name}': ${(err as Error).message}`,
@@ -416,20 +407,18 @@ export async function saveProductAction(formData: FormData) {
   }
 
   // 6. Pastikan tepat satu cover aktif jika produk memiliki gambar
-  const allImages = db
+  const allImages = await db
     .select()
     .from(productImages)
     .where(eq(productImages.productId, targetProductId))
-    .orderBy(productImages.sortOrder)
-    .all();
+    .orderBy(productImages.sortOrder);
 
   if (allImages.length > 0) {
     const hasCover = allImages.some((img) => img.isCover);
     if (!hasCover) {
-      db.update(productImages)
+      await db.update(productImages)
         .set({ isCover: true })
-        .where(eq(productImages.id, allImages[0].id))
-        .run();
+        .where(eq(productImages.id, allImages[0].id));
     }
   }
 

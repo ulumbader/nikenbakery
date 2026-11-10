@@ -2,8 +2,13 @@ import sharp, { type Metadata } from "sharp";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import {
+  getSupabaseAdmin,
+  getSupabaseStorageConfig,
+  isSupabaseStorageConfigured,
+} from "@/lib/supabase-admin";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "avif"]);
 
 export function getUploadDir(): string {
@@ -20,23 +25,16 @@ export interface ProcessedImageResult {
   thumbUrl: string;
 }
 
-/**
- * Validasi dan proses upload gambar ke WebP (large 1200w & thumb 480w).
- * EXIF dibuang otomatis oleh Sharp untuk privasi dan efisiensi.
- */
+/** Convert uploaded images to WebP and persist them to Supabase Storage. */
 export async function processAndSaveImage(
   file: File | Blob
 ): Promise<ProcessedImageResult> {
-  // 1. Cek ukuran file
   if (file.size > MAX_FILE_SIZE) {
     throw new Error("Ukuran file gambar maksimal 5 MB.");
   }
 
-  // 2. Baca isi buffer
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const buffer = Buffer.from(await file.arrayBuffer());
 
-  // 3. Verifikasi isi file lewat Sharp (bukan sekadar ekstensi atau mime type klien)
   let metadata: Metadata;
   try {
     metadata = await sharp(buffer).metadata();
@@ -44,37 +42,82 @@ export async function processAndSaveImage(
     throw new Error("File yang diunggah rusak atau bukan format gambar valid.");
   }
 
-  // Tolak SVG dan format yang tidak diizinkan
   if (!metadata.format || !ALLOWED_FORMATS.has(metadata.format.toLowerCase())) {
     throw new Error(
       "Format gambar harus JPEG, PNG, WebP, atau AVIF. Format SVG tidak diizinkan demi keamanan."
     );
   }
 
-  // 4. Pastikan direktori penyimpanan ada
-  const uploadDir = getUploadDir();
-  await fs.mkdir(uploadDir, { recursive: true });
-
   const fileId = crypto.randomUUID();
   const largeFileName = `${fileId}-1200w.webp`;
   const thumbFileName = `${fileId}-480w.webp`;
+  const [largeBuffer, thumbBuffer] = await Promise.all([
+    sharp(buffer)
+      .rotate()
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer(),
+    sharp(buffer)
+      .rotate()
+      .resize({ width: 480, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer(),
+  ]);
 
-  const largePath = path.join(uploadDir, largeFileName);
-  const thumbPath = path.join(uploadDir, thumbFileName);
+  if (isSupabaseStorageConfigured()) {
+    const config = getSupabaseStorageConfig();
+    if (!config) throw new Error("Konfigurasi Supabase Storage tidak lengkap.");
 
-  // 5. Generate Large (1200px lebar, WebP, EXIF dihapus)
-  await sharp(buffer)
-    .rotate() // Mengikuti orientasi EXIF sebelum di-strip
-    .resize({ width: 1200, withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(largePath);
+    const supabase = getSupabaseAdmin();
+    const largePath = `products/${largeFileName}`;
+    const thumbPath = `products/${thumbFileName}`;
+    const uploadedPaths: string[] = [];
 
-  // 6. Generate Thumbnail (480px lebar, WebP, EXIF dihapus)
-  await sharp(buffer)
-    .rotate()
-    .resize({ width: 480, withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(thumbPath);
+    try {
+      for (const [objectPath, imageBuffer] of [
+        [largePath, largeBuffer],
+        [thumbPath, thumbBuffer],
+      ] as const) {
+        const { error } = await supabase.storage
+          .from(config.bucket)
+          .upload(objectPath, imageBuffer, {
+            cacheControl: "31536000",
+            contentType: "image/webp",
+            upsert: false,
+          });
+
+        if (error) throw error;
+        uploadedPaths.push(objectPath);
+      }
+    } catch (error) {
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from(config.bucket).remove(uploadedPaths);
+      }
+      throw new Error(
+        `Gagal menyimpan gambar ke Supabase Storage: ${error instanceof Error ? error.message : "kesalahan tidak diketahui"}`
+      );
+    }
+
+    const largeUrl = supabase.storage.from(config.bucket).getPublicUrl(largePath)
+      .data.publicUrl;
+    const thumbUrl = supabase.storage.from(config.bucket).getPublicUrl(thumbPath)
+      .data.publicUrl;
+
+    return { largeFileName: largePath, thumbFileName: thumbPath, largeUrl, thumbUrl };
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Supabase Storage harus dikonfigurasi di production; filesystem Vercel tidak persisten."
+    );
+  }
+
+  const uploadDir = getUploadDir();
+  await fs.mkdir(uploadDir, { recursive: true });
+  await Promise.all([
+    fs.writeFile(path.join(uploadDir, largeFileName), largeBuffer),
+    fs.writeFile(path.join(uploadDir, thumbFileName), thumbBuffer),
+  ]);
 
   return {
     largeFileName,
@@ -84,25 +127,43 @@ export async function processAndSaveImage(
   };
 }
 
-/**
- * Hapus file gambar fisik dari direktori upload secara aman.
- */
+/** Delete either a Supabase object URL/key or a legacy local upload. */
 export async function deleteUploadedFile(fileNameOrUrl: string): Promise<void> {
   if (!fileNameOrUrl) return;
 
-  // Bersihkan prefix /media/ jika ada
+  if (/^https?:\/\//i.test(fileNameOrUrl)) {
+    const config = getSupabaseStorageConfig();
+    if (!config) return;
+
+    try {
+      const url = new URL(fileNameOrUrl);
+      const publicPrefix = `/storage/v1/object/public/${config.bucket}/`;
+      if (!url.pathname.includes(publicPrefix)) return;
+
+      const objectPath = decodeURIComponent(url.pathname.split(publicPrefix)[1]);
+      if (!objectPath) return;
+
+      const { error } = await getSupabaseAdmin()
+        .storage.from(config.bucket)
+        .remove([objectPath]);
+      if (error) throw error;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Invalid URL")) return;
+      throw error;
+    }
+    return;
+  }
+
   const cleanName = path.basename(fileNameOrUrl);
   if (!cleanName || cleanName === "." || cleanName === "..") return;
 
   const uploadDir = getUploadDir();
   const filePath = path.join(/*turbopackIgnore: true*/ uploadDir, cleanName);
-
-  // Pastikan tetap berada di dalam uploadDir
   if (!filePath.startsWith(uploadDir)) return;
 
   try {
     await fs.unlink(filePath);
   } catch {
-    // Abaikan jika file sudah tidak ada
+    // Abaikan file lokal lama yang sudah tidak tersedia.
   }
 }

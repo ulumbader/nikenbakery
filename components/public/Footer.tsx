@@ -11,9 +11,11 @@ import {
   IconHeart,
 } from "@/components/ui/Icons";
 
-export function Footer() {
-  const settings = getSettings();
-  const openingHours = getOpeningHours();
+export async function Footer() {
+  const [settings, openingHours] = await Promise.all([
+    getSettings(),
+    getOpeningHours(),
+  ]);
   const currentYear = new Date().getFullYear();
 
   const waLink = buildWhatsAppLink(

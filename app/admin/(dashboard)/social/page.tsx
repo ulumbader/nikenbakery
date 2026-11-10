@@ -12,12 +12,11 @@ export const metadata = {
   title: "Kelola Postingan Sosial | Admin Niken Bakery",
 };
 
-export default function AdminSocialPage() {
-  const allPosts = db
+export default async function AdminSocialPage() {
+  const allPosts = await db
     .select()
     .from(socialPosts)
-    .orderBy(asc(socialPosts.sortOrder))
-    .all();
+    .orderBy(asc(socialPosts.sortOrder));
 
   return (
     <div className="space-y-6">

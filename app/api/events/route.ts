@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { events } from "@/db/schema";
 import { isBotUserAgent } from "@/lib/events";
@@ -78,13 +77,12 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const { type, productId } = parsed.data;
 
-    db.insert(events)
+    await db.insert(events)
       .values({
         type,
         productId: productId ?? null,
-        createdAt: sql`(unixepoch())`,
-      })
-      .run();
+        createdAt: new Date(),
+      });
 
     return new Response(null, { status: 204 });
   } catch {

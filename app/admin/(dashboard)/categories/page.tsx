@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { categories, products } from "@/db/schema";
-import { asc, eq, count } from "drizzle-orm";
+import { asc, count } from "drizzle-orm";
 import { SectionHeading } from "@/components/ui";
 import { CategoryManager, type CategoryWithCount } from "@/components/admin/CategoryManager";
 
@@ -10,20 +10,23 @@ export const metadata = {
   title: "Kelola Kategori",
 };
 
-export default function AdminCategoriesPage() {
-  const allCategories = db
-    .select()
-    .from(categories)
-    .orderBy(asc(categories.sortOrder), asc(categories.name))
-    .all();
+export default async function AdminCategoriesPage() {
+  const [allCategories, productCounts] = await Promise.all([
+    db
+      .select()
+      .from(categories)
+      .orderBy(asc(categories.sortOrder), asc(categories.name)),
+    db
+      .select({ categoryId: products.categoryId, count: count() })
+      .from(products)
+      .groupBy(products.categoryId),
+  ]);
+  const countByCategoryId = new Map(
+    productCounts.map(({ categoryId, count: productCount }) => [categoryId, productCount])
+  );
 
   const categoriesWithCount: CategoryWithCount[] = allCategories.map((cat) => {
-    const productCount =
-      db
-        .select({ count: count() })
-        .from(products)
-        .where(eq(products.categoryId, cat.id))
-        .get()?.count ?? 0;
+    const productCount = countByCategoryId.get(cat.id) ?? 0;
 
     return {
       id: cat.id,

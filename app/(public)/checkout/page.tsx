@@ -33,7 +33,7 @@ export default async function CheckoutPage({
   const slug = getSingleParam(params.product);
   if (!slug) redirect("/menu");
 
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
   if (product.status === "soldout") redirect(`/menu/${product.slug}`);
 
@@ -54,7 +54,7 @@ export default async function CheckoutPage({
     : 1;
   const unitPrice = selectedVariant?.price ?? product.basePrice;
   const subtotal = unitPrice * quantity;
-  const settings = getSettings();
+  const settings = await getSettings();
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:space-y-9 sm:px-6 sm:py-12">

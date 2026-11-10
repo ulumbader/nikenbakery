@@ -1,5 +1,6 @@
-import { eq, sql } from "drizzle-orm";
-import { db } from "../db";
+import { eq } from "drizzle-orm";
+import { db, postgresClient } from "../db";
+import { first } from "../db/first";
 import { adminUsers } from "../db/schema";
 import { hashPassword } from "../lib/auth/password";
 
@@ -27,28 +28,26 @@ async function main() {
   console.log(`🔐 Memproses akun admin '${username}'...`);
 
   const passwordHash = await hashPassword(password);
-  const existing = db
+  const existing = await first(db
     .select()
     .from(adminUsers)
     .where(eq(adminUsers.username, username))
-    .get();
+    .limit(1));
 
   if (existing) {
-    db.update(adminUsers)
+    await db.update(adminUsers)
       .set({
         passwordHash,
-        updatedAt: sql`(unixepoch())`,
+        updatedAt: new Date(),
       })
-      .where(eq(adminUsers.id, existing.id))
-      .run();
+      .where(eq(adminUsers.id, existing.id));
     console.log(`✅ Password untuk admin '${username}' berhasil diperbarui!`);
   } else {
-    db.insert(adminUsers)
+    await db.insert(adminUsers)
       .values({
         username,
         passwordHash,
-      })
-      .run();
+      });
     console.log(`✅ Akun admin '${username}' berhasil dibuat!`);
   }
 }
@@ -56,4 +55,6 @@ async function main() {
 main().catch((err) => {
   console.error("❌ Gagal membuat/memperbarui admin:", err);
   process.exit(1);
+}).finally(async () => {
+  await postgresClient.end();
 });

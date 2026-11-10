@@ -2,8 +2,9 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { eq, asc, sql, count } from "drizzle-orm";
+import { eq, asc, ne, count } from "drizzle-orm";
 import { db } from "@/db";
+import { first } from "@/db/first";
 import { categories, products, COLORS, type TokenColor } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { generateSlug, ensureUniqueSlug } from "@/lib/slug";
@@ -33,11 +34,10 @@ export async function createCategoryAction(
   }
 
   // Hitung sort_order berikutnya
-  const allCats = db
+  const allCats = await db
     .select({ slug: categories.slug, sortOrder: categories.sortOrder })
     .from(categories)
-    .orderBy(asc(categories.sortOrder))
-    .all();
+    .orderBy(asc(categories.sortOrder));
 
   const baseSlug = generateSlug(validation.data.name);
   const existingSlugs = allCats.map((c) => c.slug);
@@ -45,14 +45,13 @@ export async function createCategoryAction(
 
   const maxOrder = allCats.reduce((max, c) => Math.max(max, c.sortOrder), 0);
 
-  db.insert(categories)
+  await db.insert(categories)
     .values({
       name: validation.data.name,
       slug,
       color: validation.data.color,
       sortOrder: maxOrder + 1,
-    })
-    .run();
+    });
 
   revalidatePath("/admin/categories");
   revalidatePath("/menu");
@@ -83,35 +82,33 @@ export async function updateCategoryAction(
     };
   }
 
-  const existing = db
+  const existing = await first(db
     .select()
     .from(categories)
     .where(eq(categories.id, id))
-    .get();
+    .limit(1));
 
   if (!existing) return { error: "Kategori tidak ditemukan" };
 
   let slug = existing.slug;
   if (existing.name !== validation.data.name) {
-    const allSlugs = db
+    const allSlugs = (await db
       .select({ slug: categories.slug })
       .from(categories)
-      .where(sql`${categories.id} != ${id}`)
-      .all()
-      .map((c) => c.slug);
+      .where(ne(categories.id, id))
+    ).map((c) => c.slug);
 
     slug = ensureUniqueSlug(generateSlug(validation.data.name), allSlugs);
   }
 
-  db.update(categories)
+  await db.update(categories)
     .set({
       name: validation.data.name,
       slug,
       color: validation.data.color,
-      updatedAt: sql`(unixepoch())`,
+      updatedAt: new Date(),
     })
-    .where(eq(categories.id, id))
-    .run();
+    .where(eq(categories.id, id));
 
   revalidatePath("/admin/categories");
   revalidatePath("/menu");
@@ -129,11 +126,10 @@ export async function reorderCategoryAction(
 ) {
   await requireAdmin();
 
-  const allCats = db
+  const allCats = await db
     .select()
     .from(categories)
-    .orderBy(asc(categories.sortOrder), asc(categories.name))
-    .all();
+    .orderBy(asc(categories.sortOrder), asc(categories.name));
 
   const currentIndex = allCats.findIndex((c) => c.id === id);
   if (currentIndex === -1) return { error: "Kategori tidak ditemukan" };
@@ -147,15 +143,16 @@ export async function reorderCategoryAction(
   const targetCat = allCats[targetIndex];
 
   // Tukar sortOrder
-  db.update(categories)
-    .set({ sortOrder: targetCat.sortOrder })
-    .where(eq(categories.id, currentCat.id))
-    .run();
-
-  db.update(categories)
-    .set({ sortOrder: currentCat.sortOrder })
-    .where(eq(categories.id, targetCat.id))
-    .run();
+  await Promise.all([
+    db
+      .update(categories)
+      .set({ sortOrder: targetCat.sortOrder })
+      .where(eq(categories.id, currentCat.id)),
+    db
+      .update(categories)
+      .set({ sortOrder: currentCat.sortOrder })
+      .where(eq(categories.id, targetCat.id)),
+  ]);
 
   revalidatePath("/admin/categories");
   revalidatePath("/menu");
@@ -174,11 +171,12 @@ export async function deleteCategoryAction(
   await requireAdmin();
 
   // Hitung jumlah produk yang memakai kategori ini
-  const productUsage = db
+  const productUsageRow = await first(db
     .select({ count: count() })
     .from(products)
     .where(eq(products.categoryId, id))
-    .get()?.count ?? 0;
+    .limit(1));
+  const productUsage = Number(productUsageRow?.count ?? 0);
 
   if (productUsage > 0 && !replacementCategoryId) {
     return {
@@ -190,14 +188,13 @@ export async function deleteCategoryAction(
 
   // Pindahkan produk ke kategori pengganti jika ditentukan
   if (replacementCategoryId) {
-    db.update(products)
+    await db.update(products)
       .set({ categoryId: replacementCategoryId })
-      .where(eq(products.categoryId, id))
-      .run();
+      .where(eq(products.categoryId, id));
   }
 
   // Hapus kategori
-  db.delete(categories).where(eq(categories.id, id)).run();
+  await db.delete(categories).where(eq(categories.id, id));
 
   revalidatePath("/admin/categories");
   revalidatePath("/admin/products");

@@ -19,13 +19,13 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
 
-  const settings = getSettings();
+  const settings = await getSettings();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const description =
     product.description ||
@@ -65,16 +65,19 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
 
-  const settings = getSettings();
+  const settings = await getSettings();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const relatedProducts = listRelatedProducts(product.id, 3);
-  const { cookieHeaderValue } = await recordProductViewServer(product.id);
+  const [relatedProducts, viewResult] = await Promise.all([
+    listRelatedProducts(product.id, 3),
+    recordProductViewServer(product.id),
+  ]);
+  const { cookieHeaderValue } = viewResult;
 
   // Structured Data (JSON-LD) Product Schema
   const productJsonLd = {

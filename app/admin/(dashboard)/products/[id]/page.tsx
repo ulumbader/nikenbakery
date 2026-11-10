@@ -3,6 +3,7 @@ import { eq, asc } from "drizzle-orm";
 import { db } from "@/db";
 import { products, productVariants, productImages, categories } from "@/db/schema";
 import { ProductForm, type ProductFormData } from "@/components/admin/ProductForm";
+import { first } from "@/db/first";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,11 @@ export async function generateMetadata({ params }: PageProps) {
     return { title: "Edit Produk | Admin Niken Bakery" };
   }
 
-  const product = db
+  const product = await first(db
     .select({ name: products.name })
     .from(products)
     .where(eq(products.id, productId))
-    .get();
+    .limit(1));
 
   return {
     title: product ? `Edit ${product.name} | Admin Niken Bakery` : "Edit Produk | Admin Niken Bakery",
@@ -36,38 +37,32 @@ export default async function EditProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const product = db
+  const product = await first(db
     .select()
     .from(products)
     .where(eq(products.id, productId))
-    .get();
+    .limit(1));
 
   if (!product) {
     notFound();
   }
 
-  const variants = db
-    .select()
-    .from(productVariants)
-    .where(eq(productVariants.productId, productId))
-    .orderBy(asc(productVariants.sortOrder))
-    .all();
-
-  const images = db
-    .select()
-    .from(productImages)
-    .where(eq(productImages.productId, productId))
-    .orderBy(asc(productImages.sortOrder))
-    .all();
-
-  const categoryList = db
-    .select({
-      id: categories.id,
-      name: categories.name,
-    })
-    .from(categories)
-    .orderBy(asc(categories.sortOrder), asc(categories.name))
-    .all();
+  const [variants, images, categoryList] = await Promise.all([
+    db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.productId, productId))
+      .orderBy(asc(productVariants.sortOrder)),
+    db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.productId, productId))
+      .orderBy(asc(productImages.sortOrder)),
+    db
+      .select({ id: categories.id, name: categories.name })
+      .from(categories)
+      .orderBy(asc(categories.sortOrder), asc(categories.name)),
+  ]);
 
   const initialProduct: ProductFormData = {
     id: product.id,
