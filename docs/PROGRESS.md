@@ -1,13 +1,13 @@
 # PROGRESS — Dokumen Hidup
 
 > **Agent WAJIB memperbarui file ini di akhir setiap sesi/tahap.** Ini adalah memori proyek antar sesi.
-> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-09.
+> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-10.
 
 ## Posisi saat ini
 
 - **Tahap aktif:** 11 — Deploy & serah terima
 - **Status:** selesai ✅
-- **Kondisi repo:** Tahap 11 deploy tetap selesai. Atas permintaan pengguna, alur pemesanan kini mencakup jumlah pcs, checkout ringkas untuk satu produk, biodata pemesan, dan bill ke WhatsApp. Tidak ada penyimpanan order, keranjang multi-produk, atau pembayaran online. Lihat keputusan D-020.
+- **Kondisi repo:** Tahap 11 deploy tetap selesai. Checkout WhatsApp satu produk tetap berlaku (D-020); tautan marketplace per produk ditambahkan sebagai opsi pembelian langsung yang bisa diatur admin (D-023). Tidak ada keranjang multi-produk, penyimpanan order, atau pembayaran online.
 - **Langkah berikutnya:** serah-terima. Tahap 12 (opsional: form custom order) tetap terpisah.
 
 ## Checklist tahap
@@ -118,6 +118,12 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 
 ## Ringkasan sesi terakhir
 
+- Tambahkan URL HTTPS Shopee, Tokopedia, dan TikTok Shop beserta sakelar aktif terpisah pada data, form admin, dan halaman detail produk.
+- Tombol marketplace hanya muncul untuk kanal yang aktif dan memiliki URL HTTPS valid; migrasi database bersifat additive sehingga semua produk lama tetap nonaktif secara default.
+- Catat keputusan pengguna di D-023 dan selaraskan brief, arsitektur, design system, dan panduan admin.
+- Migrasi lokal `0001_add_product_marketplace_links` berhasil; `npm run lint` dan `npm run build` lulus.
+- Detail dan topbar diperiksa pada 375px dan 1280px tanpa overflow. Data CONTOH belum memiliki tautan marketplace untuk ditampilkan; editor admin terkompilasi, tetapi tidak dibuka dalam sesi browser.
+
 - Lengkapi PWA browser-installable: manifest ikon 192/512, ikon Apple Touch, metadata standalone Apple. Panduan Android/desktop dan iOS ada di README; HTTPS diperlukan untuk domain produksi.
 - Aplikasi tetap online-only; service worker/offline cache tidak ditambahkan.
 - Catat keputusan pengguna di D-022.
@@ -134,6 +140,17 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-10 — Tautan Pembelian Marketplace Per Produk
+- Dikerjakan:
+  1. Tambahkan tiga URL opsional dan sakelar aktif terpisah untuk Shopee, Tokopedia, dan TikTok Shop.
+  2. Admin dapat mengedit tautan dan visibilitas dari form produk; Zod memvalidasi URL HTTPS dan mensyaratkan tautan sebelum kanal diaktifkan.
+  3. Halaman detail hanya menampilkan tombol kanal aktif dengan tautan HTTPS; setiap tautan dibuka di tab baru dengan `noopener noreferrer`.
+  4. Buat dan terapkan migrasi additive agar produk lama tetap tidak menampilkan tombol sampai admin mengaturnya.
+- Keputusan: D-023.
+- File penting: `db/schema.ts`, `db/migrations/0001_add_product_marketplace_links.sql`, `actions/products.ts`, `components/admin/ProductForm.tsx`, `components/public/ProductDetailClient.tsx`, `docs/`.
+- Cara verifikasi: `npm run db:migrate` ✅, `npm run lint` ✅, `npm run build` ✅; detail diperiksa pada 375px dan 1280px, topbar tetap tampil, tanpa overflow horizontal.
+- Catatan: sampel produk CONTOH belum memiliki link marketplace sehingga tombolnya belum tampak sampai admin mengisi tautan dan mengaktifkan kanal.
 
 ### 2026-11-09 — Dukungan Instalasi Browser (PWA)
 - Dikerjakan:

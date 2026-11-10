@@ -122,6 +122,46 @@ const productFormSchema = z.object({
   allergens: z.string().trim().nullable().optional(),
   isFeatured: z.boolean().default(false),
   isPublished: z.boolean().default(true),
+  shopeeUrl: z
+    .string()
+    .trim()
+    .url("Masukkan tautan Shopee yang valid.")
+    .refine((url) => url.toLowerCase().startsWith("https://"), "Tautan Shopee harus menggunakan HTTPS.")
+    .or(z.literal(""))
+    .transform((url) => url || null),
+  shopeeEnabled: z.boolean(),
+  tokopediaUrl: z
+    .string()
+    .trim()
+    .url("Masukkan tautan Tokopedia yang valid.")
+    .refine((url) => url.toLowerCase().startsWith("https://"), "Tautan Tokopedia harus menggunakan HTTPS.")
+    .or(z.literal(""))
+    .transform((url) => url || null),
+  tokopediaEnabled: z.boolean(),
+  tiktokShopUrl: z
+    .string()
+    .trim()
+    .url("Masukkan tautan TikTok Shop yang valid.")
+    .refine((url) => url.toLowerCase().startsWith("https://"), "Tautan TikTok Shop harus menggunakan HTTPS.")
+    .or(z.literal(""))
+    .transform((url) => url || null),
+  tiktokShopEnabled: z.boolean(),
+}).superRefine((data, ctx) => {
+  const marketplaces = [
+    { name: "Shopee", enabled: data.shopeeEnabled, url: data.shopeeUrl, field: "shopeeUrl" },
+    { name: "Tokopedia", enabled: data.tokopediaEnabled, url: data.tokopediaUrl, field: "tokopediaUrl" },
+    { name: "TikTok Shop", enabled: data.tiktokShopEnabled, url: data.tiktokShopUrl, field: "tiktokShopUrl" },
+  ] as const;
+
+  for (const marketplace of marketplaces) {
+    if (marketplace.enabled && !marketplace.url) {
+      ctx.addIssue({
+        code: "custom",
+        path: [marketplace.field],
+        message: `Tambahkan tautan ${marketplace.name} sebelum mengaktifkan tombolnya.`,
+      });
+    }
+  }
 });
 
 /**
@@ -148,6 +188,12 @@ export async function saveProductAction(formData: FormData) {
     allergens: formData.get("allergens")?.toString() || null,
     isFeatured: formData.get("isFeatured") === "true",
     isPublished: formData.get("isPublished") === "true",
+    shopeeUrl: formData.get("shopeeUrl")?.toString() ?? "",
+    shopeeEnabled: formData.get("shopeeEnabled") === "true",
+    tokopediaUrl: formData.get("tokopediaUrl")?.toString() ?? "",
+    tokopediaEnabled: formData.get("tokopediaEnabled") === "true",
+    tiktokShopUrl: formData.get("tiktokShopUrl")?.toString() ?? "",
+    tiktokShopEnabled: formData.get("tiktokShopEnabled") === "true",
   };
 
   const validation = productFormSchema.safeParse(rawData);
@@ -187,6 +233,12 @@ export async function saveProductAction(formData: FormData) {
         allergens: data.allergens,
         isFeatured: data.isFeatured,
         isPublished: data.isPublished,
+        shopeeUrl: data.shopeeUrl,
+        shopeeEnabled: data.shopeeEnabled,
+        tokopediaUrl: data.tokopediaUrl,
+        tokopediaEnabled: data.tokopediaEnabled,
+        tiktokShopUrl: data.tiktokShopUrl,
+        tiktokShopEnabled: data.tiktokShopEnabled,
         updatedAt: sql`(unixepoch())`,
       })
       .where(eq(products.id, targetProductId))
@@ -207,6 +259,12 @@ export async function saveProductAction(formData: FormData) {
         allergens: data.allergens,
         isFeatured: data.isFeatured,
         isPublished: data.isPublished,
+        shopeeUrl: data.shopeeUrl,
+        shopeeEnabled: data.shopeeEnabled,
+        tokopediaUrl: data.tokopediaUrl,
+        tokopediaEnabled: data.tokopediaEnabled,
+        tiktokShopUrl: data.tiktokShopUrl,
+        tiktokShopEnabled: data.tiktokShopEnabled,
       })
       .returning({ id: products.id })
       .get();

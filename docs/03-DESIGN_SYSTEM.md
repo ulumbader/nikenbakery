@@ -115,7 +115,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 800; line-height: 1.
 | Cara Pesan | Langkah bernomor (urutan nyata), kartu solid |
 | Testimoni | Kartu solid dengan warna berselang-seling dan rotasi kecil |
 | Social | Grid kartu solid; boleh kolom bergaya masonry |
-| Detail produk | Galeri berborder; panel ringkasan harga + CTA sebagai glass sticky di bawah pada mobile (1 elemen glass) |
+| Detail produk | Galeri berborder; panel ringkasan harga + CTA sebagai glass sticky di bawah pada mobile (1 elemen glass); tombol marketplace neo-brutal tampil hanya untuk kanal aktif |
 | Footer | Blok warna solid besar |
 | Admin | Neo-brutal bersih: putih, border tegas, tanpa glass, padat dan cepat dipakai |
 

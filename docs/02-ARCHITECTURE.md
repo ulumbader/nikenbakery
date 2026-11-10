@@ -102,6 +102,9 @@ export const products = sqliteTable("products", {
   allergens: text("allergens"),
   isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
   isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
+  shopeeUrl: text("shopee_url"), shopeeEnabled: integer("shopee_enabled", { mode: "boolean" }).notNull().default(false),
+  tokopediaUrl: text("tokopedia_url"), tokopediaEnabled: integer("tokopedia_enabled", { mode: "boolean" }).notNull().default(false),
+  tiktokShopUrl: text("tiktok_shop_url"), tiktokShopEnabled: integer("tiktok_shop_enabled", { mode: "boolean" }).notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   ...ts,
 }, (t) => [index("products_category_idx").on(t.categoryId)]);
@@ -210,6 +213,7 @@ Akses lewat `getSettings()` yang mengembalikan objek bertipe dengan default aman
 - Upload: hanya JPEG/PNG/WebP/AVIF, maksimal 5 MB, verifikasi isi file lewat `sharp`, selalu re-encode (membuang EXIF). SVG ditolak.
 - Semua input admin divalidasi zod di server. Escape output (React sudah default); jangan memakai `dangerouslySetInnerHTML` untuk konten admin.
 - Link eksternal: `target="_blank"` selalu dengan `rel="noopener noreferrer"`.
+- Tautan marketplace produk divalidasi sebagai URL HTTPS di server. Tombol publik hanya tampil saat tautan tersedia dan kanal diaktifkan admin.
 - `/admin` dan `/media` di-`noindex`/disallow di robots untuk admin.
 - Event analitik tidak menyimpan IP atau data pribadi.
 

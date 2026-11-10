@@ -23,6 +23,7 @@ Hero (heading besar, tagline, tombol "Pesan via WhatsApp" dan "Lihat menu") · s
 ### Menu (`/menu`, `/menu/[slug]`)
 - **Daftar**: grid kartu (foto, nama, harga "Mulai dari", badge status), filter kategori (pill), pencarian, empty state.
 - **Detail**: galeri foto, harga mengikuti varian terpilih, pilihan varian, jumlah pcs, status dan lead time pre-order, deskripsi, bahan dan alergen, tombol **Pesan via WhatsApp** menuju checkout, tombol bagikan, produk terkait.
+- Detail produk dapat menampilkan tombol pembelian Shopee, Tokopedia, dan TikTok Shop. Setiap kanal memiliki tautan dan sakelar aktif sendiri di admin; tombol hanya tampil jika aktif dan tautannya valid.
 
 ### Checkout (`/checkout`)
 - Checkout hanya memuat satu produk dari detail yang dipilih; harga dan varian diverifikasi ulang dari katalog.

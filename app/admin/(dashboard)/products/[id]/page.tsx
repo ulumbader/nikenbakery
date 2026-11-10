@@ -82,6 +82,12 @@ export default async function EditProductPage({ params }: PageProps) {
     allergens: product.allergens,
     isFeatured: Boolean(product.isFeatured),
     isPublished: Boolean(product.isPublished),
+    shopeeUrl: product.shopeeUrl,
+    shopeeEnabled: product.shopeeEnabled,
+    tokopediaUrl: product.tokopediaUrl,
+    tokopediaEnabled: product.tokopediaEnabled,
+    tiktokShopUrl: product.tiktokShopUrl,
+    tiktokShopEnabled: product.tiktokShopEnabled,
     variants: variants.map((v) => ({
       id: v.id,
       label: v.label,

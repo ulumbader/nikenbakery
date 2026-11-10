@@ -52,6 +52,12 @@ export interface ProductFormData {
   allergens?: string | null;
   isFeatured: boolean;
   isPublished: boolean;
+  shopeeUrl?: string | null;
+  shopeeEnabled?: boolean;
+  tokopediaUrl?: string | null;
+  tokopediaEnabled?: boolean;
+  tiktokShopUrl?: string | null;
+  tiktokShopEnabled?: boolean;
   variants: ProductVariantItem[];
   images: ExistingImage[];
 }
@@ -96,6 +102,22 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
   );
   const [isPublished, setIsPublished] = useState(
     initialProduct?.isPublished ?? true
+  );
+  const [shopeeUrl, setShopeeUrl] = useState(initialProduct?.shopeeUrl ?? "");
+  const [shopeeEnabled, setShopeeEnabled] = useState(
+    initialProduct?.shopeeEnabled ?? false
+  );
+  const [tokopediaUrl, setTokopediaUrl] = useState(
+    initialProduct?.tokopediaUrl ?? ""
+  );
+  const [tokopediaEnabled, setTokopediaEnabled] = useState(
+    initialProduct?.tokopediaEnabled ?? false
+  );
+  const [tiktokShopUrl, setTiktokShopUrl] = useState(
+    initialProduct?.tiktokShopUrl ?? ""
+  );
+  const [tiktokShopEnabled, setTiktokShopEnabled] = useState(
+    initialProduct?.tiktokShopEnabled ?? false
   );
 
   // Variants state
@@ -234,6 +256,12 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
       formData.set("allergens", allergens);
       formData.set("isFeatured", isFeatured ? "true" : "false");
       formData.set("isPublished", isPublished ? "true" : "false");
+      formData.set("shopeeUrl", shopeeUrl);
+      formData.set("shopeeEnabled", shopeeEnabled ? "true" : "false");
+      formData.set("tokopediaUrl", tokopediaUrl);
+      formData.set("tokopediaEnabled", tokopediaEnabled ? "true" : "false");
+      formData.set("tiktokShopUrl", tiktokShopUrl);
+      formData.set("tiktokShopEnabled", tiktokShopEnabled ? "true" : "false");
 
       // Varian JSON
       formData.set("variants", JSON.stringify(variants));
@@ -626,7 +654,82 @@ export function ProductForm({ initialProduct, categories }: ProductFormProps) {
         </div>
       </div>
 
-      {/* ─── 5. PENGATURAN VISIBILITAS ─── */}
+      {/* ─── 5. TAUTAN MARKETPLACE ─── */}
+      <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
+        <div className="pb-3 border-b-2 border-ink/10">
+          <h2 className="text-lg font-extrabold">Tautan Marketplace</h2>
+          <p className="text-xs text-ink/70 mt-1">
+            Isi tautan produk lalu aktifkan kanal yang ingin ditampilkan di halaman detail. Tautan wajib menggunakan HTTPS.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3 rounded-[10px] border-2 border-ink/15 p-3">
+            <Input
+              id="prod-shopee-url"
+              type="url"
+              label="Link Shopee"
+              placeholder="https://shopee.co.id/..."
+              value={shopeeUrl}
+              onChange={(event) => setShopeeUrl(event.target.value)}
+            />
+            <label htmlFor="prod-shopee-enabled" className="flex min-h-11 items-center gap-2 font-bold text-sm cursor-pointer">
+              <input
+                id="prod-shopee-enabled"
+                type="checkbox"
+                checked={shopeeEnabled}
+                onChange={(event) => setShopeeEnabled(event.target.checked)}
+                className="w-5 h-5 rounded border-2 border-ink text-mint focus:ring-ink"
+              />
+              Tampilkan tombol Shopee
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3 rounded-[10px] border-2 border-ink/15 p-3">
+            <Input
+              id="prod-tokopedia-url"
+              type="url"
+              label="Link Tokopedia"
+              placeholder="https://www.tokopedia.com/..."
+              value={tokopediaUrl}
+              onChange={(event) => setTokopediaUrl(event.target.value)}
+            />
+            <label htmlFor="prod-tokopedia-enabled" className="flex min-h-11 items-center gap-2 font-bold text-sm cursor-pointer">
+              <input
+                id="prod-tokopedia-enabled"
+                type="checkbox"
+                checked={tokopediaEnabled}
+                onChange={(event) => setTokopediaEnabled(event.target.checked)}
+                className="w-5 h-5 rounded border-2 border-ink text-mint focus:ring-ink"
+              />
+              Tampilkan tombol Tokopedia
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-end gap-3 rounded-[10px] border-2 border-ink/15 p-3">
+            <Input
+              id="prod-tiktok-shop-url"
+              type="url"
+              label="Link TikTok Shop"
+              placeholder="https://www.tiktok.com/..."
+              value={tiktokShopUrl}
+              onChange={(event) => setTiktokShopUrl(event.target.value)}
+            />
+            <label htmlFor="prod-tiktok-shop-enabled" className="flex min-h-11 items-center gap-2 font-bold text-sm cursor-pointer">
+              <input
+                id="prod-tiktok-shop-enabled"
+                type="checkbox"
+                checked={tiktokShopEnabled}
+                onChange={(event) => setTiktokShopEnabled(event.target.checked)}
+                className="w-5 h-5 rounded border-2 border-ink text-mint focus:ring-ink"
+              />
+              Tampilkan tombol TikTok Shop
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 6. PENGATURAN VISIBILITAS ─── */}
       <div className="bg-white border-3 border-ink rounded-[14px] p-5 md:p-6 shadow-[var(--shadow-brutal)] space-y-4">
         <h2 className="text-lg font-extrabold pb-3 border-b-2 border-ink/10 flex items-center gap-2">
           <IconEye className="w-5 h-5 text-ink flex-shrink-0" />

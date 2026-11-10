@@ -19,6 +19,12 @@ export type ProductDetailData = {
   preorderNote?: string | null;
   ingredients?: string | null;
   allergens?: string | null;
+  shopeeUrl?: string | null;
+  shopeeEnabled: boolean;
+  tokopediaUrl?: string | null;
+  tokopediaEnabled: boolean;
+  tiktokShopUrl?: string | null;
+  tiktokShopEnabled: boolean;
   category?: {
     id: number;
     name: string;
@@ -45,6 +51,16 @@ interface ProductDetailClientProps {
   product: ProductDetailData;
   whatsappNumber: string;
   newViewCookie?: string;
+}
+
+function isSecureMarketplaceUrl(url: string | null | undefined): url is string {
+  if (!url) return false;
+
+  try {
+    return new URL(url).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 export function ProductDetailClient({
@@ -99,6 +115,36 @@ export function ProductDetailClient({
 
   const buttonLabel = isSoldOut ? "Tanya via WhatsApp" : "Pesan via WhatsApp";
   const buttonVariant = isSoldOut ? "ghost" : "wa";
+
+  const marketplaceCandidates: Array<{
+    name: string;
+    url: string | null | undefined;
+    enabled: boolean;
+    accent: string;
+  }> = [
+    {
+      name: "Shopee",
+      url: product.shopeeUrl,
+      enabled: product.shopeeEnabled,
+      accent: "bg-[#EE4D2D] text-white",
+    },
+    {
+      name: "Tokopedia",
+      url: product.tokopediaUrl,
+      enabled: product.tokopediaEnabled,
+      accent: "bg-[#B7F3C8] text-ink",
+    },
+    {
+      name: "TikTok Shop",
+      url: product.tiktokShopUrl,
+      enabled: product.tiktokShopEnabled,
+      accent: "bg-ink text-white",
+    },
+  ];
+  const marketplaceLinks = marketplaceCandidates.filter(
+    (marketplace): marketplace is typeof marketplace & { url: string } =>
+      marketplace.enabled && isSecureMarketplaceUrl(marketplace.url)
+  );
 
   // Share handler
   async function handleShare() {
@@ -346,6 +392,36 @@ export function ProductDetailClient({
               <IconCheck className="w-4 h-4 text-ink" />
               <span>Tautan kue berhasil disalin ke clipboard!</span>
             </div>
+          )}
+
+          {marketplaceLinks.length > 0 && (
+            <section aria-labelledby="marketplace-heading" className="space-y-2">
+              <h2 id="marketplace-heading" className="text-sm font-extrabold">
+                Beli lewat marketplace
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {marketplaceLinks.map((marketplace) => (
+                  <a
+                    key={marketplace.name}
+                    href={marketplace.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Beli ${product.name} di ${marketplace.name} (buka tab baru)`}
+                    className="min-h-11 flex items-center justify-between gap-2 rounded-[8px] border-3 border-ink bg-white px-3 py-2 text-sm font-extrabold shadow-[var(--shadow-brutal-sm)] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-none focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ink focus-visible:ring-offset-2"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden="true" className={`grid h-7 w-7 place-items-center rounded-full border-2 border-ink text-[10px] ${marketplace.accent}`}>
+                        {marketplace.name === "TikTok Shop" ? "T" : marketplace.name[0]}
+                      </span>
+                      Beli di {marketplace.name}
+                    </span>
+                    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-4 w-4 shrink-0">
+                      <path d="M11 3h6v6M17 3l-8 8M15 11v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* Deskripsi & Keterangan Bahan */}

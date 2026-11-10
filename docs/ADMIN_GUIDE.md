@@ -43,6 +43,7 @@ Panduan ini disusun khusus untuk pemilik dan staf toko agar dapat memperbarui ka
    - **Varian & Harga**:
      - Masukkan nama varian (misal: *Ukuran 20x10 cm* atau *Box Isi 6*) beserta harganya (masukkan angka saja, contoh: `65000`).
      - Jika kue punya lebih dari satu ukuran, klik tombol **"+ Tambah Varian"**.
+   - **Tautan Marketplace** (opsional): tempel tautan HTTPS produk di Shopee, Tokopedia, atau TikTok Shop. Aktifkan kotak **"Tampilkan tombol ..."** untuk setiap kanal yang ingin ditampilkan. Kanal yang dimatikan tetap menyimpan tautannya, tetapi tombolnya tidak terlihat di halaman produk.
 4. Centang kotak **"Publikasikan produk sekarang"** agar kue langsung tampil di website.
 5. Centang **"Jadikan produk andalan"** jika ingin kue ini muncul di halaman depan (Home).
 6. Klik tombol hijau **"Simpan Produk"**. Kue baru Anda langsung tampil di menu website!
@@ -54,7 +55,7 @@ Panduan ini disusun khusus untuk pemilik dan staf toko agar dapat memperbarui ka
 1. Buka menu **"Produk"**.
 2. Cari kue yang ingin diubah pada daftar produk.
 3. Klik tombol **"Edit"** (ikon pensil) di samping nama kue tersebut.
-4. Ubah informasi yang diinginkan (nama, deskripsi, harga varian, atau unggah foto baru).
+4. Ubah informasi yang diinginkan (nama, deskripsi, harga varian, tautan dan status marketplace, atau unggah foto baru).
 5. Klik tombol hijau **"Perbarui Produk"** di bagian bawah untuk menyimpan perubahan.
 
 ---

@@ -56,6 +56,18 @@ export const products = sqliteTable(
     isPublished: integer("is_published", { mode: "boolean" })
       .notNull()
       .default(true),
+    shopeeUrl: text("shopee_url"),
+    shopeeEnabled: integer("shopee_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    tokopediaUrl: text("tokopedia_url"),
+    tokopediaEnabled: integer("tokopedia_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    tiktokShopUrl: text("tiktok_shop_url"),
+    tiktokShopEnabled: integer("tiktok_shop_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
     sortOrder: integer("sort_order").notNull().default(0),
     ...ts,
   },
