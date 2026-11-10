@@ -6,9 +6,9 @@
 ## Posisi saat ini
 
 - **Tahap aktif:** 11 — Deploy & serah terima (selesai); adaptasi hosting berdasarkan permintaan pengguna
-- **Status:** kode Vercel + Supabase selesai ✅; migrasi data produksi menunggu konfigurasi/kredensial Supabase pemilik
-- **Kondisi repo:** Aplikasi memakai Supabase PostgreSQL untuk runtime dan Supabase Storage untuk gambar produksi (D-024). Migrator SQL dan importer SQLite → Supabase tersedia; file data lokal tidak disentuh. Checkout satu produk melalui WhatsApp tetap berlaku (D-020), dan marketplace per produk tetap tersedia (D-023).
-- **Langkah berikutnya:** isi environment Supabase, jalankan migrasi schema, import data lokal bila diperlukan, lalu set environment Vercel dan deploy. Tahap 12 (opsional: form custom order) tetap terpisah.
+- **Status:** Seluruh 35 commit lokal (termasuk migrasi Supabase PostgreSQL & Storage untuk Vercel) telah berhasil di-push ke GitHub remote `origin/master` ✅
+- **Kondisi repo:** Branch `master` tersinkronisasi bersih dengan `origin/master`. Linting dan build produksi Next.js lulus tanpa kendala.
+- **Langkah berikutnya:** Pastikan environment variables Supabase terpasang di Vercel Dashboard (`DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`, `SESSION_SECRET`, `NEXT_PUBLIC_SITE_URL`), jalankan migrasi schema Supabase via `npm run db:migrate`, dan verifikasi deployment di Vercel.
 
 ## Checklist tahap
 
@@ -140,6 +140,15 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-10 — Push Repository untuk Deployment Vercel
+- Dikerjakan:
+  1. Jalankan pra-pemeriksaan build produksi (`npm run lint` dan `npm run build`), seluruhnya lulus tanpa error/warning.
+  2. Melakukan sinkronisasi dan push 35 commit lokal ke remote GitHub `https://github.com/ulumbader/nikenbakery.git` pada branch `master`.
+  3. Memastikan repository lokal bersih dan sinkron dengan `origin/master`.
+  4. Menyusun panduan langkah konfigurasi Environment Variables Vercel + Supabase untuk penyelesaian deployment.
+- Verifikasi: `git push origin master` ✅, `git status` clean ✅, `npm run build` ✅.
+- Berikutnya: Hubungkan repository ke project Vercel (atau tunggu auto-deploy jika sudah terhubung), masukkan konfigurasi Environment Variables Supabase di dashboard Vercel, dan jalankan `npm run db:migrate`.
 
 ### 2026-11-10 — Adaptasi Vercel + Supabase
 - Dikerjakan:
