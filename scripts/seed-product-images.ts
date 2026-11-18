@@ -1,11 +1,10 @@
-import { db } from "../db";
 import { products, productImages } from "../db/schema";
 import sharp from "sharp";
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
-
-const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || path.join(process.cwd(), "data", "uploads"));
+import { db, sqlClient } from "../db";
+import { uploadMediaObject } from "../lib/supabase-admin";
 
 interface ProductImagePlan {
   productSlug: string;
@@ -260,43 +259,41 @@ const imagePlans: ProductImagePlan[] = [
   },
 ];
 
-async function processImageBuffer(buffer: Buffer): Promise<{ largeFileName: string; thumbFileName: string }> {
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-
+async function processImageBuffer(buffer: Buffer): Promise<{ largeUrl: string; thumbUrl: string }> {
   const fileId = crypto.randomUUID();
   const largeFileName = `${fileId}-1200w.webp`;
   const thumbFileName = `${fileId}-480w.webp`;
 
-  const largePath = path.join(UPLOAD_DIR, largeFileName);
-  const thumbPath = path.join(UPLOAD_DIR, thumbFileName);
-
-  await sharp(buffer)
+  const [largeBuffer, thumbBuffer] = await Promise.all([
+    sharp(buffer)
     .rotate()
     .resize({ width: 1200, withoutEnlargement: true })
     .webp({ quality: 80 })
-    .toFile(largePath);
-
-  await sharp(buffer)
+    .toBuffer(),
+    sharp(buffer)
     .rotate()
     .resize({ width: 480, withoutEnlargement: true })
     .webp({ quality: 80 })
-    .toFile(thumbPath);
+    .toBuffer(),
+  ]);
 
-  return { largeFileName, thumbFileName };
+  const largeUrl = await uploadMediaObject(largeFileName, largeBuffer);
+  const thumbUrl = await uploadMediaObject(thumbFileName, thumbBuffer);
+  return { largeUrl, thumbUrl };
 }
 
 async function main() {
   console.log("🚀 Menyiapkan pembaruan foto produk (2 foto per menu, product style)...");
-  console.log(`📁 Upload Dir: ${UPLOAD_DIR}`);
+  console.log("📁 Target: Supabase Storage");
 
   // 1. Ambil semua produk dari DB
-  const allProducts = db.select().from(products).all();
+  const allProducts = await db.select().from(products);
   const productMap = new Map(allProducts.map((p) => [p.slug, p]));
 
   // 2. Bersihkan tabel productImages saat ini
-  const oldImages = db.select().from(productImages).all();
+  const oldImages = await db.select().from(productImages);
   console.log(`🗑️ Menghapus ${oldImages.length} data foto lama dari database...`);
-  db.delete(productImages).run();
+  await db.delete(productImages);
 
   // 3. Proses setiap item menu
   for (const plan of imagePlans) {
@@ -325,29 +322,30 @@ async function main() {
         buffer = Buffer.from(ab);
       }
 
-      const { largeFileName, thumbFileName } = await processImageBuffer(buffer);
+      const { largeUrl, thumbUrl } = await processImageBuffer(buffer);
 
-      db.insert(productImages)
+      await db.insert(productImages)
         .values({
           productId: product.id,
-          fileName: `/media/${largeFileName}`,
-          thumbName: `/media/${thumbFileName}`,
+          fileName: largeUrl,
+          thumbName: thumbUrl,
           alt: imgConfig.alt,
           isCover: imgConfig.isCover,
           sortOrder,
-        })
-        .run();
+        });
 
-      console.log(`  ✓ Tersimpan: /media/${thumbFileName} (Cover: ${imgConfig.isCover})`);
+      console.log(`  ✓ Tersimpan di Supabase Storage (Cover: ${imgConfig.isCover})`);
       sortOrder++;
     }
   }
 
-  const finalCount = db.select().from(productImages).all().length;
+  const finalCount = (await db.select().from(productImages)).length;
   console.log(`\n🎉 Selesai! Total ${finalCount} foto produk berhasil disimpan dan aktif di katalog.`);
 }
 
-main().catch((err) => {
+main().catch((err: unknown) => {
   console.error("❌ Error saat memperbarui foto produk:", err);
-  process.exit(1);
+  process.exitCode = 1;
+}).finally(async () => {
+  await sqlClient.end();
 });

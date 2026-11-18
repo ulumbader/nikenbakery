@@ -9,12 +9,11 @@ export const metadata = {
   title: "Kelola Tanya Jawab (FAQ) | Admin Niken Bakery",
 };
 
-export default function AdminFaqsPage() {
-  const allFaqs = db
+export default async function AdminFaqsPage() {
+  const allFaqs = await db
     .select()
     .from(faqs)
-    .orderBy(asc(faqs.sortOrder))
-    .all();
+    .orderBy(asc(faqs.sortOrder));
 
   return (
     <div className="space-y-6">

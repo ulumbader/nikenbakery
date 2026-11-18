@@ -24,7 +24,7 @@ Titik masuk utama untuk semua AI agent (Claude Code, Codex, Cursor, Copilot, Gem
 
 ## 2. Stack (terkunci)
 
-Next.js (App Router, TypeScript) · Tailwind CSS · SQLite + Drizzle ORM (`better-sqlite3`) · zod · `jose` + `bcryptjs` (auth admin) · `sharp` (kompres gambar ke WebP).
+Next.js (App Router, TypeScript) · Tailwind CSS · Supabase PostgreSQL + Drizzle ORM (`pg`) · Supabase Storage · zod · `jose` + `bcryptjs` (auth admin) · `sharp` (kompres gambar ke WebP).
 
 - Versi sebenarnya ada di `package.json`. **Jangan mengandalkan memori untuk API Next.js.** Versi baru punya breaking change (mis. `params` dan `searchParams` berupa Promise, perubahan caching, `middleware.ts` vs `proxy.ts`). Bila ragu, cek dokumentasi resmi sesuai versi terpasang.
 - Dependency baru di luar daftar ini harus dicatat di `docs/DECISIONS.md`. Pilih paket yang aktif dipelihara.
@@ -58,7 +58,8 @@ Jika kamu tidak bisa melihat tampilan (tanpa browser atau screenshot), **jangan 
 - Server Component adalah default. `"use client"` hanya untuk interaktivitas yang memang butuh.
 - Mutasi data lewat Server Action (atau route handler) dengan **validasi zod di server**.
 - **Setiap** action/route admin wajib memanggil `requireAdmin()`. Jangan hanya mengandalkan middleware/proxy atau layout.
-- Akses database hanya lewat `src/db/`. Komponen UI tidak boleh mengimpor `drizzle-orm` atau `better-sqlite3` langsung (memudahkan migrasi ke Turso/Postgres).
+- Akses database hanya lewat `db/`. Komponen UI tidak boleh mengimpor `drizzle-orm` atau driver database langsung.
+- `SUPABASE_SERVICE_ROLE_KEY` hanya boleh dipakai pada kode server dan tidak boleh diawali `NEXT_PUBLIC_`.
 - Harga disimpan sebagai integer Rupiah; tampilkan dengan `formatRupiah()`.
 - Teks UI dan konten: Bahasa Indonesia. Nama kode, tabel, kolom, variabel: Bahasa Inggris.
 - Jangan hardcode nomor WA, alamat, jam buka, atau sosmed di komponen. Ambil dari `site_settings`.

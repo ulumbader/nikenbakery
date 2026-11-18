@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { siteSettings } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -105,7 +105,7 @@ export async function updateSettingsAction(_prevState: unknown, formData: FormDa
   // 8. Upload Foto About jika ada
   const removeAboutImage = formData.get("remove_about_image") === "true";
   if (removeAboutImage) {
-    const current = db.select().from(siteSettings).where(eq(siteSettings.key, "about_image")).get();
+    const [current] = await db.select().from(siteSettings).where(eq(siteSettings.key, "about_image")).limit(1);
     if (current?.value) {
       await deleteUploadedFile(current.value);
     }
@@ -116,7 +116,7 @@ export async function updateSettingsAction(_prevState: unknown, formData: FormDa
   if (aboutImageFile && aboutImageFile.size > 0 && aboutImageFile.name !== "undefined") {
     try {
       const uploadRes = await processAndSaveImage(aboutImageFile);
-      const current = db.select().from(siteSettings).where(eq(siteSettings.key, "about_image")).get();
+      const [current] = await db.select().from(siteSettings).where(eq(siteSettings.key, "about_image")).limit(1);
       if (current?.value) {
         await deleteUploadedFile(current.value);
       }
@@ -128,20 +128,20 @@ export async function updateSettingsAction(_prevState: unknown, formData: FormDa
 
   // Tulis semua update ke DB
   for (const [key, value] of Object.entries(updates)) {
-    db.insert(siteSettings)
+    await db.insert(siteSettings)
       .values({
         key,
         value,
-        updatedAt: sql`(unixepoch())`,
+        updatedAt: new Date(),
       })
       .onConflictDoUpdate({
         target: siteSettings.key,
         set: {
           value,
-          updatedAt: sql`(unixepoch())`,
+          updatedAt: new Date(),
         },
       })
-      .run();
+      ;
   }
 
   // Revalidasi seluruh rute publik terkait

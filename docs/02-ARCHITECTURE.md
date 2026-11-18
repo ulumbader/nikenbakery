@@ -1,6 +1,6 @@
 # 02 — Architecture
 
-Notasi path memakai `src/`. Jika proyek tidak memakai `src/`, sesuaikan secara konsisten dan catat di `DECISIONS.md` (tahap 01).
+Proyek tidak memakai direktori `src/`; folder `app/`, `db/`, `lib/`, dan lainnya berada langsung di root.
 
 ## Stack
 
@@ -8,10 +8,10 @@ Notasi path memakai `src/`. Jika proyek tidak memakai `src/`, sesuaikan secara k
 |---|---|
 | Framework | Next.js App Router, TypeScript strict |
 | Styling | Tailwind CSS (cek versi: v4 memakai `@theme` di CSS, v3 memakai `tailwind.config`) |
-| Database | SQLite (file `data/nikenbakery.db`), Drizzle ORM, `better-sqlite3`, WAL mode, `foreign_keys = ON` |
+| Database | Supabase PostgreSQL, Drizzle ORM, `pg` connection pool (max 1 per serverless instance), SSL |
 | Validasi | zod |
 | Auth admin | `jose` (JWT HS256) + `bcryptjs`, cookie httpOnly |
-| Gambar | `sharp` (WebP) |
+| Gambar | `sharp` (WebP) + Supabase Storage (`nikenbakery-media`) |
 | Script TS | `tsx` |
 
 ## Struktur folder (target)
@@ -34,7 +34,7 @@ src/
         page.tsx            # ringkasan
         products/ (page, new, [id])
         categories/ banners/ testimonials/ social/ faqs/ settings/
-    media/[...path]/route.ts  # sajikan file upload
+    media/[...path]/route.ts  # kompatibilitas file lokal lama
     api/health/route.ts
     styleguide/page.tsx       # hanya development
     sitemap.ts  robots.ts  not-found.tsx  error.tsx
@@ -50,7 +50,7 @@ src/
     format.ts       # formatRupiah, formatDate
     whatsapp.ts     # normalizePhone, buildWhatsAppLink, template pesan
     auth/           # password.ts, session.ts, require-admin.ts
-    upload.ts       # validasi + sharp + simpan/hapus file
+    upload.ts       # validasi + sharp + simpan/hapus objek Storage
     slug.ts  settings.ts  hours.ts
 data/                       # di-gitignore: nikenbakery.db, uploads/
 scripts/                    # backup, admin:create
@@ -58,143 +58,14 @@ scripts/                    # backup, admin:create
 
 ## Environment variables
 
-Lihat `.env.example`: `DB_PATH`, `UPLOAD_DIR`, `SESSION_SECRET` (≥ 32 karakter), `NEXT_PUBLIC_SITE_URL`, `ADMIN_USERNAME`/`ADMIN_PASSWORD` (hanya untuk script `admin:create`).
+- `DATABASE_URL`: Supabase Transaction pooler connection string, server-side only.
+- `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY`: server-side access untuk Supabase Storage; key tidak pernah diekspos ke browser.
+- `SESSION_SECRET` (≥ 32 karakter), `NEXT_PUBLIC_SITE_URL`, dan `ADMIN_USERNAME`/`ADMIN_PASSWORD` untuk script `admin:create`.
+- `DB_PATH` dan `UPLOAD_DIR` hanya menunjuk sumber SQLite lama saat menjalankan `npm run migrate:supabase`.
 
-## Skema database (acuan; sesuaikan sintaks dengan versi `drizzle-orm` terpasang)
+## Skema database
 
-```ts
-// src/db/schema.ts
-import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
-
-const ts = {
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
-};
-const COLORS = ["pink", "butter", "mint", "lavender"] as const;
-
-export const adminUsers = sqliteTable("admin_users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  username: text("username").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  ...ts,
-});
-
-export const categories = sqliteTable("categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  color: text("color", { enum: COLORS }).notNull().default("butter"),
-  sortOrder: integer("sort_order").notNull().default(0),
-  ...ts,
-});
-
-export const products = sqliteTable("products", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description").notNull().default(""),
-  basePrice: integer("base_price").notNull(),             // Rupiah
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
-  status: text("status", { enum: ["ready", "preorder", "soldout"] }).notNull().default("ready"),
-  preorderNote: text("preorder_note"),                    // mis. "Pre-order H-2"
-  ingredients: text("ingredients"),
-  allergens: text("allergens"),
-  isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
-  isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
-  shopeeUrl: text("shopee_url"), shopeeEnabled: integer("shopee_enabled", { mode: "boolean" }).notNull().default(false),
-  tokopediaUrl: text("tokopedia_url"), tokopediaEnabled: integer("tokopedia_enabled", { mode: "boolean" }).notNull().default(false),
-  tiktokShopUrl: text("tiktok_shop_url"), tiktokShopEnabled: integer("tiktok_shop_enabled", { mode: "boolean" }).notNull().default(false),
-  sortOrder: integer("sort_order").notNull().default(0),
-  ...ts,
-}, (t) => [index("products_category_idx").on(t.categoryId)]);
-
-export const productVariants = sqliteTable("product_variants", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
-  label: text("label").notNull(),                         // mis. "Diameter 18 cm"
-  price: integer("price").notNull(),
-  sortOrder: integer("sort_order").notNull().default(0),
-});
-
-export const productImages = sqliteTable("product_images", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
-  fileName: text("file_name").notNull(),                  // large 1200w
-  thumbName: text("thumb_name").notNull(),                // thumb 480w
-  alt: text("alt").notNull().default(""),
-  isCover: integer("is_cover", { mode: "boolean" }).notNull().default(false),
-  sortOrder: integer("sort_order").notNull().default(0),
-});
-
-export const banners = sqliteTable("banners", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  title: text("title").notNull(),
-  subtitle: text("subtitle"),
-  imageFile: text("image_file"),
-  ctaLabel: text("cta_label"),
-  ctaUrl: text("cta_url"),
-  color: text("color", { enum: COLORS }).notNull().default("pink"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  startsAt: integer("starts_at", { mode: "timestamp" }),
-  endsAt: integer("ends_at", { mode: "timestamp" }),
-  sortOrder: integer("sort_order").notNull().default(0),
-});
-
-export const testimonials = sqliteTable("testimonials", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  handle: text("handle"),                                 // mis. "@username"
-  content: text("content").notNull(),
-  rating: integer("rating").notNull().default(5),
-  isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
-  sortOrder: integer("sort_order").notNull().default(0),
-});
-
-export const socialPosts = sqliteTable("social_posts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  platform: text("platform", { enum: ["instagram", "tiktok", "other"] }).notNull().default("instagram"),
-  imageFile: text("image_file"),
-  caption: text("caption").notNull().default(""),
-  postUrl: text("post_url").notNull(),
-  isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
-  sortOrder: integer("sort_order").notNull().default(0),
-});
-
-export const faqs = sqliteTable("faqs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  question: text("question").notNull(),
-  answer: text("answer").notNull(),
-  isPublished: integer("is_published", { mode: "boolean" }).notNull().default(true),
-  sortOrder: integer("sort_order").notNull().default(0),
-});
-
-export const siteSettings = sqliteTable("site_settings", {
-  key: text("key").primaryKey(),
-  value: text("value").notNull(),                         // string; nilai kompleks = JSON
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
-});
-
-export const events = sqliteTable("events", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  type: text("type", { enum: ["product_view", "wa_click"] }).notNull(),
-  productId: integer("product_id").references(() => products.id, { onDelete: "set null" }),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
-}, (t) => [index("events_type_created_idx").on(t.type, t.createdAt)]);
-```
-
-### Aturan data
-
-- **Harga tampil**: jika produk punya varian, tampilkan "Mulai dari Rp{harga varian terendah}"; jika tidak, pakai `basePrice`.
-- **Cover**: tepat satu `is_cover` per produk; jika tidak ada, pakai gambar pertama; jika tidak ada gambar, tampilkan `PlaceholderCake`.
-- **Publik hanya melihat**: produk `isPublished = true`, banner aktif dalam rentang jadwal, testimoni/FAQ/social yang published.
-- **Slug**: unik, huruf kecil, tanda hubung; dibuat otomatis dari nama, bisa diedit; tangani tabrakan dengan sufiks `-2`, `-3`.
-
-### Kunci `site_settings` (dengan nilai default seed bertanda CONTOH)
-
-`business_name`, `tagline`, `timezone` (default `Asia/Jakarta`), `whatsapp_number` (disimpan ternormalisasi), `wa_default_message`, `email`, `address`, `maps_url`, `maps_embed_url`, `opening_hours` (JSON: `[{day, open, close, closed}]` ×7), `instagram_url`, `tiktok_url`, `about_story`, `about_values` (JSON array 3 item), `about_image`, `delivery_info`, `order_policy`, `halal_info`, `custom_order_enabled`, `custom_order_min_days`.
-
-Akses lewat `getSettings()` yang mengembalikan objek bertipe dengan default aman bila kunci kosong.
+Skema PostgreSQL aktif berada di `db/schema.ts`, dengan migrasi Drizzle di `db/migrations-pg/`. Skrip `db/migrate.ts` mengaktifkan RLS tanpa policy publik; aplikasi mengakses database lewat koneksi server `DATABASE_URL`. Skema SQLite lama disimpan di `db/schema-sqlite.ts` khusus untuk tes integrasi in-memory dan migrasi data lokal.
 
 ## Rute
 
@@ -203,7 +74,7 @@ Akses lewat `getSettings()` yang mengembalikan objek bertipe dengan default aman
 | `/` `/menu` `/menu/[slug]` `/social` `/about` | Publik | Data dari DB; `/menu` membaca `?kategori=` dan `?q=` |
 | `/admin/login` | Publik | Form login |
 | `/admin/**` | Terproteksi | `requireAdmin()` di layout **dan** di setiap action |
-| `/media/[...path]` | Publik | Sajikan file dari `UPLOAD_DIR`; blok path traversal; cache panjang (nama file acak) |
+| `/media/[...path]` | Publik | Kompatibilitas upload lokal lama; foto production memakai URL Supabase Storage |
 | `/api/health` | Publik | `{ ok: true }` untuk healthcheck |
 
 ## Keamanan
@@ -211,6 +82,7 @@ Akses lewat `getSettings()` yang mengembalikan objek bertipe dengan default aman
 - Cookie sesi: `httpOnly`, `sameSite=lax`, `secure` di production, masa berlaku 7 hari. `SESSION_SECRET` wajib; aplikasi gagal start jika kosong di production.
 - Pesan error login generik ("Username atau password salah"). Batasi percobaan login (mis. 5 kali per 15 menit per IP+username, in-memory cukup).
 - Upload: hanya JPEG/PNG/WebP/AVIF, maksimal 5 MB, verifikasi isi file lewat `sharp`, selalu re-encode (membuang EXIF). SVG ditolak.
+- `SUPABASE_SERVICE_ROLE_KEY` hanya dipakai di server. RLS aktif tanpa policy publik pada tabel aplikasi; browser tidak mengakses Data API secara langsung.
 - Semua input admin divalidasi zod di server. Escape output (React sudah default); jangan memakai `dangerouslySetInnerHTML` untuk konten admin.
 - Link eksternal: `target="_blank"` selalu dengan `rel="noopener noreferrer"`.
 - Tautan marketplace produk divalidasi sebagai URL HTTPS di server. Tombol publik hanya tampil saat tautan tersedia dan kanal diaktifkan admin.
@@ -223,4 +95,4 @@ Perubahan dari admin harus langsung terlihat di publik. Panggil `revalidatePath`
 
 ## Deployment
 
-SQLite berbasis file **tidak persisten di platform serverless** (mis. Vercel). Target: VPS atau PaaS dengan volume persisten untuk `data/` (Docker + `output: "standalone"`). Jika ingin Vercel, pindah ke Turso (libSQL; Drizzle mendukung) cukup dengan mengganti `src/db/index.ts` karena akses DB terisolasi.
+Target produksi adalah Vercel dengan Supabase PostgreSQL dan Supabase Storage. Gunakan Transaction pooler URL untuk koneksi fungsi serverless. File unggahan tidak disimpan pada filesystem Vercel; upload baru dan gambar hasil migrasi disimpan sebagai objek pada bucket `nikenbakery-media`. Lihat `docs/DEPLOY.md` untuk impor dari SQLite, variabel Vercel, akun admin, dan backup terpisah untuk database serta Storage.

@@ -12,12 +12,11 @@ export const metadata = {
   title: "Kelola Testimoni | Admin Niken Bakery",
 };
 
-export default function AdminTestimonialsPage() {
-  const allTestimonials = db
+export default async function AdminTestimonialsPage() {
+  const allTestimonials = await db
     .select()
     .from(testimonials)
-    .orderBy(asc(testimonials.sortOrder))
-    .all();
+    .orderBy(asc(testimonials.sortOrder));
 
   return (
     <div className="space-y-6">

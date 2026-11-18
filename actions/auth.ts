@@ -84,11 +84,11 @@ export async function loginAction(
   }
 
   // Cari user di database
-  const user = db
+  const [user] = await db
     .select()
     .from(adminUsers)
     .where(eq(adminUsers.username, username))
-    .get();
+    .limit(1);
 
   const isPasswordValid = user
     ? await verifyPassword(password, user.passwordHash)

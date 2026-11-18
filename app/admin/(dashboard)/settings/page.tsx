@@ -7,8 +7,8 @@ export const metadata = {
   title: "Pengaturan Toko | Admin Niken Bakery",
 };
 
-export default function AdminSettingsPage() {
-  const settings = getSettings();
+export default async function AdminSettingsPage() {
+  const settings = await getSettings();
 
   return (
     <div>

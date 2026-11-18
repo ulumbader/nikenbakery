@@ -1,26 +1,37 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { existsSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 
-const DB_PATH = process.env.DB_PATH ?? "./data/nikenbakery.db";
+async function main() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL wajib diatur untuk menjalankan migrasi Supabase.");
+  }
 
-// Ensure data directory exists
-const dir = dirname(DB_PATH);
-if (!existsSync(dir)) {
-  mkdirSync(dir, { recursive: true });
+  const client = new Pool({
+    connectionString,
+    max: 1,
+    ssl: { rejectUnauthorized: false },
+  });
+
+  try {
+    console.log("🔄 Menjalankan migrasi skema Supabase Postgres...");
+    await migrate(drizzle(client), { migrationsFolder: "./db/migrations-pg" });
+
+    for (const tableName of [
+      "admin_users", "categories", "products", "product_variants", "product_images",
+      "banners", "testimonials", "social_posts", "faqs", "site_settings", "events",
+    ]) {
+      await client.query(`ALTER TABLE public."${tableName}" ENABLE ROW LEVEL SECURITY`);
+    }
+
+    console.log("✅ Migrasi selesai; RLS aktif tanpa akses publik.");
+  } finally {
+    await client.end();
+  }
 }
 
-const sqlite = new Database(DB_PATH);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-
-const db = drizzle(sqlite);
-
-console.log("🔄 Running migrations...");
-migrate(db, { migrationsFolder: "./db/migrations" });
-console.log("✅ Migrations complete!");
-
-sqlite.close();
-
+main().catch((error: unknown) => {
+  console.error("❌ Migrasi gagal:", error instanceof Error ? error.message : "Unknown error");
+  process.exitCode = 1;
+});

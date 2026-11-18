@@ -79,16 +79,16 @@ export async function createBannerAction(_prevState: unknown, formData: FormData
   }
 
   // Hitung sort order berikutnya
-  const lastBanner = db
+  const [lastBanner] = await db
     .select({ sortOrder: banners.sortOrder })
     .from(banners)
     .orderBy(desc(banners.sortOrder))
     .limit(1)
-    .get();
+    ;
 
   const nextOrder = (lastBanner?.sortOrder ?? 0) + 1;
 
-  db.insert(banners)
+  await db.insert(banners)
     .values({
       title,
       subtitle: subtitle || null,
@@ -101,7 +101,7 @@ export async function createBannerAction(_prevState: unknown, formData: FormData
       endsAt,
       sortOrder: nextOrder,
     })
-    .run();
+    ;
 
   revalidatePath("/admin/banners");
   revalidatePath("/");
@@ -120,7 +120,8 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
     return { error: "ID banner tidak valid" };
   }
 
-  const existing = db.select().from(banners).where(eq(banners.id, id)).get();
+  const [existing] = await db.select().from(banners).where(eq(banners.id, id))
+    .limit(1);
   if (!existing) {
     return { error: "Banner tidak ditemukan" };
   }
@@ -162,7 +163,7 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
     await deleteUploadedFile(existing.imageFile);
   }
 
-  db.update(banners)
+  await db.update(banners)
     .set({
       title,
       subtitle: subtitle || null,
@@ -175,7 +176,7 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
       endsAt,
     })
     .where(eq(banners.id, id))
-    .run();
+    ;
 
   revalidatePath("/admin/banners");
   revalidatePath("/");
@@ -189,10 +190,10 @@ export async function updateBannerAction(_prevState: unknown, formData: FormData
 export async function toggleBannerActiveAction(id: number, isActive: boolean) {
   await requireAdmin();
 
-  db.update(banners)
+  await db.update(banners)
     .set({ isActive })
     .where(eq(banners.id, id))
-    .run();
+    ;
 
   revalidatePath("/admin/banners");
   revalidatePath("/");
@@ -206,7 +207,7 @@ export async function toggleBannerActiveAction(id: number, isActive: boolean) {
 export async function reorderBannerAction(id: number, direction: "up" | "down") {
   await requireAdmin();
 
-  const allBanners = db.select().from(banners).orderBy(asc(banners.sortOrder)).all();
+  const allBanners = await db.select().from(banners).orderBy(asc(banners.sortOrder));
   const currentIndex = allBanners.findIndex((b) => b.id === id);
   if (currentIndex === -1) return { error: "Banner tidak ditemukan" };
 
@@ -216,8 +217,8 @@ export async function reorderBannerAction(id: number, direction: "up" | "down") 
   const current = allBanners[currentIndex];
   const target = allBanners[targetIndex];
 
-  db.update(banners).set({ sortOrder: target.sortOrder }).where(eq(banners.id, current.id)).run();
-  db.update(banners).set({ sortOrder: current.sortOrder }).where(eq(banners.id, target.id)).run();
+  await db.update(banners).set({ sortOrder: target.sortOrder }).where(eq(banners.id, current.id));
+  await db.update(banners).set({ sortOrder: current.sortOrder }).where(eq(banners.id, target.id));
 
   revalidatePath("/admin/banners");
   revalidatePath("/");
@@ -231,14 +232,15 @@ export async function reorderBannerAction(id: number, direction: "up" | "down") 
 export async function deleteBannerAction(id: number) {
   await requireAdmin();
 
-  const existing = db.select().from(banners).where(eq(banners.id, id)).get();
+  const [existing] = await db.select().from(banners).where(eq(banners.id, id))
+    .limit(1);
   if (!existing) return { error: "Banner tidak ditemukan" };
 
   if (existing.imageFile) {
     await deleteUploadedFile(existing.imageFile);
   }
 
-  db.delete(banners).where(eq(banners.id, id)).run();
+  await db.delete(banners).where(eq(banners.id, id));
 
   revalidatePath("/admin/banners");
   revalidatePath("/");

@@ -1,7 +1,7 @@
-import { sql, eq, and, desc, count } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { events, products, productImages, banners } from "@/db/schema";
-import { getSettings, getOpeningHours } from "@/lib/settings";
+import { banners, events, productImages, products } from "@/db/schema";
+import { getOpeningHours, getSettings } from "@/lib/settings";
 
 export interface AnalyticsSummary {
   stats: {
@@ -42,197 +42,148 @@ export interface AnalyticsSummary {
   }>;
 }
 
-/**
- * Mengambil ringkasan analitik dan kelengkapan konten untuk dashboard admin.
- */
-export function getAnalyticsSummary(): AnalyticsSummary {
-  const now = Math.floor(Date.now() / 1000);
-  const sevenDaysAgo = now - 7 * 86400;
-  const thirtyDaysAgo = now - 30 * 86400;
+export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 86400000);
 
-  // 1. Produk Aktif & Sold Out
-  const allProducts = db
-    .select({
-      id: products.id,
-      isPublished: products.isPublished,
-      status: products.status,
-    })
-    .from(products)
-    .all();
-
-  const activeProducts = allProducts.filter((p) => p.isPublished).length;
-  const soldOutProducts = allProducts.filter((p) => p.status === "soldout").length;
-
-  // 2. Event Counts (7 hari & 30 hari)
-  const statsRows = db
-    .select({
-      type: events.type,
-      total7d: sql<number>`SUM(CASE WHEN ${events.createdAt} >= ${sevenDaysAgo} THEN 1 ELSE 0 END)`,
-      total30d: sql<number>`SUM(CASE WHEN ${events.createdAt} >= ${thirtyDaysAgo} THEN 1 ELSE 0 END)`,
-    })
-    .from(events)
-    .groupBy(events.type)
-    .all();
+  const [allProducts, statsRows, topViewsRaw, topWaRaw, settings, openingHours] =
+    await Promise.all([
+      db
+        .select({
+          id: products.id,
+          isPublished: products.isPublished,
+          status: products.status,
+        })
+        .from(products),
+      db
+        .select({
+          type: events.type,
+          total7d: sql<number>`COALESCE(SUM(CASE WHEN ${events.createdAt} >= ${sevenDaysAgo} THEN 1 ELSE 0 END), 0)`,
+          total30d: sql<number>`COALESCE(SUM(CASE WHEN ${events.createdAt} >= ${thirtyDaysAgo} THEN 1 ELSE 0 END), 0)`,
+        })
+        .from(events)
+        .groupBy(events.type),
+      db
+        .select({
+          productId: events.productId,
+          totalViews: count(events.id),
+          productName: products.name,
+          productSlug: products.slug,
+        })
+        .from(events)
+        .innerJoin(products, eq(events.productId, products.id))
+        .where(and(eq(events.type, "product_view"), sql`${events.createdAt} >= ${thirtyDaysAgo}`))
+        .groupBy(events.productId, products.name, products.slug)
+        .orderBy(desc(count(events.id)))
+        .limit(5),
+      db
+        .select({
+          productId: events.productId,
+          totalClicks: count(events.id),
+          productName: products.name,
+          productSlug: products.slug,
+        })
+        .from(events)
+        .innerJoin(products, eq(events.productId, products.id))
+        .where(and(eq(events.type, "wa_click"), sql`${events.createdAt} >= ${thirtyDaysAgo}`))
+        .groupBy(events.productId, products.name, products.slug)
+        .orderBy(desc(count(events.id)))
+        .limit(5),
+      getSettings(),
+      getOpeningHours(),
+    ]);
 
   let waClicks7d = 0;
   let waClicks30d = 0;
   let productViews7d = 0;
   let productViews30d = 0;
-
   for (const row of statsRows) {
     if (row.type === "wa_click") {
-      waClicks7d = Number(row.total7d || 0);
-      waClicks30d = Number(row.total30d || 0);
-    } else if (row.type === "product_view") {
-      productViews7d = Number(row.total7d || 0);
-      productViews30d = Number(row.total30d || 0);
+      waClicks7d = Number(row.total7d);
+      waClicks30d = Number(row.total30d);
+    } else {
+      productViews7d = Number(row.total7d);
+      productViews30d = Number(row.total30d);
     }
   }
 
-  // 3. Top 5 Produk Berdasarkan View (30 hari terakhir)
-  const topViewsRaw = db
-    .select({
-      productId: events.productId,
-      totalViews: count(events.id),
-      productName: products.name,
-      productSlug: products.slug,
-    })
-    .from(events)
-    .innerJoin(products, eq(events.productId, products.id))
-    .where(
-      and(
-        eq(events.type, "product_view"),
-        sql`${events.createdAt} >= ${thirtyDaysAgo}`
-      )
-    )
-    .groupBy(events.productId)
-    .orderBy(desc(count(events.id)))
-    .limit(5)
-    .all();
+  const imageProductIds = [
+    ...topViewsRaw.map((row) => row.productId),
+    ...topWaRaw.map((row) => row.productId),
+  ].filter((id): id is number => id !== null);
+  const covers = imageProductIds.length
+    ? await db
+        .select({
+          productId: productImages.productId,
+          thumb: productImages.thumbName,
+          file: productImages.fileName,
+          isCover: productImages.isCover,
+          sortOrder: productImages.sortOrder,
+        })
+        .from(productImages)
+        .where(inArray(productImages.productId, imageProductIds))
+        .orderBy(desc(productImages.isCover), productImages.sortOrder)
+    : [];
+  const coverByProduct = new Map<number, string>();
+  for (const cover of covers) {
+    if (!coverByProduct.has(cover.productId)) {
+      coverByProduct.set(cover.productId, cover.thumb || cover.file);
+    }
+  }
 
-  const topViewedProducts = topViewsRaw.map((item) => {
-    const cover = db
-      .select({ thumb: productImages.thumbName, file: productImages.fileName })
-      .from(productImages)
-      .where(eq(productImages.productId, item.productId!))
-      .orderBy(desc(productImages.isCover), productImages.sortOrder)
-      .limit(1)
-      .get();
+  const mapTopProducts = (rows: typeof topViewsRaw | typeof topWaRaw) =>
+    rows.flatMap((item) =>
+      item.productId === null
+        ? []
+        : [
+            {
+              id: item.productId,
+              name: item.productName,
+              slug: item.productSlug,
+              count: Number(
+                "totalViews" in item ? item.totalViews : item.totalClicks
+              ),
+              coverUrl: coverByProduct.get(item.productId) ?? null,
+            },
+          ]
+    );
 
-    return {
-      id: item.productId!,
-      name: item.productName,
-      slug: item.productSlug,
-      count: Number(item.totalViews),
-      coverUrl: cover?.thumb || cover?.file || null,
-    };
-  });
-
-  // 4. Top 5 Produk Berdasarkan Klik WA (30 hari terakhir)
-  const topWaRaw = db
-    .select({
-      productId: events.productId,
-      totalClicks: count(events.id),
-      productName: products.name,
-      productSlug: products.slug,
-    })
-    .from(events)
-    .innerJoin(products, eq(events.productId, products.id))
-    .where(
-      and(
-        eq(events.type, "wa_click"),
-        sql`${events.createdAt} >= ${thirtyDaysAgo}`
-      )
-    )
-    .groupBy(events.productId)
-    .orderBy(desc(count(events.id)))
-    .limit(5)
-    .all();
-
-  const topWaClickProducts = topWaRaw.map((item) => {
-    const cover = db
-      .select({ thumb: productImages.thumbName, file: productImages.fileName })
-      .from(productImages)
-      .where(eq(productImages.productId, item.productId!))
-      .orderBy(desc(productImages.isCover), productImages.sortOrder)
-      .limit(1)
-      .get();
-
-    return {
-      id: item.productId!,
-      name: item.productName,
-      slug: item.productSlug,
-      count: Number(item.totalClicks),
-      coverUrl: cover?.thumb || cover?.file || null,
-    };
-  });
-
-  // 5. Grafik Batang 14 Hari (Time-series)
-  const fourteenDaysAgo = now - 14 * 86400;
-  const recentEvents = db
+  const timezone = settings.timezone || "Asia/Jakarta";
+  const recentEvents = await db
     .select({
       type: events.type,
-      dateString: sql<string>`DATE(${events.createdAt}, 'unixepoch', 'localtime')`,
+      dateString: sql<string>`to_char(${events.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`,
       count: count(events.id),
     })
     .from(events)
     .where(sql`${events.createdAt} >= ${fourteenDaysAgo}`)
-    .groupBy(events.type, sql`DATE(${events.createdAt}, 'unixepoch', 'localtime')`)
-    .all();
+    .groupBy(events.type, sql`to_char(${events.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`);
 
-  // Susun peta tanggal 14 hari ke belakang
   const chart14Days: AnalyticsSummary["chart14Days"] = [];
   const currentDate = new Date();
-
   for (let i = 13; i >= 0; i--) {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() - i);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - i);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
     const dateKey = `${yyyy}-${mm}-${dd}`;
-    const dateLabel = `${dd}/${mm}`;
-
-    const viewMatch = recentEvents.find(
-      (e) => e.type === "product_view" && e.dateString === dateKey
-    );
-    const waMatch = recentEvents.find(
-      (e) => e.type === "wa_click" && e.dateString === dateKey
-    );
-
     chart14Days.push({
-      dateLabel,
+      dateLabel: `${dd}/${mm}`,
       rawDate: dateKey,
-      views: Number(viewMatch?.count || 0),
-      waClicks: Number(waMatch?.count || 0),
+      views: Number(
+        recentEvents.find((event) => event.type === "product_view" && event.dateString === dateKey)?.count ?? 0
+      ),
+      waClicks: Number(
+        recentEvents.find((event) => event.type === "wa_click" && event.dateString === dateKey)?.count ?? 0
+      ),
     });
   }
 
-  // 6. Checklist Kelengkapan Konten
-  const settings = getSettings();
-  const openingHours = getOpeningHours();
-
-  const hasWaNumber = Boolean(
-    settings.whatsapp_number &&
-      settings.whatsapp_number !== "6281234567890" &&
-      settings.whatsapp_number.length >= 10
-  );
-
-  const hasAddress = Boolean(
-    settings.address &&
-      !settings.address.toLowerCase().includes("contoh") &&
-      settings.address.trim().length > 5
-  );
-
-  const hasProductWithImage = Boolean(
-    db
-      .select({ id: productImages.id })
-      .from(productImages)
-      .limit(1)
-      .get()
-  );
-
-  const hasActiveBanner = Boolean(
+  const [imageRows, activeBannerRows] = await Promise.all([
+    db.select({ id: productImages.id }).from(productImages).limit(1),
     db
       .select({ id: banners.id })
       .from(banners)
@@ -243,16 +194,26 @@ export function getAnalyticsSummary(): AnalyticsSummary {
           sql`(${banners.endsAt} IS NULL OR ${banners.endsAt} >= ${now})`
         )
       )
-      .limit(1)
-      .get()
-  );
+      .limit(1),
+  ]);
 
-  const hasOpeningHours = Boolean(
+  const hasWaNumber = Boolean(
+    settings.whatsapp_number &&
+      settings.whatsapp_number !== "6281234567890" &&
+      settings.whatsapp_number.length >= 10
+  );
+  const hasAddress = Boolean(
+    settings.address &&
+      !settings.address.toLowerCase().includes("contoh") &&
+      settings.address.trim().length > 5
+  );
+  const hasOpeningHours =
     openingHours.length === 7 &&
-      openingHours.some((h) => !h.closed && h.open && h.close)
-  );
+    openingHours.some((hour) => !hour.closed && hour.open && hour.close);
+  const hasProductWithImage = imageRows.length > 0;
+  const hasActiveBanner = activeBannerRows.length > 0;
 
-  const checklist = [
+  const checklist: AnalyticsSummary["checklist"] = [
     {
       id: "whatsapp",
       label: "Nomor WhatsApp Toko",
@@ -307,17 +268,16 @@ export function getAnalyticsSummary(): AnalyticsSummary {
 
   return {
     stats: {
-      activeProducts,
-      soldOutProducts,
+      activeProducts: allProducts.filter((product) => product.isPublished).length,
+      soldOutProducts: allProducts.filter((product) => product.status === "soldout").length,
       waClicks7d,
       waClicks30d,
       productViews7d,
       productViews30d,
     },
-    topViewedProducts,
-    topWaClickProducts,
+    topViewedProducts: mapTopProducts(topViewsRaw),
+    topWaClickProducts: mapTopProducts(topWaRaw),
     chart14Days,
     checklist,
   };
 }
-

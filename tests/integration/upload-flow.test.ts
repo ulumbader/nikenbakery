@@ -7,7 +7,7 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { eq } from "drizzle-orm";
-import * as schema from "@/db/schema";
+import * as schema from "@/db/schema-sqlite";
 import { processAndSaveImage, deleteUploadedFile } from "@/lib/upload";
 
 describe("Pengujian Siklus Hidup Upload, Edit, Hapus Foto & Tampilan", () => {

@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
-import { db } from "@/db";
+import { lt } from "drizzle-orm";
+import { db, sqlClient } from "@/db";
 import { events } from "@/db/schema";
 
 /**
@@ -11,20 +11,22 @@ import { events } from "@/db/schema";
  */
 async function pruneOldEvents() {
   const RETENTION_DAYS = 180;
-  const cutoffTimestamp = Math.floor(Date.now() / 1000) - RETENTION_DAYS * 86400;
+  const cutoff = new Date(Date.now() - RETENTION_DAYS * 86400000);
 
   console.log(`[Events Prune] Memeriksa event analitik lebih lama dari ${RETENTION_DAYS} hari...`);
-  console.log(`[Events Prune] Cutoff timestamp: ${cutoffTimestamp} (${new Date(cutoffTimestamp * 1000).toISOString()})`);
+  console.log(`[Events Prune] Batas tanggal: ${cutoff.toISOString()}`);
 
-  const result = db
+  const deleted = await db
     .delete(events)
-    .where(sql`${events.createdAt} < ${cutoffTimestamp}`)
-    .run();
+    .where(lt(events.createdAt, cutoff))
+    .returning({ id: events.id });
 
-  console.log(`[Events Prune] Selesai. Sebanyak ${result.changes} baris event telah dipangkas.`);
+  console.log(`[Events Prune] Selesai. Sebanyak ${deleted.length} baris event telah dipangkas.`);
 }
 
 pruneOldEvents().catch((err) => {
   console.error("[Events Prune] Error:", err);
-  process.exit(1);
+  process.exitCode = 1;
+}).finally(async () => {
+  await sqlClient.end();
 });

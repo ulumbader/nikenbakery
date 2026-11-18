@@ -53,16 +53,16 @@ export async function createSocialPostAction(_prevState: unknown, formData: Form
     }
   }
 
-  const last = db
+  const [last] = await db
     .select({ sortOrder: socialPosts.sortOrder })
     .from(socialPosts)
     .orderBy(desc(socialPosts.sortOrder))
     .limit(1)
-    .get();
+    ;
 
   const nextOrder = (last?.sortOrder ?? 0) + 1;
 
-  db.insert(socialPosts)
+  await db.insert(socialPosts)
     .values({
       platform,
       caption,
@@ -71,7 +71,7 @@ export async function createSocialPostAction(_prevState: unknown, formData: Form
       isPublished,
       sortOrder: nextOrder,
     })
-    .run();
+    ;
 
   revalidatePath("/admin/social");
   revalidatePath("/social");
@@ -89,7 +89,8 @@ export async function updateSocialPostAction(_prevState: unknown, formData: Form
   const id = Number(formData.get("id"));
   if (!id || isNaN(id)) return { error: "ID postingan tidak valid" };
 
-  const existing = db.select().from(socialPosts).where(eq(socialPosts.id, id)).get();
+  const [existing] = await db.select().from(socialPosts).where(eq(socialPosts.id, id))
+    .limit(1);
   if (!existing) return { error: "Postingan tidak ditemukan" };
 
   const platform = (formData.get("platform")?.toString() || "instagram") as "instagram" | "tiktok" | "other";
@@ -130,7 +131,7 @@ export async function updateSocialPostAction(_prevState: unknown, formData: Form
     }
   }
 
-  db.update(socialPosts)
+  await db.update(socialPosts)
     .set({
       platform,
       caption,
@@ -139,7 +140,7 @@ export async function updateSocialPostAction(_prevState: unknown, formData: Form
       isPublished,
     })
     .where(eq(socialPosts.id, id))
-    .run();
+    ;
 
   revalidatePath("/admin/social");
   revalidatePath("/social");
@@ -154,10 +155,10 @@ export async function updateSocialPostAction(_prevState: unknown, formData: Form
 export async function toggleSocialPublishAction(id: number, isPublished: boolean) {
   await requireAdmin();
 
-  db.update(socialPosts)
+  await db.update(socialPosts)
     .set({ isPublished })
     .where(eq(socialPosts.id, id))
-    .run();
+    ;
 
   revalidatePath("/admin/social");
   revalidatePath("/social");
@@ -172,7 +173,7 @@ export async function toggleSocialPublishAction(id: number, isPublished: boolean
 export async function reorderSocialPostAction(id: number, direction: "up" | "down") {
   await requireAdmin();
 
-  const all = db.select().from(socialPosts).orderBy(asc(socialPosts.sortOrder)).all();
+  const all = await db.select().from(socialPosts).orderBy(asc(socialPosts.sortOrder));
   const currentIndex = all.findIndex((p) => p.id === id);
   if (currentIndex === -1) return { error: "Postingan tidak ditemukan" };
 
@@ -182,8 +183,8 @@ export async function reorderSocialPostAction(id: number, direction: "up" | "dow
   const current = all[currentIndex];
   const target = all[targetIndex];
 
-  db.update(socialPosts).set({ sortOrder: target.sortOrder }).where(eq(socialPosts.id, current.id)).run();
-  db.update(socialPosts).set({ sortOrder: current.sortOrder }).where(eq(socialPosts.id, target.id)).run();
+  await db.update(socialPosts).set({ sortOrder: target.sortOrder }).where(eq(socialPosts.id, current.id));
+  await db.update(socialPosts).set({ sortOrder: current.sortOrder }).where(eq(socialPosts.id, target.id));
 
   revalidatePath("/admin/social");
   revalidatePath("/social");
@@ -198,14 +199,15 @@ export async function reorderSocialPostAction(id: number, direction: "up" | "dow
 export async function deleteSocialPostAction(id: number) {
   await requireAdmin();
 
-  const existing = db.select().from(socialPosts).where(eq(socialPosts.id, id)).get();
+  const [existing] = await db.select().from(socialPosts).where(eq(socialPosts.id, id))
+    .limit(1);
   if (!existing) return { error: "Postingan tidak ditemukan" };
 
   if (existing.imageFile) {
     await deleteUploadedFile(existing.imageFile);
   }
 
-  db.delete(socialPosts).where(eq(socialPosts.id, id)).run();
+  await db.delete(socialPosts).where(eq(socialPosts.id, id));
 
   revalidatePath("/admin/social");
   revalidatePath("/social");

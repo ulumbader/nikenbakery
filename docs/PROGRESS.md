@@ -1,14 +1,14 @@
 # PROGRESS — Dokumen Hidup
 
 > **Agent WAJIB memperbarui file ini di akhir setiap sesi/tahap.** Ini adalah memori proyek antar sesi.
-> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-10.
+> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-18.
 
 ## Posisi saat ini
 
 - **Tahap aktif:** 11 — Deploy & serah terima
-- **Status:** selesai ✅
-- **Kondisi repo:** Tahap 11 deploy tetap selesai. Checkout WhatsApp satu produk tetap berlaku (D-020); tautan marketplace per produk ditambahkan sebagai opsi pembelian langsung yang bisa diatur admin (D-023). Tidak ada keranjang multi-produk, penyimpanan order, atau pembayaran online.
-- **Langkah berikutnya:** serah-terima. Tahap 12 (opsional: form custom order) tetap terpisah.
+- **Status:** selesai ✅ — migrasi kode dan data ke Supabase berhasil, terverifikasi, serta siap untuk deployment Vercel.
+- **Kondisi repo:** Produksi memakai Supabase PostgreSQL + Storage. Data SQLite dan 57 objek gambar berhasil disalin serta diverifikasi; sumber lokal tetap utuh. Checkout WhatsApp satu produk tetap berlaku (D-020), begitu juga tautan marketplace per produk (D-023). Deployment sungguhan belum dilakukan.
+- **Langkah berikutnya:** siapkan environment Production di Vercel dan deploy saat diminta pengguna. Tahap 12 (opsional: form custom order) tetap terpisah.
 
 ## Checklist tahap
 
@@ -63,10 +63,10 @@ Perbarui tabel ini begitu pengguna memberi data asli.
    ```bash
    npm run admin:create
    ```
-3. Akun admin otomatis dibuat/diperbarui di database SQLite.
+3. Akun admin otomatis dibuat/diperbarui di Supabase PostgreSQL yang dituju `DATABASE_URL`.
 
 ## Pemeliharaan Data Analitik (Prune Events)
-Untuk menjaga database SQLite tetap ramping dan performa query tetap cepat, data event analitik yang lebih lama dari 180 hari dapat dipangkas secara berkala:
+Untuk menjaga tabel Postgres tetap ramping dan performa query tetap cepat, data event analitik yang lebih lama dari 180 hari dapat dipangkas secara berkala:
 ```bash
 npm run events:prune
 ```
@@ -80,7 +80,7 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
    ```bash
    npm test
    ```
-   Menjalankan 37 pengujian fungsi murni (`normalizePhone`, `buildWhatsAppLink`, `orderMessage`, `formatRupiah`, `slug`, `hours`, validasi Zod) dan query integrasi SQLite in-memory secara cepat (< 2 detik).
+   Menjalankan pengujian fungsi murni (`normalizePhone`, `buildWhatsAppLink`, `orderMessage`, `formatRupiah`, `slug`, `hours`, validasi Zod) dan query integrasi SQLite in-memory.
 
 2. **Playwright E2E Headless (Semua Kasus Desktop & Mobile):**
    ```bash
@@ -107,7 +107,7 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
    Menjalankan `npm test` dilanjutkan `npm run test:e2e` secara otomatis dari kondisi bersih.
 
 > [!NOTE]
-> **Isolasi Data Penuh:** Pengujian E2E menggunakan `.env.test` (`DB_PATH=./data/test.db` dan `UPLOAD_DIR=./data/test-uploads`). File database pengguna `data/nikenbakery.db` dan upload fisik `data/uploads/` **terisolasi 100% dan tidak pernah disentuh oleh runner pengujian**.
+> **Isolasi Data Penuh:** Unit/integration tests memakai SQLite in-memory dan direktori upload sementara. Playwright E2E membutuhkan proyek Supabase khusus dengan `E2E_DATABASE_URL`, `E2E_SUPABASE_URL`, dan `E2E_SUPABASE_SERVICE_ROLE_KEY` di `.env.test`; global setup menolak proyek yang sama dengan `.env.local`.
 
 6. **Checklist UAT Manual Perangkat Asli:**
    Tersedia di `docs/UAT_CHECKLIST.md` untuk menguji pembukaan aplikasi WhatsApp nyata di smartphone fisik, interaksi gestur sentuhan, dan review "vibe" estetika bersama calon target pasar.
@@ -140,6 +140,16 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-18 — Migrasi Supabase untuk Deployment Vercel
+- Dikerjakan:
+  1. Pindahkan schema, query, aksi server, seed/admin/event utilities, dan koneksi Drizzle dari SQLite ke PostgreSQL melalui `pg`.
+  2. Simpan upload baru dan gambar lama di Supabase Storage; aktifkan RLS tanpa policy publik pada semua 11 tabel aplikasi.
+  3. Tambahkan skrip migrasi SQLite satu kali yang mempertahankan ID/foreign key/timestamp, menolak target berisi data, mengunggah media, dan memeriksa jumlah baris. DB dan upload sumber tidak dihapus.
+  4. Perbarui panduan agent, arsitektur, deploy, environment, dan isolasi E2E untuk Supabase/Vercel.
+- Hasil impor: `admin_users` 1, `categories` 5, `products` 14, `product_variants` 17, `product_images` 28, `banners` 3, `testimonials` 5, `social_posts` 6, `faqs` 6, `site_settings` 20, `events` 36. Sebanyak 57 referensi media cocok dengan 57 objek di bucket publik; RLS aktif pada 11/11 tabel.
+- Verifikasi: `npx tsc --noEmit` ✅, `npm run lint` ✅, `npm run build` ✅. Pengujian otomatis tidak dijalankan pada sesi ini. Deployment Vercel belum dilakukan.
+- Berikutnya: commit hasil migrasi; isi environment Production di Vercel dan deploy setelah diminta.
 
 ### 2026-11-10 — Tautan Pembelian Marketplace Per Produk
 - Dikerjakan:

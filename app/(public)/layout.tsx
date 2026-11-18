@@ -2,12 +2,12 @@ import { getSettings } from "@/lib/settings";
 import { Navbar } from "@/components/public/Navbar";
 import { Footer } from "@/components/public/Footer";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = getSettings();
+  const settings = await getSettings();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   // Structured Data (JSON-LD) Bakery / LocalBusiness

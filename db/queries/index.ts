@@ -1,18 +1,26 @@
-import { eq, and, asc, desc, like, sql, or, ne } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
 import { db } from "@/db";
 import {
+  banners,
   categories,
+  faqs,
+  productImages,
   products,
   productVariants,
-  productImages,
-  banners,
-  testimonials,
-  socialPosts,
-  faqs,
   siteSettings,
+  socialPosts,
+  testimonials,
 } from "@/db/schema";
-
-/* ─── Settings ─── */
 
 export {
   getSettings,
@@ -21,21 +29,16 @@ export {
   getAboutValues,
 } from "@/lib/settings";
 
-export function getAllSettings() {
-  return db.select().from(siteSettings).all();
+export async function getAllSettings() {
+  return db.select().from(siteSettings);
 }
 
-/* ─── Categories ─── */
-
-export function listCategories() {
+export async function listCategories() {
   return db
     .select()
     .from(categories)
-    .orderBy(asc(categories.sortOrder), asc(categories.name))
-    .all();
+    .orderBy(asc(categories.sortOrder), asc(categories.name));
 }
-
-/* ─── Products ─── */
 
 type ListProductsOpts = {
   categorySlug?: string;
@@ -43,312 +46,215 @@ type ListProductsOpts = {
   status?: "ready" | "preorder" | "soldout";
 };
 
-export function listProducts(opts: ListProductsOpts = {}) {
-  const conditions = [eq(products.isPublished, true)];
+async function attachProductDetails(
+  rows: (typeof products.$inferSelect)[],
+  options: { imageOrder?: "cover" | "sort" } = {}
+) {
+  if (rows.length === 0) return [];
 
-  if (opts.status) {
-    conditions.push(eq(products.status, opts.status));
+  const ids = rows.map((product) => product.id);
+  const [variants, images, categoryRows] = await Promise.all([
+    db
+      .select()
+      .from(productVariants)
+      .where(inArray(productVariants.productId, ids))
+      .orderBy(asc(productVariants.price)),
+    db
+      .select()
+      .from(productImages)
+      .where(inArray(productImages.productId, ids))
+      .orderBy(
+        options.imageOrder === "cover"
+          ? desc(productImages.isCover)
+          : asc(productImages.sortOrder),
+        asc(productImages.sortOrder)
+      ),
+    db
+      .select()
+      .from(categories)
+      .where(
+        inArray(
+          categories.id,
+          rows.flatMap((product) =>
+            product.categoryId === null ? [] : [product.categoryId]
+          )
+        )
+      ),
+  ]);
+
+  const variantsByProduct = new Map<number, typeof variants>();
+  for (const variant of variants) {
+    const items = variantsByProduct.get(variant.productId) ?? [];
+    items.push(variant);
+    variantsByProduct.set(variant.productId, items);
   }
 
-  // Build query with optional category join
+  const imagesByProduct = new Map<number, typeof images>();
+  for (const image of images) {
+    const items = imagesByProduct.get(image.productId) ?? [];
+    items.push(image);
+    imagesByProduct.set(image.productId, items);
+  }
+
+  const categoryById = new Map(categoryRows.map((category) => [category.id, category]));
+
+  return rows.map((product) => {
+    const productVariants = variantsByProduct.get(product.id) ?? [];
+    const productImages = imagesByProduct.get(product.id) ?? [];
+    const cover = productImages.find((image) => image.isCover);
+    const firstImage = options.imageOrder === "cover" ? productImages[0] : cover;
+
+    return {
+      ...product,
+      displayPrice: productVariants[0]?.price ?? product.basePrice,
+      hasVariants: productVariants.length > 0,
+      coverImage: firstImage ?? productImages[0] ?? null,
+      category:
+        product.categoryId === null
+          ? null
+          : (categoryById.get(product.categoryId) ?? null),
+    };
+  });
+}
+
+export async function listProducts(opts: ListProductsOpts = {}) {
+  const conditions = [eq(products.isPublished, true)];
+
+  if (opts.status) conditions.push(eq(products.status, opts.status));
+
   if (opts.categorySlug) {
-    const category = db
+    const [category] = await db
       .select({ id: categories.id })
       .from(categories)
       .where(eq(categories.slug, opts.categorySlug))
-      .get();
-    if (category) {
-      conditions.push(eq(products.categoryId, category.id));
-    } else {
-      return []; // category not found
-    }
+      .limit(1);
+    if (!category) return [];
+    conditions.push(eq(products.categoryId, category.id));
   }
 
   if (opts.q) {
     const search = `%${opts.q}%`;
     conditions.push(
-      or(like(products.name, search), like(products.description, search))!
+      or(ilike(products.name, search), ilike(products.description, search))!
     );
   }
 
-  const result = db
+  const rows = await db
     .select()
     .from(products)
     .where(and(...conditions))
-    .orderBy(asc(products.sortOrder), desc(products.createdAt))
-    .all();
+    .orderBy(asc(products.sortOrder), desc(products.createdAt));
 
-  // Attach variants (lowest price) and cover image for each product
-  return result.map((p) => {
-    const variants = db
-      .select()
-      .from(productVariants)
-      .where(eq(productVariants.productId, p.id))
-      .orderBy(asc(productVariants.price))
-      .all();
-
-    const cover = db
-      .select()
-      .from(productImages)
-      .where(
-        and(eq(productImages.productId, p.id), eq(productImages.isCover, true))
-      )
-      .get();
-
-    const firstImage = cover
-      ? cover
-      : db
-          .select()
-          .from(productImages)
-          .where(eq(productImages.productId, p.id))
-          .orderBy(asc(productImages.sortOrder))
-          .get();
-
-    const displayPrice =
-      variants.length > 0 ? variants[0].price : p.basePrice;
-
-    const category = p.categoryId
-      ? db
-          .select()
-          .from(categories)
-          .where(eq(categories.id, p.categoryId))
-          .get()
-      : null;
-
-    return {
-      ...p,
-      displayPrice,
-      hasVariants: variants.length > 0,
-      coverImage: firstImage ?? null,
-      category,
-    };
-  });
+  return attachProductDetails(rows, { imageOrder: "cover" });
 }
 
-export function getProductBySlug(slug: string) {
-  const product = db
+export async function getProductBySlug(slug: string) {
+  const [product] = await db
     .select()
     .from(products)
     .where(and(eq(products.slug, slug), eq(products.isPublished, true)))
-    .get();
-
+    .limit(1);
   if (!product) return null;
 
-  const variants = db
-    .select()
-    .from(productVariants)
-    .where(eq(productVariants.productId, product.id))
-    .orderBy(asc(productVariants.sortOrder))
-    .all();
-
-  const images = db
-    .select()
-    .from(productImages)
-    .where(eq(productImages.productId, product.id))
-    .orderBy(asc(productImages.sortOrder))
-    .all();
-
-  const category = product.categoryId
-    ? db
-        .select()
-        .from(categories)
-        .where(eq(categories.id, product.categoryId))
-        .get()
-    : null;
-
-  return {
-    ...product,
-    variants,
-    images,
-    category,
-  };
-}
-
-export function listFeaturedProducts(limit = 6) {
-  const result = db
-    .select()
-    .from(products)
-    .where(
-      and(eq(products.isPublished, true), eq(products.isFeatured, true))
-    )
-    .orderBy(asc(products.sortOrder))
-    .limit(limit)
-    .all();
-
-  return result.map((p) => {
-    const variants = db
+  const [variants, images, category] = await Promise.all([
+    db
       .select()
       .from(productVariants)
-      .where(eq(productVariants.productId, p.id))
-      .orderBy(asc(productVariants.price))
-      .all();
-
-    const cover = db
+      .where(eq(productVariants.productId, product.id))
+      .orderBy(asc(productVariants.sortOrder)),
+    db
       .select()
       .from(productImages)
-      .where(
-        and(eq(productImages.productId, p.id), eq(productImages.isCover, true))
-      )
-      .get();
-
-    const firstImage = cover
-      ? cover
+      .where(eq(productImages.productId, product.id))
+      .orderBy(asc(productImages.sortOrder)),
+    product.categoryId === null
+      ? Promise.resolve([])
       : db
           .select()
-          .from(productImages)
-          .where(eq(productImages.productId, p.id))
-          .orderBy(asc(productImages.sortOrder))
-          .get();
-
-    const category = p.categoryId
-      ? db
-          .select()
           .from(categories)
-          .where(eq(categories.id, p.categoryId))
-          .get()
-      : null;
+          .where(eq(categories.id, product.categoryId))
+          .limit(1),
+  ]);
 
-    return {
-      ...p,
-      displayPrice: variants.length > 0 ? variants[0].price : p.basePrice,
-      hasVariants: variants.length > 0,
-      coverImage: firstImage ?? null,
-      category,
-    };
-  });
+  return { ...product, variants, images, category: category[0] ?? null };
 }
 
-export function listRelatedProducts(productId: number, limit = 4) {
-  const product = db
+export async function listFeaturedProducts(limit = 6) {
+  const rows = await db
+    .select()
+    .from(products)
+    .where(and(eq(products.isPublished, true), eq(products.isFeatured, true)))
+    .orderBy(asc(products.sortOrder))
+    .limit(limit);
+
+  return attachProductDetails(rows, { imageOrder: "cover" });
+}
+
+export async function listRelatedProducts(productId: number, limit = 4) {
+  const [product] = await db
     .select()
     .from(products)
     .where(eq(products.id, productId))
-    .get();
-
+    .limit(1);
   if (!product) return [];
 
   const conditions = [
     eq(products.isPublished, true),
     ne(products.id, productId),
   ];
-
-  if (product.categoryId) {
+  if (product.categoryId !== null) {
     conditions.push(eq(products.categoryId, product.categoryId));
   }
 
-  const result = db
+  const rows = await db
     .select()
     .from(products)
     .where(and(...conditions))
-    .orderBy(sql`RANDOM()`)
-    .limit(limit)
-    .all();
+    .orderBy(sql`random()`)
+    .limit(limit);
 
-  return result.map((p) => {
-    const variants = db
-      .select()
-      .from(productVariants)
-      .where(eq(productVariants.productId, p.id))
-      .orderBy(asc(productVariants.price))
-      .all();
-
-    const cover = db
-      .select()
-      .from(productImages)
-      .where(
-        and(eq(productImages.productId, p.id), eq(productImages.isCover, true))
-      )
-      .get();
-
-    const firstImage = cover
-      ? cover
-      : db
-          .select()
-          .from(productImages)
-          .where(eq(productImages.productId, p.id))
-          .orderBy(asc(productImages.sortOrder))
-          .get();
-
-    const category = p.categoryId
-      ? db
-          .select()
-          .from(categories)
-          .where(eq(categories.id, p.categoryId))
-          .get()
-      : null;
-
-    return {
-      ...p,
-      displayPrice: variants.length > 0 ? variants[0].price : p.basePrice,
-      hasVariants: variants.length > 0,
-      coverImage: firstImage ?? null,
-      category,
-    };
-  });
+  return attachProductDetails(rows, { imageOrder: "cover" });
 }
 
-/* ─── Banners ─── */
-
-export function listActiveBanners() {
-  const now = Math.floor(Date.now() / 1000);
+export async function listActiveBanners() {
+  const now = new Date();
   return db
     .select()
     .from(banners)
     .where(
       and(
         eq(banners.isActive, true),
-        or(
-          sql`${banners.startsAt} IS NULL`,
-          sql`${banners.startsAt} <= ${now}`
-        ),
-        or(
-          sql`${banners.endsAt} IS NULL`,
-          sql`${banners.endsAt} >= ${now}`
-        )
+        or(sql`${banners.startsAt} IS NULL`, sql`${banners.startsAt} <= ${now}`),
+        or(sql`${banners.endsAt} IS NULL`, sql`${banners.endsAt} >= ${now}`)
       )
     )
-    .orderBy(asc(banners.sortOrder))
-    .all();
+    .orderBy(asc(banners.sortOrder));
 }
 
-/* ─── Testimonials ─── */
-
-export function listTestimonials() {
+export async function listTestimonials() {
   return db
     .select()
     .from(testimonials)
     .where(eq(testimonials.isPublished, true))
-    .orderBy(asc(testimonials.sortOrder))
-    .all();
+    .orderBy(asc(testimonials.sortOrder));
 }
 
-/* ─── Social Posts ─── */
-
-export function listSocialPosts(limit?: number) {
+export async function listSocialPosts(limit?: number) {
   const query = db
     .select()
     .from(socialPosts)
     .where(eq(socialPosts.isPublished, true))
     .orderBy(asc(socialPosts.sortOrder));
 
-  if (limit) {
-    return query.limit(limit).all();
-  }
-  return query.all();
+  return limit ? query.limit(limit) : query;
 }
 
-/* ─── FAQs ─── */
-
-export function listFaqs() {
+export async function listFaqs() {
   return db
     .select()
     .from(faqs)
     .where(eq(faqs.isPublished, true))
-    .orderBy(asc(faqs.sortOrder))
-    .all();
+    .orderBy(asc(faqs.sortOrder));
 }
 
-/* ─── Analytics & Events ─── */
 export { getAnalyticsSummary, type AnalyticsSummary } from "./events";
-
-

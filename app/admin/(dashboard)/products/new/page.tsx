@@ -9,15 +9,14 @@ export const metadata = {
   title: "Tambah Produk Baru | Admin Niken Bakery",
 };
 
-export default function NewProductPage() {
-  const categoryList = db
+export default async function NewProductPage() {
+  const categoryList = await db
     .select({
       id: categories.id,
       name: categories.name,
     })
     .from(categories)
-    .orderBy(asc(categories.sortOrder), asc(categories.name))
-    .all();
+    .orderBy(asc(categories.sortOrder), asc(categories.name));
 
   return (
     <div className="space-y-6">

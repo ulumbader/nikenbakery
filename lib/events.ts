@@ -1,5 +1,4 @@
 import { cookies, headers } from "next/headers";
-import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { events } from "@/db/schema";
 
@@ -46,13 +45,12 @@ export async function recordProductViewServer(productId: number): Promise<{
     }
 
     // Catat ke DB
-    db.insert(events)
+    await db.insert(events)
       .values({
         type: "product_view",
         productId,
-        createdAt: sql`(unixepoch())`,
-      })
-      .run();
+        createdAt: new Date(),
+      });
 
     // Siapkan daftar baru untuk cookie (batasi maks 50 entri agar cookie tidak terlalu besar)
     const updatedList = [...viewedList.filter((item) => item.endsWith(today)), token].slice(-50);
