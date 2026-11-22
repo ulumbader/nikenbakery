@@ -7,8 +7,8 @@
 
 - **Tahap aktif:** 11 — Deploy & serah terima
 - **Status:** selesai ✅ — migrasi kode dan data ke Supabase berhasil, terverifikasi, serta siap untuk deployment Vercel.
-- **Kondisi repo:** Aplikasi sudah dipasang di Vercel dan memakai Supabase PostgreSQL + Storage. Data SQLite dan 57 objek gambar berhasil disalin serta diverifikasi; sumber lokal tetap utuh. Perbaikan query analitik admin untuk PostgreSQL diverifikasi lokal; deployment terbaru perlu dipastikan setelah push.
-- **Langkah berikutnya:** verifikasi login dan dashboard admin pada deployment terbaru. Tahap 12 (opsional: form custom order) tetap terpisah.
+- **Kondisi repo:** Aplikasi sudah dipasang di Vercel dan memakai Supabase PostgreSQL + Storage. Data SQLite dan 57 objek gambar berhasil disalin serta diverifikasi; sumber lokal tetap utuh. Perbaikan query analitik admin sudah dipush; beranda dan halaman login Vercel merespons HTTP 200.
+- **Langkah berikutnya:** pemilik memverifikasi dashboard `/admin` setelah login. Tahap 12 (opsional: form custom order) tetap terpisah.
 
 ## Checklist tahap
 
@@ -145,7 +145,7 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - Penyebab: query ringkasan grafik 14 hari mengulang ekspresi tanggal dengan parameter timezone berbeda di `SELECT` dan `GROUP BY`; PostgreSQL memunculkan error `42803` saat membuka dashboard admin.
 - Perbaikan: hitung tanggal per event di subquery lalu kelompokkan berdasarkan kolom tanggal hasil subquery.
 - Verifikasi: pemanggilan `getAnalyticsSummary()` ke Supabase berhasil mengembalikan 14 hari; `npm run lint` ✅ dan `npm run build` ✅. Suite tes tidak dijalankan.
-- Langkah berikutnya: push perbaikan dan periksa ulang `/admin` setelah deployment selesai.
+- Setelah push, beranda, `/admin/login`, dan `/api/health` merespons HTTP 200. Dashboard terautentikasi perlu dicek setelah pemilik login.
 
 ### 2026-11-18 — Migrasi Supabase untuk Deployment Vercel
 - Dikerjakan:
