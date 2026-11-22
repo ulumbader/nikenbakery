@@ -1,14 +1,14 @@
 # PROGRESS — Dokumen Hidup
 
 > **Agent WAJIB memperbarui file ini di akhir setiap sesi/tahap.** Ini adalah memori proyek antar sesi.
-> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-18.
+> Dibuat: 2026-11-07. Terakhir diperbarui: 2026-11-23.
 
 ## Posisi saat ini
 
 - **Tahap aktif:** 11 — Deploy & serah terima
 - **Status:** selesai ✅ — migrasi kode dan data ke Supabase berhasil, terverifikasi, serta siap untuk deployment Vercel.
-- **Kondisi repo:** Produksi memakai Supabase PostgreSQL + Storage. Data SQLite dan 57 objek gambar berhasil disalin serta diverifikasi; sumber lokal tetap utuh. Checkout WhatsApp satu produk tetap berlaku (D-020), begitu juga tautan marketplace per produk (D-023). Deployment sungguhan belum dilakukan.
-- **Langkah berikutnya:** siapkan environment Production di Vercel dan deploy saat diminta pengguna. Tahap 12 (opsional: form custom order) tetap terpisah.
+- **Kondisi repo:** Aplikasi sudah dipasang di Vercel dan memakai Supabase PostgreSQL + Storage. Data SQLite dan 57 objek gambar berhasil disalin serta diverifikasi; sumber lokal tetap utuh. Perbaikan query analitik admin untuk PostgreSQL diverifikasi lokal; deployment terbaru perlu dipastikan setelah push.
+- **Langkah berikutnya:** verifikasi login dan dashboard admin pada deployment terbaru. Tahap 12 (opsional: form custom order) tetap terpisah.
 
 ## Checklist tahap
 
@@ -140,6 +140,12 @@ Proyek ini dilengkapi rangkaian pengujian otomatis bertingkat (Unit Test, Integr
 - `npm run lint` dan `npm run build` lulus. Checkout diperiksa pada lebar 375px dan 1280px, detail pada 1280px; topbar tetap terlihat dan layout tidak meluber.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-23 — Perbaikan Ringkasan Analitik Admin
+- Penyebab: query ringkasan grafik 14 hari mengulang ekspresi tanggal dengan parameter timezone berbeda di `SELECT` dan `GROUP BY`; PostgreSQL memunculkan error `42803` saat membuka dashboard admin.
+- Perbaikan: hitung tanggal per event di subquery lalu kelompokkan berdasarkan kolom tanggal hasil subquery.
+- Verifikasi: pemanggilan `getAnalyticsSummary()` ke Supabase berhasil mengembalikan 14 hari; `npm run lint` ✅ dan `npm run build` ✅. Suite tes tidak dijalankan.
+- Langkah berikutnya: push perbaikan dan periksa ulang `/admin` setelah deployment selesai.
 
 ### 2026-11-18 — Migrasi Supabase untuk Deployment Vercel
 - Dikerjakan:

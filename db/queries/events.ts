@@ -151,15 +151,23 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     );
 
   const timezone = settings.timezone || "Asia/Jakarta";
-  const recentEvents = await db
+  const recentEventDays = db
     .select({
       type: events.type,
-      dateString: sql<string>`to_char(${events.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`,
-      count: count(events.id),
+      eventId: events.id,
+      dateString: sql<string>`to_char(${events.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`.as("date_string"),
     })
     .from(events)
     .where(sql`${events.createdAt} >= ${fourteenDaysAgo}`)
-    .groupBy(events.type, sql`to_char(${events.createdAt} AT TIME ZONE ${timezone}, 'YYYY-MM-DD')`);
+    .as("recent_event_days");
+  const recentEvents = await db
+    .select({
+      type: recentEventDays.type,
+      dateString: recentEventDays.dateString,
+      count: count(recentEventDays.eventId),
+    })
+    .from(recentEventDays)
+    .groupBy(recentEventDays.type, recentEventDays.dateString);
 
   const chart14Days: AnalyticsSummary["chart14Days"] = [];
   const currentDate = new Date();
